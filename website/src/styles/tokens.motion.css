@@ -1,0 +1,103 @@
+/*
+  YUKTI Website — Motion Tokens
+  Source of truth: yukti-motion-system-v1.md, Section 2 (Motion Token Foundation)
+
+  These are transcribed verbatim from the canonical Motion System, not
+  reinterpreted for the website (Constitution: "do not invent additional
+  animation languages"). If a value here ever needs to differ from the
+  Motion System document, the Motion System is amended first (its own
+  Section 13 governance process), and this file follows.
+
+  Values only — no selectors, no components, per Build Order Step 1.
+*/
+
+:root {
+  /* ============================================================
+     2.1 — Duration Scale
+     ============================================================ */
+  --yukti-duration-instant: 120ms;     /* icon color/opacity flips, focus rings */
+  --yukti-duration-quick: 200ms;       /* hover states, button presses, tab underline */
+  --yukti-duration-standard: 300ms;    /* toggles, checkboxes, tooltip show */
+  --yukti-duration-deliberate: 600ms;  /* panel slides, modal takeovers, sidebar collapse */
+  --yukti-duration-reveal: 800ms;      /* section/card entrance on scroll */
+  --yukti-duration-cinematic: 1600ms;  /* chart/graph line-draw, confidence-timeline reveal */
+  --yukti-duration-cinematic-short: 1100ms; /* bar/gauge fills */
+  --yukti-duration-count: 1080ms;      /* numeric counters — 45 steps, 24ms/step, driven in JS not CSS */
+
+  /* NOTE: there is no 400–500ms token. This gap is intentional (Motion System
+     Rule 13 / architecture D10). Do not introduce one. */
+
+  /* ============================================================
+     2.2 — Easing Scale
+     ============================================================ */
+  --yukti-ease-standard: cubic-bezier(0.2, 0.7, 0, 1);   /* default: reveals, bars, chart fills, hover */
+  --yukti-ease-emphasis: cubic-bezier(0.76, 0, 0.24, 1); /* RESERVED — one component per surface (panel-takeover only) */
+  --yukti-ease-micro: cubic-bezier(0.2, 0.8, 0.2, 1);    /* small controls: tabs, chips, icon-buttons */
+  --yukti-ease-linear: linear;                            /* counters, scroll-scrub, literal-data progress fills */
+
+  /* No bounce/elastic token exists in this system. See Motion System Rule 1. */
+
+  /* ============================================================
+     2.3 — Distance & Transform Scale
+     ============================================================ */
+  --yukti-distance-xs: 4px;   /* micro-nudges: accordion chevrons, focus indicators */
+  --yukti-distance-sm: 12px;  /* hover lifts, small card entrances */
+  --yukti-distance-md: 30px;  /* standard reveal-on-scroll translateY */
+  --yukti-distance-lg: 60px;  /* large section entrances, hero-scale reveals */
+  --yukti-tilt-max: 6deg;     /* max rotateX/rotateY for cursor-parallax cards (disabled by default outside landing/dashboard contexts) */
+
+  /* ============================================================
+     2.5 — Opacity Scale
+     ============================================================ */
+  --yukti-opacity-hidden: 0;
+  --yukti-opacity-muted: 0.35;
+  --yukti-opacity-full: 1;
+
+  /* ============================================================
+     Addendum v1.3 — Entry Sequence timing (see architecture §17,
+     Motion Addendum §17). Chosen so the brief's absolute checkpoints
+     (0.2 / 0.4 / 1.0 / 1.2 / 1.8 / 2.4s) fall out of the transition math:
+     split 0.4→1.6s (halfway≈1.0s), logo 1.2→1.9s, reveal 1.8→2.4s.
+     --yukti-entry-reveal-duration is DELIBERATELY EXEMPT from the
+     reduced-motion zero-out below — see the note there.
+     ============================================================ */
+  --yukti-entry-ack-duration: 150ms;
+  --yukti-entry-split-delay: 400ms;
+  --yukti-entry-split-duration: 1200ms;
+  --yukti-entry-logo-delay: 1200ms;
+  --yukti-entry-logo-duration: 700ms;
+  --yukti-entry-reveal-duration: 600ms;
+}
+
+/*
+  Motion System Rule 8 / architecture D8: prefers-reduced-motion disables
+  motion STRUCTURALLY, not just faster. Every component that consumes the
+  tokens above must also consume this override — see reveal-on-scroll.css
+  (Build Order Step 3) for the reference implementation pattern.
+*/
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --yukti-duration-instant: 0ms;
+    --yukti-duration-quick: 0ms;
+    --yukti-duration-standard: 0ms;
+    --yukti-duration-deliberate: 0ms;
+    --yukti-duration-reveal: 0ms;
+    --yukti-duration-cinematic: 0ms;
+    --yukti-duration-cinematic-short: 0ms;
+    --yukti-distance-xs: 0px;
+    --yukti-distance-sm: 0px;
+    --yukti-distance-md: 0px;
+    --yukti-distance-lg: 0px;
+    --yukti-tilt-max: 0deg;
+    --yukti-entry-ack-duration: 0ms;
+    --yukti-entry-split-duration: 0ms;
+    --yukti-entry-logo-duration: 0ms;
+    /* --yukti-entry-reveal-duration is deliberately NOT zeroed here — the
+       Entry Sequence brief explicitly requires reduced-motion users still
+       get "a simple fade transition," not an instant cut. Zeroing it would
+       be a jump-cut, the opposite of that intent. See Motion Addendum §17.
+       (The split/logo choreography above is skipped entirely for reduced
+       motion via a separate JS code path, not via these zeroed durations —
+       they're zeroed here only as defense-in-depth.) */
+  }
+}

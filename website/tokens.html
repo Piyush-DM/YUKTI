@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>YUKTI — Design Token Verification (Build Order Step 1)</title>
+  <link rel="stylesheet" href="/src/styles/tokens.design.css" />
+  <link rel="stylesheet" href="/src/styles/tokens.motion.css" />
+  <link rel="stylesheet" href="/src/styles/base.css" />
+  <link rel="stylesheet" href="/tokens.preview.css" />
+</head>
+<body>
+  <main class="tp-page">
+    <header class="tp-header">
+      <p class="tp-eyebrow">Build Order — Step 1</p>
+      <h1 class="tp-title">Design &amp; Motion Tokens</h1>
+      <p class="tp-sub">
+        This page is a review harness, not a website scene. It exists solely to verify
+        the token layer defined in <code>yukti-website-v1-architecture.md</code> §2 and
+        <code>yukti-motion-system-v1.md</code> §2 before any component is built.
+      </p>
+    </header>
+
+    <section class="tp-section" aria-labelledby="tp-colors-h">
+      <h2 id="tp-colors-h" class="tp-section-title">2.1 — Color Tokens</h2>
+      <div class="tp-swatch-grid">
+        <div class="tp-swatch" style="background:var(--yukti-color-graphite-900)">
+          <span class="tp-swatch-label">graphite-900</span>
+        </div>
+        <div class="tp-swatch" style="background:var(--yukti-color-graphite-700)">
+          <span class="tp-swatch-label">graphite-700</span>
+        </div>
+        <div class="tp-swatch tp-swatch--light" style="background:var(--yukti-color-bone-100)">
+          <span class="tp-swatch-label">bone-100</span>
+        </div>
+        <div class="tp-swatch tp-swatch--light" style="background:var(--yukti-color-bone-300)">
+          <span class="tp-swatch-label">bone-300</span>
+        </div>
+        <div class="tp-swatch tp-swatch--light" style="background:var(--yukti-color-yellow-500)">
+          <span class="tp-swatch-label">yellow-500</span>
+        </div>
+        <div class="tp-swatch tp-swatch--light" style="background:var(--yukti-color-yellow-600)">
+          <span class="tp-swatch-label">yellow-600</span>
+        </div>
+      </div>
+      <p class="tp-note">
+        Reminder (hard constraint): yellow appears only on hover/active/focus states,
+        evidence-flow signals, and one link per scene. Never as decoration.
+      </p>
+      <a class="tp-focus-demo" href="#tp-colors-h">Tab to me to verify the yellow focus ring (D8)</a>
+    </section>
+
+    <section class="tp-section" aria-labelledby="tp-type-h">
+      <h2 id="tp-type-h" class="tp-section-title">2.2 — Typography Scale</h2>
+      <p class="tp-note">
+        Font stacks render as system-fallback until licensed Söhne files are procured
+        (architecture §0.1). Inter and IBM Plex Mono are self-hostable now.
+      </p>
+      <p class="tp-type-sample" style="font-family:var(--yukti-font-display);font-size:var(--yukti-type-display-size);font-weight:var(--yukti-type-display-weight);letter-spacing:var(--yukti-type-display-tracking);">
+        Reasoning, made legible.
+      </p>
+      <p class="tp-type-sample" style="font-family:var(--yukti-font-display);font-size:var(--yukti-type-heading-size);font-weight:var(--yukti-type-heading-weight);letter-spacing:var(--yukti-type-heading-tracking);">
+        Every conclusion traces to evidence.
+      </p>
+      <p class="tp-type-sample" style="font-family:var(--yukti-font-body);font-size:var(--yukti-type-body-size);font-weight:var(--yukti-type-body-weight);line-height:var(--yukti-type-body-line-height);">
+        Modern systems produce answers. Institutions require reasoning. YUKTI exists to
+        keep a conclusion connected to the evidence that produced it, at every step.
+      </p>
+      <p class="tp-type-sample tp-type-sample--label" style="font-family:var(--yukti-font-body);font-size:var(--yukti-type-label-size);font-weight:var(--yukti-type-label-weight);letter-spacing:var(--yukti-type-label-tracking);">
+        FACET · CONFIDENCE · SOURCE · DATE
+      </p>
+      <p class="tp-type-sample tp-type-sample--data" style="font-family:var(--yukti-font-data);font-size:var(--yukti-type-data-size);font-weight:var(--yukti-type-data-weight);font-variant-numeric:var(--yukti-type-data-numeric);">
+        confidence: 0.87 · source: SEC-10K-2024 · cross-checked: 2026-03-11 04:12:09
+      </p>
+    </section>
+
+    <section class="tp-section" aria-labelledby="tp-space-h">
+      <h2 id="tp-space-h" class="tp-section-title">2.3 — Spacing Scale</h2>
+      <div class="tp-space-rail">
+        <div class="tp-space-bar" style="width:var(--yukti-space-1)"><span>1 · 4px</span></div>
+        <div class="tp-space-bar" style="width:var(--yukti-space-2)"><span>2 · 8px</span></div>
+        <div class="tp-space-bar" style="width:var(--yukti-space-3)"><span>3 · 16px</span></div>
+        <div class="tp-space-bar" style="width:var(--yukti-space-4)"><span>4 · 24px</span></div>
+        <div class="tp-space-bar" style="width:var(--yukti-space-5)"><span>5 · 40px</span></div>
+        <div class="tp-space-bar" style="width:var(--yukti-space-6)"><span>6 · 64px</span></div>
+        <div class="tp-space-bar tp-space-bar--fluid"><span>7 · fluid 96–128px</span></div>
+      </div>
+    </section>
+
+    <section class="tp-section" aria-labelledby="tp-motion-h">
+      <h2 id="tp-motion-h" class="tp-section-title">Motion §2 — Duration &amp; Easing</h2>
+      <p class="tp-note">
+        Click each bar to replay. Note the empty 400–500ms gap is intentional
+        (Motion System Rule 13 / architecture D10) — there is no token there.
+      </p>
+      <div class="tp-motion-grid">
+        <button class="tp-motion-demo" data-duration="quick" data-ease="micro">quick / micro (200ms)</button>
+        <button class="tp-motion-demo" data-duration="standard" data-ease="standard">standard / standard (300ms)</button>
+        <button class="tp-motion-demo" data-duration="deliberate" data-ease="emphasis">deliberate / emphasis (600ms) — reserved token, demo only</button>
+        <button class="tp-motion-demo" data-duration="reveal" data-ease="standard">reveal / standard (800ms)</button>
+      </div>
+      <p class="tp-note tp-note--small">
+        Try OS-level "reduce motion" — every duration above should collapse to 0ms
+        (tokens.motion.css media query), not just play faster.
+      </p>
+    </section>
+
+    <section class="tp-section" aria-labelledby="tp-zlayer-h">
+      <h2 id="tp-zlayer-h" class="tp-section-title">2.6 — Z-Layer Scale</h2>
+      <ul class="tp-zlist">
+        <li>canvas — 1</li>
+        <li>veil — 2</li>
+        <li>content — 3</li>
+        <li>nav — 100</li>
+        <li>panel — 500</li>
+        <li>modal — 900</li>
+        <li>toast — 950</li>
+        <li>consent — 999</li>
+      </ul>
+    </section>
+  </main>
+
+  <script type="module" src="/tokens.preview.js"></script>
+</body>
+</html>

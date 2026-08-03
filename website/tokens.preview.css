@@ -1,0 +1,203 @@
+/*
+  Styling for the tokens.html REVIEW HARNESS ONLY.
+  These "tp-*" classes are scoped to this verification page and are not part
+  of the website's component system — they must never be reused once real
+  components (Build Order Step 2+) exist.
+*/
+
+.tp-page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: var(--yukti-space-6) var(--yukti-grid-margin) var(--yukti-space-7);
+}
+
+.tp-header {
+  margin-bottom: var(--yukti-space-6);
+  border-bottom: var(--yukti-border-width-hairline) solid var(--yukti-color-border-hairline-dark);
+  padding-bottom: var(--yukti-space-5);
+}
+
+.tp-eyebrow {
+  font-family: var(--yukti-font-data);
+  font-size: var(--yukti-type-data-size);
+  color: var(--yukti-color-yellow-500);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 0 0 var(--yukti-space-2);
+}
+
+.tp-title {
+  font-family: var(--yukti-font-display);
+  font-size: var(--yukti-type-heading-size);
+  font-weight: var(--yukti-type-heading-weight);
+  color: var(--yukti-color-bone-100);
+  margin: 0 0 var(--yukti-space-3);
+}
+
+.tp-sub {
+  max-width: 62ch;
+  color: var(--yukti-color-bone-300);
+}
+
+.tp-sub code {
+  font-family: var(--yukti-font-data);
+  font-size: 0.9em;
+  color: var(--yukti-color-bone-100);
+}
+
+.tp-section {
+  margin-bottom: var(--yukti-space-7);
+}
+
+.tp-section-title {
+  font-family: var(--yukti-font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--yukti-color-bone-100);
+  margin: 0 0 var(--yukti-space-4);
+  padding-bottom: var(--yukti-space-2);
+  border-bottom: var(--yukti-border-width-hairline) dashed var(--yukti-color-border-hairline-dark);
+}
+
+.tp-note {
+  font-size: 0.875rem;
+  color: var(--yukti-color-bone-300);
+  opacity: 0.8;
+  max-width: 62ch;
+}
+
+.tp-note--small {
+  font-size: 0.8125rem;
+}
+
+/* Color swatches */
+.tp-swatch-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--yukti-space-3);
+  margin-bottom: var(--yukti-space-3);
+}
+
+.tp-swatch {
+  height: 96px;
+  border-radius: var(--yukti-radius-sm);
+  border: var(--yukti-border-width-hairline) solid var(--yukti-color-border-hairline-dark);
+  display: flex;
+  align-items: flex-end;
+  padding: var(--yukti-space-2);
+}
+
+.tp-swatch--light {
+  border-color: var(--yukti-color-border-hairline-light);
+}
+
+.tp-swatch-label {
+  font-family: var(--yukti-font-data);
+  font-size: 0.6875rem;
+  background: rgba(20, 20, 15, 0.55);
+  color: var(--yukti-color-bone-100);
+  padding: 2px 6px;
+  border-radius: 2px;
+}
+
+.tp-focus-demo {
+  display: inline-block;
+  margin-top: var(--yukti-space-2);
+  color: var(--yukti-color-bone-100);
+  font-size: 0.875rem;
+  padding: var(--yukti-space-1) var(--yukti-space-2);
+  border: var(--yukti-border-width-hairline) solid var(--yukti-color-border-hairline-dark);
+  border-radius: var(--yukti-radius-sm);
+  text-decoration: none;
+  transition: background var(--yukti-duration-quick) var(--yukti-ease-micro);
+}
+
+.tp-focus-demo:hover {
+  background: var(--yukti-color-graphite-700);
+}
+
+/* Typography samples */
+.tp-type-sample {
+  color: var(--yukti-color-bone-100);
+  margin: 0 0 var(--yukti-space-4);
+  max-width: 62ch;
+}
+
+.tp-type-sample--label {
+  color: var(--yukti-color-yellow-500);
+  text-transform: uppercase;
+}
+
+.tp-type-sample--data {
+  color: var(--yukti-color-bone-300);
+  background: var(--yukti-color-graphite-700);
+  display: inline-block;
+  padding: var(--yukti-space-2) var(--yukti-space-3);
+  border-radius: var(--yukti-radius-sm);
+  border: var(--yukti-border-width-hairline) solid var(--yukti-color-border-hairline-dark);
+}
+
+/* Spacing rail */
+.tp-space-rail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--yukti-space-2);
+}
+
+.tp-space-bar {
+  background: var(--yukti-color-yellow-500);
+  height: 20px;
+  min-width: 20px;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+}
+
+.tp-space-bar--fluid {
+  width: clamp(6rem, 4rem + 6vw, 8rem);
+}
+
+.tp-space-bar span {
+  font-family: var(--yukti-font-data);
+  font-size: 0.6875rem;
+  color: var(--yukti-color-ink-900);
+  white-space: nowrap;
+  padding-left: var(--yukti-space-2);
+}
+
+/* Motion demo */
+.tp-motion-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--yukti-space-2);
+  align-items: flex-start;
+}
+
+.tp-motion-demo {
+  font-family: var(--yukti-font-body);
+  font-size: 0.875rem;
+  background: var(--yukti-color-bone-100);
+  color: var(--yukti-color-ink-900);
+  border: none;
+  border-radius: var(--yukti-radius-sm);
+  padding: var(--yukti-space-2) var(--yukti-space-4);
+  cursor: pointer;
+  transform: translateY(0);
+}
+
+.tp-motion-demo.tp-run {
+  background: var(--yukti-color-yellow-500);
+}
+
+/* Z-layer list */
+.tp-zlist {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-family: var(--yukti-font-data);
+  font-size: 0.8125rem;
+  color: var(--yukti-color-bone-300);
+  display: flex;
+  flex-direction: column;
+  gap: var(--yukti-space-1);
+}

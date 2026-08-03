@@ -1,0 +1,50 @@
+/*
+  Footer — "blueprint sign-off" (Addendum v1.2/§16). Implemented now, direct
+  authorization from the v3 brief (superseding the earlier "pending Build
+  Order Step 5" placeholder).
+*/
+
+.yukti-footer {
+  padding-block: var(--yukti-space-6);
+}
+
+.yukti-footer__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--yukti-space-4);
+  padding-block: var(--yukti-space-4);
+}
+
+.yukti-footer__word {
+  font-family: var(--yukti-font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--yukti-color-bone-100);
+  letter-spacing: 0.02em;
+}
+
+.yukti-footer__tagline {
+  font-family: var(--yukti-font-data);
+  font-size: var(--yukti-type-data-size);
+  color: var(--yukti-color-bone-300);
+  opacity: 0.7;
+}
+
+.yukti-footer__meta {
+  display: flex;
+  gap: var(--yukti-space-5);
+  font-family: var(--yukti-font-data);
+  font-size: var(--yukti-type-data-size);
+  color: var(--yukti-color-bone-300);
+  opacity: 0.55;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.yukti-footer__meta b {
+  color: var(--yukti-color-yellow-500);
+  font-weight: 400;
+  margin-right: var(--yukti-space-1);
+}

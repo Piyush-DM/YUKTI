@@ -1,0 +1,40 @@
+/*
+  YUKTI Website — Base Reset
+  Not a component. Generic document-level normalization only, so the token
+  layer (Step 1) can be visually verified before any component (Step 2+)
+  exists. No selector here is scene- or component-specific.
+*/
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  background: var(--yukti-color-graphite-900);
+  color: var(--yukti-color-bone-300);
+  font-family: var(--yukti-font-body);
+  font-size: var(--yukti-type-body-size);
+  font-weight: var(--yukti-type-body-weight);
+  line-height: var(--yukti-type-body-line-height);
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: var(--yukti-focus-ring-width) solid var(--yukti-color-yellow-focus);
+  outline-offset: var(--yukti-focus-ring-offset);
+  border-radius: var(--yukti-radius-focus);
+}
+
+img,
+svg,
+canvas {
+  display: block;
+  max-width: 100%;
+}

@@ -1,0 +1,44 @@
+/*
+  Applications Scene — stacked sequence (Addendum v1.2/§16). Huge domain
+  name, tiny supporting copy, drafting-tick divider between entries. No
+  icons, no cards — unchanged rule from v1.1.
+*/
+
+.yukti-app-sequence {
+  margin-top: var(--yukti-space-5);
+  display: flex;
+  flex-direction: column;
+  max-width: 60ch;
+}
+
+.yukti-app-entry {
+  padding-block: var(--yukti-space-4);
+}
+
+.yukti-app-entry__name {
+  font-family: var(--yukti-font-display);
+  font-size: clamp(1.75rem, 1.2rem + 3vw, 3.5rem);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  color: var(--yukti-color-bone-100);
+  margin: 0 0 var(--yukti-space-1);
+  transition: letter-spacing var(--yukti-duration-quick) var(--yukti-ease-micro);
+}
+
+.yukti-app-entry:hover .yukti-app-entry__name {
+  letter-spacing: 0.005em;
+}
+
+.yukti-app-entry__copy {
+  font-family: var(--yukti-font-body);
+  font-size: var(--yukti-type-data-size);
+  color: var(--yukti-color-bone-300);
+  opacity: 0.85;
+  margin: 0;
+  max-width: 42ch;
+}
+
+.yukti-app-divider {
+  margin: 0;
+}

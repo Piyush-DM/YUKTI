@@ -1,0 +1,147 @@
+/*
+  YUKTI Website — BlueprintBackground (component tree: App Shell level)
+  Architectural drafting linework. Section 2.1 hard rule: must remain barely
+  perceptible — if a visitor notices this before the content, opacity is wrong.
+*/
+
+.yukti-blueprint {
+  position: fixed;
+  inset: 0;
+  z-index: var(--yukti-z-canvas);
+  pointer-events: none;
+  background-color: transparent; /* body already paints graphite-900 — this layer is linework ONLY */
+  will-change: transform; /* scroll-parallax target, Motion Addendum §15.2 — set only while scrolling in practice */
+  background-image:
+    repeating-linear-gradient(
+      to right,
+      var(--yukti-color-line-blueprint) 0 1px,
+      transparent 1px 96px
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      var(--yukti-color-line-blueprint) 0 1px,
+      transparent 1px 96px
+    );
+}
+
+/* Responsive rule (Section 5): reduced density on small viewports, not the
+   same density compressed — prevents the linework reading as noise. */
+@media (max-width: 479px) {
+  .yukti-blueprint {
+    background-image:
+      repeating-linear-gradient(
+        to right,
+        var(--yukti-color-line-blueprint) 0 1px,
+        transparent 1px 64px
+      ),
+      repeating-linear-gradient(
+        to bottom,
+        var(--yukti-color-line-blueprint) 0 1px,
+        transparent 1px 64px
+      );
+    opacity: 0.6;
+  }
+}
+
+/* ============================================================
+   Blueprint System Expansion (Addendum §15.2) — registration crosses
+   Fixed reference marks, deliberately NOT parallaxed (a coordinate
+   reference should stay still while the grid drifts slightly behind it).
+   ============================================================ */
+
+.yukti-registration {
+  position: fixed;
+  inset: 0;
+  z-index: var(--yukti-z-canvas);
+  pointer-events: none;
+}
+
+.yukti-registration__mark {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  opacity: 0.18;
+}
+
+.yukti-registration__mark::before,
+.yukti-registration__mark::after {
+  content: '';
+  position: absolute;
+  background: var(--yukti-color-bone-300);
+}
+
+.yukti-registration__mark::before {
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  transform: translateY(-50%);
+}
+
+.yukti-registration__mark::after {
+  left: 50%;
+  top: 0;
+  width: 1px;
+  height: 100%;
+  transform: translateX(-50%);
+}
+
+.yukti-registration__mark--tl {
+  top: var(--yukti-space-5);
+  left: var(--yukti-space-4);
+}
+.yukti-registration__mark--tr {
+  top: var(--yukti-space-5);
+  right: var(--yukti-space-4);
+}
+.yukti-registration__mark--bl {
+  bottom: var(--yukti-space-4);
+  left: var(--yukti-space-4);
+}
+.yukti-registration__mark--br {
+  bottom: var(--yukti-space-4);
+  right: var(--yukti-space-4);
+}
+
+/* Reduced density on small viewports, not compressed density (Section 5) */
+@media (max-width: 759px) {
+  .yukti-registration {
+    display: none;
+  }
+}
+
+/* ============================================================
+   Blueprint System Expansion — left-edge measurement-tick ruler
+   Wide-viewport only, removed (not shrunk) below --yukti-bp-standard.
+   ============================================================ */
+
+.yukti-ruler {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 20px;
+  z-index: var(--yukti-z-canvas);
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    var(--yukti-color-line-blueprint) 0 1px,
+    transparent 1px 40px
+  );
+}
+
+.yukti-ruler::after {
+  content: '';
+  position: absolute;
+  left: 19px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--yukti-color-line-blueprint);
+}
+
+@media (max-width: 1199px) {
+  .yukti-ruler {
+    display: none;
+  }
+}

@@ -1,0 +1,32 @@
+/*
+  YUKTI Website — Shared Motion Primitives (Motion System Addendum §15.2)
+  reveal-on-scroll (Motion §4.9) implemented as a generic [data-reveal]
+  attribute selector so any element can opt in without a bespoke class.
+  Transform/opacity only — GPU-safe, per Motion §12.
+*/
+
+[data-reveal] {
+  opacity: var(--yukti-opacity-hidden);
+  transform: translateY(var(--yukti-distance-md));
+  transition:
+    opacity var(--yukti-duration-reveal) var(--yukti-ease-standard),
+    transform var(--yukti-duration-reveal) var(--yukti-ease-standard);
+  transition-delay: var(--yukti-reveal-delay, 0ms);
+}
+
+[data-reveal].is-revealed {
+  opacity: var(--yukti-opacity-full);
+  transform: none;
+}
+
+/* Belt-and-suspenders: tokens.motion.css already zeroes durations/distances
+   under reduced-motion, but this guarantees no flash-of-hidden-content if JS
+   is slow to attach the .is-revealed class (Motion Rule 8 — structural, not
+   just shortened). */
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: var(--yukti-opacity-full);
+    transform: none;
+    transition: none;
+  }
+}

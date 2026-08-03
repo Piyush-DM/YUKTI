@@ -1,0 +1,70 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "yukti-daale"
+version = "0.0.0"
+description = "Frozen scaffold for CHOIR research artifacts and DAALE implementation engineering."
+requires-python = ">=3.12"
+dependencies = [
+    "aiofiles",
+    "aiosqlite",
+    "httpx",
+    "jinja2",
+    "orjson",
+    "pydantic",
+    "python-dotenv",
+    "rich",
+    "typer",
+]
+
+[project.scripts]
+daale = "daale.cli:main"
+
+[dependency-groups]
+dev = [
+    "mypy",
+    "pytest",
+    "ruff",
+]
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.pytest.ini_options]
+testpaths = [
+    "daale/tests",
+    "applications/investment/prototype_risk_rik/tests",
+    "choir_prototype/tests",
+]
+
+[tool.mypy]
+python_version = "3.12"
+packages = [
+    "daale",
+    "applications.investment.prototype_risk_rik",
+]
+strict = true
+
+[tool.setuptools.packages.find]
+include = ["daale*"]
+exclude = [
+    "applications*",
+    "choir*",
+    "docs*",
+    "reports*",
+    "tools*",
+]
+
+[tool.daale.doctor]
+reports_dir = "reports"
+required_api_keys = []
+required_paths = [
+    "daale",
+    "daale/tests",
+    "docs/development/DEVELOPMENT_ENVIRONMENT.md",
+    "pyproject.toml",
+    "requirements-dev.txt",
+]

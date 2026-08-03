@@ -1,0 +1,24 @@
+/*
+  Mega scene-heading tier — Addendum v1.2/§16. Each scene heading stacks one
+  word per line at the --yukti-type-mega scale, left-aligned, uppercase.
+  Rendered by content-loader.js (renderMegaHeading) — one <span> per word,
+  each individually [data-reveal] inside the heading's [data-reveal-group].
+*/
+
+.yukti-heading-mega {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0;
+}
+
+.yukti-mega-line {
+  display: block;
+  font-family: var(--yukti-font-display);
+  font-size: var(--yukti-type-mega-size);
+  font-weight: var(--yukti-type-mega-weight);
+  letter-spacing: var(--yukti-type-mega-tracking);
+  line-height: var(--yukti-type-mega-line-height);
+  text-transform: uppercase;
+  color: var(--yukti-color-bone-100);
+}

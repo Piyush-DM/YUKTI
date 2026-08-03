@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YUKTI — Institutional reasoning, grounded in evidence.</title>
+  <meta
+    name="description"
+    content="YUKTI builds reasoning systems where assumptions, findings, claims, and decisions can be inspected instead of accepted on faith."
+  />
+  <link rel="stylesheet" href="/src/styles/tokens.design.css" />
+  <link rel="stylesheet" href="/src/styles/tokens.motion.css" />
+  <link rel="stylesheet" href="/src/styles/base.css" />
+  <link rel="stylesheet" href="/src/styles/blueprint.css" />
+  <link rel="stylesheet" href="/src/styles/drafting.css" />
+  <link rel="stylesheet" href="/src/styles/layout.css" />
+  <link rel="stylesheet" href="/src/styles/mega-heading.css" />
+  <link rel="stylesheet" href="/src/styles/margin-note.css" />
+  <link rel="stylesheet" href="/src/styles/motion.css" />
+  <link rel="stylesheet" href="/src/styles/nav.css" />
+  <link rel="stylesheet" href="/src/styles/hero.css" />
+  <link rel="stylesheet" href="/src/styles/reasoning-canvas.css" />
+  <link rel="stylesheet" href="/src/styles/evidence.css" />
+  <link rel="stylesheet" href="/src/styles/pull-quote.css" />
+  <link rel="stylesheet" href="/src/styles/applications.css" />
+  <link rel="stylesheet" href="/src/styles/philosophy.css" />
+  <link rel="stylesheet" href="/src/styles/footer.css" />
+  <link rel="stylesheet" href="/src/styles/entry-sequence.css" />
+  <script>
+    // Addendum v1.3 — synchronous, runs before first paint, avoids any flash
+    // in either direction (cover-on-repeat-visit or homepage-on-fresh-visit).
+    // Progressive-enhancement fallback: if this never runs (JS disabled),
+    // html never gets this class, .yukti-entry-cover stays display:none by
+    // default (entry-sequence.css), and the homepage is fully visible.
+    (function () {
+      var seen = false;
+      try {
+        seen = sessionStorage.getItem('yukti-entry-seen') === '1';
+      } catch (e) {}
+      if (!seen) {
+        document.documentElement.classList.add('yukti-entry-pending');
+      }
+    })();
+  </script>
+</head>
+<body class="yukti-material-graphite">
+  <!-- ============================================================
+       ENTRY SEQUENCE
+       ============================================================ -->
+  <!-- EntrySequence — Addendum v1.3. Cover page in front of the homepage.
+       Native <button> for free click/Enter/Space semantics. No visible
+       hint/instruction text anywhere (brief: "nothing else competes for
+       attention") — the accessible name lives in aria-label instead. -->
+  <button type="button" class="yukti-entry-cover" data-entry-cover aria-label="Enter YUKTI">
+    <span class="yukti-entry-bg" aria-hidden="true"></span>
+    <span class="yukti-entry-grid" aria-hidden="true"></span>
+    <span class="yukti-entry-door yukti-entry-door--left" aria-hidden="true"></span>
+    <span class="yukti-entry-seam" aria-hidden="true"></span>
+    <span class="yukti-entry-door yukti-entry-door--right" aria-hidden="true"></span>
+    <span class="yukti-entry-logo" aria-hidden="true">
+      <span class="yukti-entry-wordmark">YUKTI</span>
+    </span>
+  </button>
+
+  <div class="yukti-entry-reveal" data-entry-reveal aria-hidden="true"></div>
+
+  <div class="yukti-homepage" data-homepage>
+
+  <!-- BlueprintBackground — App Shell level. Ambient linework only (parallaxes
+       slightly on scroll); never contains content. -->
+  <div class="yukti-blueprint" aria-hidden="true"></div>
+
+  <!-- Page-level registration crosses + measurement ruler (blueprint.css) —
+       a different concept from the ReasoningCanvas's own L-bracket corners
+       (drafting.css), see architecture Addendum §16. -->
+  <div class="yukti-registration" aria-hidden="true">
+    <span class="yukti-registration__mark yukti-registration__mark--tl"></span>
+    <span class="yukti-registration__mark yukti-registration__mark--tr"></span>
+    <span class="yukti-registration__mark yukti-registration__mark--bl"></span>
+    <span class="yukti-registration__mark yukti-registration__mark--br"></span>
+  </div>
+  <div class="yukti-ruler" aria-hidden="true"></div>
+
+  <!-- PrimaryNav — precision-underline hover grammar. Scroll-aware .scrolled
+       toggle and MenuTrigger→PanelTakeover remain not part of this pass. -->
+  <!-- ============================================================
+       NAVIGATION
+       ============================================================ -->
+  <header class="yukti-nav">
+    <a href="#hero" class="yukti-nav__wordmark">YUKTI</a>
+    <nav aria-label="Primary">
+      <ul id="nav-links" class="yukti-nav__links"></ul>
+    </nav>
+    <button class="yukti-nav__menu-trigger" aria-label="Menu (not yet available)" disabled>
+      Menu
+    </button>
+  </header>
+
+  <main>
+    <!-- ============================================================
+         Scene 1 — Hero. Addendum v1.2: recomposed sparser, single column,
+         drafting-frame dividers around the reserved ReasoningCanvas. Typography,
+         copy, and nav content UNCHANGED. Not numbered (cold open, not part of
+         the numbered "document" — matches v1.1 convention).
+         ============================================================ -->
+    <!-- ============================================================
+         HERO
+         ============================================================ -->
+    <section id="hero" class="yukti-scene yukti-scene--hero">
+      <div class="yukti-shell yukti-hero-editorial">
+        <h1 id="hero-headline" class="yukti-type-display" data-reveal></h1>
+
+        <hr class="yukti-rule--tick" data-reveal />
+
+        <div class="yukti-hero-canvas-wrap">
+          <div class="yukti-reasoning-canvas" data-reasoning-canvas data-reveal>
+            <div class="yukti-reasoning-canvas__surface" data-reasoning-canvas-surface></div>
+            <span class="yukti-reasoning-canvas__label">GRAPH MODULE</span>
+            <span class="yukti-reasoning-canvas__rev">REV 0.2</span>
+            <span class="yukti-reasoning-canvas__status">READY</span>
+            <div class="yukti-bracket yukti-bracket--tl"></div>
+            <div class="yukti-bracket yukti-bracket--tr"></div>
+            <div class="yukti-bracket yukti-bracket--bl"></div>
+            <div class="yukti-bracket yukti-bracket--br"></div>
+            <div class="yukti-reasoning-canvas__hint"><span>Reasoning graph — reserved</span></div>
+            <div class="yukti-reasoning-canvas__readout" data-coordinate-readout>X —  Y —</div>
+          </div>
+        </div>
+
+        <hr class="yukti-rule--tick" data-reveal />
+
+        <div class="yukti-hero-annotation">
+          <p id="hero-supporting" class="yukti-hero-annotation__text" data-reveal></p>
+          <a id="hero-link" href="#" class="yukti-quiet-link" data-reveal></a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         WHY REASONING MATTERS
+         ============================================================ -->
+    <section id="why-reasoning-matters" class="yukti-scene">
+      <div class="yukti-shell">
+        <div class="yukti-grid">
+          <div class="yukti-col-7">
+            <p id="wrm-index" class="yukti-scene__index yukti-type-data" data-reveal></p>
+            <h2 id="wrm-heading" data-reveal-group></h2>
+            <div id="wrm-body" data-reveal-group></div>
+          </div>
+          <aside class="yukti-margin-note" aria-hidden="true"></aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         APPROACH
+         ============================================================ -->
+    <section id="approach" class="yukti-scene">
+      <div class="yukti-shell">
+        <div class="yukti-grid">
+          <div class="yukti-col-8-offset-2">
+            <p id="approach-index" class="yukti-scene__index yukti-type-data" data-reveal></p>
+            <h2 id="approach-heading" data-reveal-group></h2>
+            <ol id="approach-principles" class="yukti-principle-list" data-reveal-group></ol>
+          </div>
+          <aside class="yukti-margin-note" aria-hidden="true"></aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         EVIDENCE
+         ============================================================ -->
+    <section id="evidence" class="yukti-scene yukti-scene--roomy">
+      <div class="yukti-shell">
+        <div class="yukti-grid">
+          <div class="yukti-col-9">
+            <p id="evidence-index" class="yukti-scene__index yukti-type-data" data-reveal></p>
+            <h2 id="evidence-heading" data-reveal-group></h2>
+            <!-- Pipeline diagram, Addendum v1.2 — Claim → Evidence → Finding →
+                 Result, arrow-connected, plus an Annotation caption. -->
+            <div id="evidence-trace" class="yukti-pipeline" data-reveal-group></div>
+          </div>
+          <aside class="yukti-margin-note" aria-hidden="true"></aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pull Quote — new scene, Addendum v1.2. The homepage's single
+         oversized-quotation moment. Copy authored by the user in the v3 brief. -->
+    <!-- ============================================================
+         PULL QUOTE
+         ============================================================ -->
+    <section id="pull-quote" class="yukti-scene yukti-pull-quote">
+      <div class="yukti-shell">
+        <blockquote id="pull-quote-text" class="yukti-pull-quote__text" data-reveal-group></blockquote>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         APPLICATIONS
+         ============================================================ -->
+    <section id="applications" class="yukti-scene">
+      <div class="yukti-shell">
+        <div class="yukti-grid">
+          <div class="yukti-col-8-offset-3">
+            <p id="applications-index" class="yukti-scene__index yukti-type-data" data-reveal></p>
+            <h2 id="applications-heading" data-reveal-group></h2>
+            <!-- Stacked sequence, Addendum v1.2 — huge name, tiny copy, no
+                 icons, no cards. -->
+            <div id="applications-domains" class="yukti-app-sequence" data-reveal-group></div>
+          </div>
+          <aside class="yukti-margin-note" aria-hidden="true"></aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- Philosophy — Addendum v1.2: intro block (numbered, mega heading) +
+         four fullscreen scroll-snap statements. -->
+    <!-- ============================================================
+         PHILOSOPHY
+         ============================================================ -->
+    <section id="philosophy" class="yukti-scene yukti-scene--center">
+      <div class="yukti-shell yukti-philosophy-intro">
+        <div class="yukti-grid">
+          <div class="yukti-col-8-offset-3">
+            <p id="philosophy-index" class="yukti-scene__index yukti-type-data" data-reveal></p>
+            <h2 id="philosophy-heading" data-reveal-group></h2>
+          </div>
+          <aside class="yukti-margin-note" aria-hidden="true"></aside>
+        </div>
+      </div>
+      <div id="philosophy-statements" class="yukti-philosophy-statements"></div>
+    </section>
+
+    <!-- Contact — LEFT UNCHANGED (v2 instruction still stands; v3 doesn't
+         mention Contact). No scene index, no grid rework, no entrance motion. -->
+    <!-- ============================================================
+         CONTACT
+         ============================================================ -->
+    <section id="contact" class="yukti-scene">
+      <div class="yukti-shell">
+        <h2 id="contact-heading" class="yukti-type-heading"></h2>
+        <p id="contact-statement" class="yukti-type-body yukti-scene__body"></p>
+        <p><a id="contact-email" href="#" class="yukti-quiet-link"></a></p>
+        <p id="contact-location" class="yukti-type-data"></p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer — "blueprint sign-off," Addendum v1.2 -->
+  <!-- ============================================================
+       FOOTER
+       ============================================================ -->
+  <footer class="yukti-footer">
+    <hr class="yukti-rule--tick" />
+    <div class="yukti-shell yukti-footer__inner">
+      <span class="yukti-footer__word">YUKTI</span>
+      <span id="footer-tagline" class="yukti-footer__tagline"></span>
+      <div class="yukti-footer__meta">
+        <span><b>Revision</b><span id="footer-revision"></span></span>
+        <span><b>Prepared</b><span id="footer-prepared"></span></span>
+      </div>
+    </div>
+    <hr class="yukti-rule--tick" />
+  </footer>
+  </div>
+
+  <script type="module" src="/src/scripts/entry-sequence.js"></script>
+  <script type="module" src="/src/scripts/content-loader.js"></script>
+  <script type="module" src="/src/scripts/reasoning-canvas.js"></script>
+  <script type="module" src="/src/scripts/motion.js"></script>
+</body>
+</html>

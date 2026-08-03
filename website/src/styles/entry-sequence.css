@@ -1,0 +1,273 @@
+/*
+  EntrySequence — Addendum v1.3, refactored architecture.
+  Cover page before the homepage. The yellow background, drafting grid, two
+  moving doors, seam, logo container, and reveal layer are independent DOM/CSS
+  layers so the door animation can work as a real architectural system.
+  Hidden by default (progressive-enhancement fallback if JS never runs);
+  shown only when `html.yukti-entry-pending` is present, which is set by a
+  synchronous inline script in <head> before first paint.
+*/
+
+/* ============================================================
+   Homepage suppression while the cover is active
+   ============================================================ */
+
+html.yukti-entry-pending,
+html.yukti-entry-pending body {
+  overflow: hidden;
+  height: 100%;
+}
+
+[data-homepage] {
+  transition: opacity var(--yukti-entry-reveal-duration) var(--yukti-ease-standard);
+}
+
+html.yukti-entry-pending [data-homepage] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.yukti-entry-reveal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  background: var(--yukti-color-graphite-900);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--yukti-entry-reveal-duration) var(--yukti-ease-standard);
+}
+
+html.yukti-entry-pending .yukti-entry-reveal {
+  display: block;
+  opacity: 1;
+}
+
+/* ============================================================
+   The cover itself
+   ============================================================ */
+
+.yukti-entry-cover {
+  display: none; /* progressive-enhancement default: no JS → no cover, ever */
+  position: fixed;
+  inset: 0;
+  z-index: var(--yukti-z-entry-cover);
+  width: 100%;
+  height: 100%;
+  border: none;
+  margin: 0;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+  overflow: hidden;
+  font: inherit;
+}
+
+html.yukti-entry-pending .yukti-entry-cover {
+  display: block;
+}
+
+.yukti-entry-bg,
+.yukti-entry-grid,
+.yukti-entry-door,
+.yukti-entry-seam,
+.yukti-entry-logo {
+  position: absolute;
+  pointer-events: none;
+}
+
+/* ============================================================
+   ENTRY SEQUENCE — background, grid, doors, seam, logo
+   ============================================================ */
+
+.yukti-entry-bg {
+  inset: 0;
+  z-index: 0;
+  background-color: var(--yukti-color-yellow-500);
+  transition: opacity 240ms var(--yukti-ease-standard);
+  transition-delay: 140ms;
+}
+
+.yukti-entry-bg::before {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  background-image: var(--yukti-texture-grain);
+  opacity: 0.035;
+  animation: yukti-entry-grain-drift 40s linear infinite;
+}
+
+.yukti-entry-bg::after {
+  content: '';
+  position: absolute;
+  width: 140%;
+  height: 140%;
+  left: -20%;
+  top: -20%;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.1), transparent 60%);
+  animation: yukti-entry-light-drift 16s ease-in-out infinite;
+}
+
+.yukti-entry-grid {
+  inset: 0;
+  z-index: 1;
+  opacity: 0.1;
+  background-image:
+    repeating-linear-gradient(to right, rgba(20, 20, 15, 0.16) 0 1px, transparent 1px 48px),
+    repeating-linear-gradient(to bottom, rgba(20, 20, 15, 0.12) 0 1px, transparent 1px 48px);
+  transition: opacity 180ms var(--yukti-ease-standard);
+  transition-delay: 160ms;
+}
+
+.yukti-entry-door {
+  top: 0;
+  z-index: 2;
+  width: 50%;
+  height: 100%;
+  background-color: var(--yukti-color-yellow-500);
+  overflow: hidden;
+  transition: transform var(--yukti-entry-split-duration) var(--yukti-ease-emphasis);
+  transition-delay: var(--yukti-entry-split-delay);
+}
+
+.yukti-entry-door::before {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  background-image: var(--yukti-texture-grain);
+  opacity: 0.04;
+  animation: yukti-entry-grain-drift 40s linear infinite;
+}
+
+.yukti-entry-door::after {
+  content: '';
+  position: absolute;
+  width: 140%;
+  height: 140%;
+  left: -20%;
+  top: -20%;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.12), transparent 60%);
+  animation: yukti-entry-light-drift 16s ease-in-out infinite;
+}
+
+.yukti-entry-door--left {
+  left: 0;
+}
+
+.yukti-entry-door--right {
+  right: 0;
+}
+
+.yukti-entry-seam {
+  top: 0;
+  left: 50%;
+  z-index: 3;
+  width: 1px;
+  height: 100%;
+  background: rgba(20, 20, 15, 0.22);
+  transform: translateX(-50%) scaleY(0.86);
+  transform-origin: center;
+  opacity: 0;
+  transition:
+    opacity var(--yukti-entry-ack-duration) var(--yukti-ease-micro),
+    transform var(--yukti-entry-split-duration) var(--yukti-ease-emphasis);
+}
+
+.yukti-entry-logo {
+  top: 50%;
+  left: 50%;
+  z-index: 4;
+  transform: translate(-50%, -50%) scale(1);
+  transition:
+    transform var(--yukti-entry-logo-duration) var(--yukti-ease-standard),
+    opacity var(--yukti-entry-logo-duration) var(--yukti-ease-standard);
+  transition-delay: var(--yukti-entry-logo-delay);
+}
+
+.yukti-entry-wordmark {
+  display: block;
+  font-family: var(--yukti-font-display);
+  font-weight: 800;
+  font-size: clamp(3rem, 1.5rem + 8vw, 11rem);
+  color: var(--yukti-color-ink-900); /* charcoal */
+  letter-spacing: -0.02em;
+  line-height: 1;
+  opacity: 1;
+}
+
+.yukti-entry-cover.is-acknowledging .yukti-entry-logo {
+  transition: opacity var(--yukti-entry-ack-duration) var(--yukti-ease-micro);
+  opacity: 0.86;
+}
+
+.yukti-entry-cover.is-acknowledging .yukti-entry-seam,
+.yukti-entry-cover.is-splitting .yukti-entry-seam {
+  opacity: 1;
+}
+
+.yukti-entry-cover.is-splitting .yukti-entry-bg,
+.yukti-entry-cover.is-splitting .yukti-entry-grid {
+  opacity: 0;
+}
+
+.yukti-entry-cover.is-splitting .yukti-entry-door--left {
+  transform: translateX(-100%);
+}
+
+.yukti-entry-cover.is-splitting .yukti-entry-door--right {
+  transform: translateX(100%);
+}
+
+.yukti-entry-cover.is-splitting .yukti-entry-seam {
+  transform: translateX(-50%) scaleY(1);
+}
+
+.yukti-entry-cover.is-advancing .yukti-entry-logo {
+  transform: translate(-50%, -50%) scale(0.86);
+  opacity: 0;
+}
+
+@keyframes yukti-entry-grain-drift {
+  from {
+    transform: translate(0, 0);
+  }
+  to {
+    transform: translate(-40px, -30px);
+  }
+}
+
+@keyframes yukti-entry-light-drift {
+  0%,
+  100% {
+    transform: translate(-6%, -4%);
+  }
+  50% {
+    transform: translate(6%, 5%);
+  }
+}
+
+/* ============================================================
+   Reduced-motion path
+   ============================================================ */
+
+.yukti-entry-cover.is-reduced-fade {
+  transition: opacity var(--yukti-entry-reveal-duration) var(--yukti-ease-standard);
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yukti-entry-bg::before,
+  .yukti-entry-bg::after,
+  .yukti-entry-door::before,
+  .yukti-entry-door::after {
+    animation: none;
+  }
+
+  .yukti-entry-cover.is-acknowledging .yukti-entry-logo,
+  .yukti-entry-cover.is-advancing .yukti-entry-logo,
+  .yukti-entry-cover.is-splitting .yukti-entry-bg,
+  .yukti-entry-cover.is-splitting .yukti-entry-grid {
+    transition: none;
+  }
+}

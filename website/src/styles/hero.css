@@ -1,0 +1,38 @@
+/*
+  Hero — Addendum v1.2 recomposition. Single column, deliberately sparse
+  ("the hero gets more empty, not less"). Typography and copy text unchanged
+  from the original build — only hierarchy/placement changed. The
+  ReasoningCanvas is framed by drafting-tick dividers and given generous
+  surrounding whitespace rather than filling half the viewport.
+*/
+
+.yukti-hero-editorial {
+  display: flex;
+  flex-direction: column;
+  gap: var(--yukti-space-6);
+}
+
+.yukti-hero-canvas-wrap {
+  display: flex;
+  justify-content: center;
+  padding-block: var(--yukti-space-6);
+}
+
+.yukti-hero-canvas-wrap .yukti-reasoning-canvas {
+  width: 100%;
+  max-width: 520px;
+}
+
+/* Supporting copy demoted to an "annotation" register beneath the canvas,
+   rather than large body text directly under the headline. */
+.yukti-hero-annotation {
+  max-width: 48ch;
+}
+
+.yukti-hero-annotation__text {
+  font-size: var(--yukti-type-data-size);
+  font-family: var(--yukti-font-data);
+  color: var(--yukti-color-bone-300);
+  opacity: 0.75;
+  line-height: 1.7;
+}

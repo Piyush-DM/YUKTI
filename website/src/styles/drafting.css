@@ -1,0 +1,131 @@
+/*
+  YUKTI Website — Drafting Motif Utilities (Addendum v1.2)
+  Shared primitives used across Hero, Evidence, Applications, and Footer, so
+  each doesn't reimplement its own divider/bracket/texture treatment.
+*/
+
+/* ============================================================
+   Drafting-tick rule — a hairline with a small perpendicular tick partway
+   along its length, instead of a plain straight divider.
+   ============================================================ */
+
+.yukti-rule--tick {
+  position: relative;
+  height: var(--yukti-border-width-hairline);
+  background: var(--yukti-color-border-hairline-dark);
+  border: none;
+  margin: 0;
+}
+
+.yukti-rule--tick::after {
+  content: '';
+  position: absolute;
+  left: 18%;
+  top: -3px;
+  width: var(--yukti-border-width-hairline);
+  height: 7px;
+  background: var(--yukti-color-border-hairline-dark);
+}
+
+/* ============================================================
+   Drafting corner brackets — an L-shaped viewfinder/crop-mark corner,
+   distinct from the page-level "+" registration crosses (blueprint.css).
+   Applied via four modifier elements inside a `position:relative` parent.
+   ============================================================ */
+
+.yukti-bracket {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  pointer-events: none;
+}
+
+.yukti-bracket::before,
+.yukti-bracket::after {
+  content: '';
+  position: absolute;
+  background: var(--yukti-color-yellow-500);
+}
+
+/* horizontal + vertical leg of the L, oriented per corner via modifier */
+.yukti-bracket::before {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+}
+.yukti-bracket::after {
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 100%;
+}
+
+.yukti-bracket--tl {
+  top: var(--yukti-space-3);
+  left: var(--yukti-space-3);
+}
+
+.yukti-bracket--tr {
+  top: var(--yukti-space-3);
+  right: var(--yukti-space-3);
+  transform: scaleX(-1);
+}
+
+.yukti-bracket--bl {
+  bottom: var(--yukti-space-3);
+  left: var(--yukti-space-3);
+  transform: scaleY(-1);
+}
+
+.yukti-bracket--br {
+  bottom: var(--yukti-space-3);
+  right: var(--yukti-space-3);
+  transform: scale(-1, -1);
+}
+
+/* ============================================================
+   Materials — grain textures. Very low opacity by design; if it's
+   noticeable before the content, the opacity is wrong (same rule as
+   blueprint linework, Section 2.1).
+   ============================================================ */
+
+/* "Graphite" — applied once, globally, to the body background */
+.yukti-material-graphite::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: var(--yukti-z-canvas);
+  pointer-events: none;
+  background-image: var(--yukti-texture-grain);
+  opacity: 0.025;
+}
+
+/* "Museum paper" — applied to bone-surfaced blocks only (currently just the
+   Evidence Annotation box; broader use waits for HairlineCard). */
+.yukti-material-paper {
+  position: relative;
+  background-color: var(--yukti-color-bone-100);
+}
+
+.yukti-material-paper::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: var(--yukti-texture-grain);
+  opacity: 0.05;
+  mix-blend-mode: multiply;
+}
+
+/* "Powder-coated industrial paint" — soft directional gradient instead of a
+   flat fill, for filled yellow surfaces only (tick dots, canvas brackets
+   already use plain yellow-500; this utility is for anything larger). */
+.yukti-material-powdercoat {
+  background: linear-gradient(155deg, var(--yukti-color-yellow-500) 0%, var(--yukti-color-yellow-600) 100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* textures are static, not motion — no override needed, kept here only as
+     a note so a future author doesn't assume otherwise. */
+}

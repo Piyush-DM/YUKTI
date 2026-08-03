@@ -1,0 +1,125 @@
+/*
+  YUKTI Website — Design Tokens (Build Order Step 1)
+  Source of truth: yukti-website-v1-architecture.md, Section 2 (Design System Mapping)
+  Governance: yukti-website-v1-architecture.md, Section 0 (D1–D14)
+
+  Rule (Section 2.3): every color/type/space/radius decision in every component
+  must reference a token defined here. A literal value anywhere else in the
+  codebase is a defect against this system, not a style choice.
+
+  This file defines VALUES ONLY. No selectors, no components, per Build Order
+  Step 1 ("no component exists yet").
+*/
+
+:root {
+  /* ============================================================
+     2.1 — Color Tokens
+     ============================================================ */
+
+  /* Foundation */
+  --yukti-color-graphite-900: #14140f; /* primary background — warm-neutral near-black, not pure #000 */
+  --yukti-color-graphite-700: #1f1f18; /* secondary/raised background, panels, alternating bands */
+
+  /* Bone / editorial surfaces */
+  --yukti-color-bone-100: #f2efe6;     /* card surface, resting — warm off-white, not clinical #fff */
+  --yukti-color-bone-300: #d8d4c6;     /* body text on dark backgrounds — dimmed bone, not pure white */
+
+  /* Ink (text on light surfaces) */
+  --yukti-color-ink-900: #14140f;      /* body text on bone/light surfaces — matches graphite-900 hue family */
+
+  /* Primary accent — construction yellow (D14: the ONLY accent hue in v1.0) */
+  --yukti-color-yellow-500: #f5c400;   /* industrial-machinery yellow — JCB/Caterpillar register, not gold/pastel/orange */
+  --yukti-color-yellow-600: #d9ac00;   /* pressed/:active state — darker/more saturated than 500 */
+  --yukti-color-yellow-focus: var(--yukti-color-yellow-500); /* D8 — mandatory :focus-visible ring color */
+
+  /* Structural linework */
+  --yukti-color-line-blueprint: rgba(242, 239, 230, 0.06); /* background drafting linework — barely perceptible */
+  --yukti-color-border-hairline-dark: rgba(242, 239, 230, 0.14);  /* hairline border on graphite surfaces */
+  --yukti-color-border-hairline-light: rgba(20, 20, 15, 0.14);    /* hairline border on bone surfaces */
+
+  /* ============================================================
+     2.2 — Typography (D2 final: Söhne / Inter / IBM Plex Mono)
+     Fallback stacks active until licensed Söhne files are procured
+     (see architecture doc, Section 0.1, D2 licensing note).
+     ============================================================ */
+
+  --yukti-font-display: "Söhne", "Neue Haas Grotesk Display", ui-sans-serif, sans-serif;
+  --yukti-font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --yukti-font-data: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
+
+  /* Fluid type scale — clamp(min, preferred-vw, max) */
+
+  /* Addendum v1.2 — mega scene-heading tier (~180px ceiling), left-aligned,
+     uppercase, multi-line word-stacked. See architecture §16. */
+  --yukti-type-mega-size: clamp(2.5rem, 1.1rem + 9vw, 11.25rem); /* up to ~180px */
+  --yukti-type-mega-weight: 700;
+  --yukti-type-mega-tracking: -0.02em;
+  --yukti-type-mega-line-height: 0.92;
+
+  --yukti-type-display-size: clamp(2.75rem, 2rem + 4.5vw, 6rem);   /* 44–96px */
+  --yukti-type-display-weight: 700;
+  --yukti-type-display-tracking: -0.02em;
+
+  --yukti-type-heading-size: clamp(1.75rem, 1.4rem + 2vw, 2.75rem); /* 28–44px — smaller in-context headings only */
+  --yukti-type-heading-weight: 600;
+  --yukti-type-heading-tracking: -0.01em;
+
+  --yukti-type-body-size: clamp(1rem, 0.95rem + 0.2vw, 1.125rem);  /* 16–18px */
+  --yukti-type-body-weight: 400;
+  --yukti-type-body-tracking: 0em;
+  --yukti-type-body-line-height: 1.6;
+
+  --yukti-type-label-size: clamp(0.6875rem, 0.65rem + 0.1vw, 0.8125rem); /* 11–13px */
+  --yukti-type-label-weight: 500;
+  --yukti-type-label-tracking: 0.08em;
+
+  --yukti-type-data-size: clamp(0.75rem, 0.72rem + 0.1vw, 0.875rem); /* 12–14px */
+  --yukti-type-data-weight: 400;
+  --yukti-type-data-tracking: 0em;
+  --yukti-type-data-numeric: tabular-nums; /* mandatory — see Section 2.2 data-register rule */
+
+  /* ============================================================
+     2.3 — Spacing Scale
+     ============================================================ */
+  --yukti-space-1: 0.25rem;   /* 4px  — micro-gaps */
+  --yukti-space-2: 0.5rem;    /* 8px  — tight internal padding */
+  --yukti-space-3: 1rem;      /* 16px — standard internal padding */
+  --yukti-space-4: 1.5rem;    /* 24px — component-to-component gaps */
+  --yukti-space-5: 2.5rem;    /* 40px — sub-scene gaps */
+  --yukti-space-6: 4rem;      /* 64px — scene-to-scene rhythm unit */
+  --yukti-space-7: clamp(6rem, 4rem + 6vw, 8rem); /* 96–128px — major scene padding */
+
+  /* Grid */
+  --yukti-grid-columns: 12;
+  --yukti-grid-columns-narrow: 4;   /* 480–760px, Section 5 */
+  --yukti-grid-columns-standard: 8; /* 760–1200px, Section 5 */
+  --yukti-grid-gutter: var(--yukti-space-4);
+  --yukti-grid-margin: clamp(1.25rem, 1rem + 2vw, 4rem);
+
+  /* ============================================================
+     2.4 — Surface & Elevation
+     ============================================================ */
+  --yukti-radius-sm: 3px; /* cards/panels — never a soft/pill radius */
+  --yukti-radius-focus: 2px;
+  --yukti-border-width-hairline: 1px;
+  --yukti-focus-ring-width: 2px;
+  --yukti-focus-ring-offset: 2px;
+
+  /* Addendum v1.2 — Materials. A shared low-opacity SVG-turbulence grain,
+     reused for both the "graphite" body feel and the "museum paper" bone
+     feel (opacity/tint differ per use, texture source is the same). */
+  --yukti-texture-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+
+  /* ============================================================
+     2.6 — Z-Layer Scale (verbatim from Motion System §2.6)
+     ============================================================ */
+  --yukti-z-canvas: 1;
+  --yukti-z-veil: 2;
+  --yukti-z-content: 3;
+  --yukti-z-nav: 100;
+  --yukti-z-panel: 500;
+  --yukti-z-modal: 900;
+  --yukti-z-toast: 950;
+  --yukti-z-entry-cover: 9999; /* Addendum v1.3 — above literally everything, including consent (999) */
+  --yukti-z-consent: 999;
+}

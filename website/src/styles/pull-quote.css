@@ -1,0 +1,31 @@
+/*
+  Pull Quote Scene — Addendum v1.2/§16. The homepage's single oversized-
+  quotation moment, between Evidence and Applications. "The page breathes" —
+  generous padding, nothing else on screen.
+*/
+
+.yukti-pull-quote {
+  padding-block: calc(var(--yukti-space-7) * 1.6);
+  display: flex;
+  justify-content: center;
+}
+
+.yukti-pull-quote__text {
+  margin: 0;
+  max-width: 20ch;
+  text-align: center;
+  font-family: var(--yukti-font-display);
+  font-size: clamp(2rem, 1.4rem + 4vw, 4.5rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--yukti-color-bone-100);
+}
+
+.yukti-pull-quote__text span {
+  display: block;
+}
+
+.yukti-pull-quote__text span:last-child {
+  color: var(--yukti-color-yellow-500);
+}

@@ -1,0 +1,19 @@
+# Developer tooling dependencies for repository validation and local bootstrap.
+#
+# The repository organization is frozen. Add dependencies here only after an
+# explicit engineering decision updates docs/development/DEVELOPMENT_ENVIRONMENT.md.
+
+ruff
+mypy
+pytest
+
+# Approved Python libraries for the developer environment.
+aiofiles
+aiosqlite
+httpx
+jinja2
+orjson
+pydantic
+python-dotenv
+rich
+typer

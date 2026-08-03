@@ -1,0 +1,73 @@
+/*
+  Evidence Scene — pipeline diagram (Addendum v1.2/§16). Replaces the v1.1
+  connected-tick-line trace with a labeled pipeline: Claim, then Evidence →
+  Finding → Result connected by arrow glyphs, then an Annotation caption in a
+  bone/paper-textured box. Content unchanged (real mock-copy fields only —
+  see architecture §16 for why "Assumption" from the brief's own mockup was
+  deliberately not added).
+*/
+
+.yukti-pipeline {
+  margin: var(--yukti-space-5) 0 0;
+  max-width: 60ch;
+  display: flex;
+  flex-direction: column;
+  gap: var(--yukti-space-4);
+}
+
+.yukti-pipeline__label {
+  display: block;
+  font-family: var(--yukti-font-data);
+  font-size: var(--yukti-type-data-size);
+  color: var(--yukti-color-yellow-500);
+  text-transform: uppercase;
+  letter-spacing: var(--yukti-type-label-tracking);
+  margin: 0 0 var(--yukti-space-1);
+}
+
+.yukti-pipeline__value {
+  font-family: var(--yukti-font-body);
+  font-size: var(--yukti-type-body-size);
+  color: var(--yukti-color-bone-100);
+  margin: 0;
+}
+
+.yukti-pipeline__stages {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--yukti-space-2);
+}
+
+.yukti-pipeline__arrow {
+  font-family: var(--yukti-font-data);
+  color: var(--yukti-color-border-hairline-dark);
+  padding-left: 2px;
+}
+
+.yukti-pipeline__stage.is-result .yukti-pipeline__label {
+  color: var(--yukti-color-bone-300);
+}
+
+/* Annotation caption — the "museum paper" material treatment */
+.yukti-pipeline__annotation {
+  padding: var(--yukti-space-4);
+  border-radius: var(--yukti-radius-sm);
+}
+
+.yukti-pipeline__annotation .yukti-pipeline__label {
+  color: var(--yukti-color-yellow-600);
+}
+
+/* Bug fix: .yukti-pipeline__value's base rule sets bone-100 text (correct for
+   the dark graphite pipeline above) — inside this bone/paper-background box
+   that's bone-on-bone, invisible. Override to ink for readability. */
+.yukti-pipeline__annotation .yukti-pipeline__value {
+  color: var(--yukti-color-ink-900);
+}
+
+.yukti-pipeline__annotation .yukti-pipeline__value,
+.yukti-pipeline__annotation .yukti-pipeline__label {
+  position: relative;
+  z-index: 1; /* sit above the paper-grain ::before overlay (drafting.css) */
+}

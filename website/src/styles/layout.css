@@ -1,0 +1,304 @@
+/*
+  YUKTI Website — Layout Shell (Build Order Step 2)
+  App Shell + 12-column grid + scene rhythm + typography utility classes.
+
+  Scope note: this file verifies grid/spacing rhythm with placeholder content
+  blocks (real mock copy, per this step's content decision) and typography
+  tokens applied via utility classes. It intentionally contains NO motion
+  (reveal-on-scroll arrives Step 3/4.9), NO bespoke visualizations
+  (EvidenceGraphCanvas/EvidenceTraceVisualization arrive Steps 4/6), and NO
+  interactive facet controls (Step 3+). Every value below traces to a token
+  in tokens.design.css — no arbitrary pixels.
+*/
+
+html {
+  scroll-behavior: smooth; /* anchor-nav only; no scroll-scrub logic lives here */
+  /* scroll-snap-statement primitive (Motion Addendum §16) — proximity, not
+     mandatory, so only the Philosophy statements (which set
+     scroll-snap-align) pause gently; everything else scrolls untouched. */
+  scroll-snap-type: y proximity;
+}
+
+/* Bug fix: BlueprintBackground is position:fixed with an explicit z-index
+   (canvas layer, 1). Per CSS paint order, ANY positioned element with a
+   z-index paints above plain in-flow static content regardless of DOM order —
+   so <main>/<footer> must be explicitly promoted into the content layer (3)
+   or a future opaque canvas layer would silently hide all scene content
+   again, exactly like this one did before the fix. */
+main,
+footer {
+  position: relative;
+  z-index: var(--yukti-z-content);
+}
+
+/* ============================================================
+   Shell / Grid (Section 2.3)
+   ============================================================ */
+
+.yukti-shell {
+  width: 100%;
+  margin-inline: auto;
+  padding-inline: var(--yukti-grid-margin);
+  max-width: 1440px;
+}
+
+.yukti-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--yukti-grid-columns), 1fr);
+  gap: var(--yukti-grid-gutter);
+}
+
+/* Breakpoints per architecture Section 5 (--yukti-bp-standard: 760–1200px) */
+@media (max-width: 1199px) {
+  .yukti-grid {
+    grid-template-columns: repeat(var(--yukti-grid-columns-standard), 1fr);
+  }
+}
+
+/* --yukti-bp-narrow: 480–760px */
+@media (max-width: 759px) {
+  .yukti-grid {
+    grid-template-columns: repeat(var(--yukti-grid-columns-narrow), 1fr);
+  }
+}
+
+/* --yukti-bp-compact: <480px */
+@media (max-width: 479px) {
+  .yukti-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================
+   Scene Rhythm
+   ============================================================ */
+
+.yukti-scene {
+  padding-block: var(--yukti-space-7);
+  /* Temporary hairline boundary for THIS layout-verification step only.
+     Remove once scene-to-scene transition anchors (architecture Section 1
+     "exit condition" / D11 continuous-document requirement) are implemented —
+     the finished homepage must not read as stacked pages. */
+  border-bottom: var(--yukti-border-width-hairline) dashed var(--yukti-color-border-hairline-dark);
+}
+
+.yukti-scene:last-of-type {
+  border-bottom: none;
+}
+
+.yukti-scene--hero {
+  padding-block-start: calc(var(--yukti-space-7) * 1.5);
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+}
+
+.yukti-scene__supporting {
+  max-width: 56ch;
+  margin-top: var(--yukti-space-3);
+}
+
+.yukti-scene__body {
+  max-width: 62ch;
+  display: flex;
+  flex-direction: column;
+  gap: var(--yukti-space-3);
+  margin-top: var(--yukti-space-4);
+}
+
+/* ============================================================
+   Typography Utility Classes (Section 2.2)
+   ============================================================ */
+
+.yukti-type-display {
+  font-family: var(--yukti-font-display);
+  font-size: var(--yukti-type-display-size);
+  font-weight: var(--yukti-type-display-weight);
+  letter-spacing: var(--yukti-type-display-tracking);
+  line-height: 1.05;
+  color: var(--yukti-color-bone-100);
+  margin: 0;
+}
+
+.yukti-type-heading {
+  font-family: var(--yukti-font-display);
+  font-size: var(--yukti-type-heading-size);
+  font-weight: var(--yukti-type-heading-weight);
+  letter-spacing: var(--yukti-type-heading-tracking);
+  color: var(--yukti-color-bone-100);
+  margin: 0;
+}
+
+.yukti-type-body {
+  font-family: var(--yukti-font-body);
+  font-size: var(--yukti-type-body-size);
+  font-weight: var(--yukti-type-body-weight);
+  line-height: var(--yukti-type-body-line-height);
+  color: var(--yukti-color-bone-300);
+  margin: 0;
+}
+
+.yukti-type-label {
+  font-family: var(--yukti-font-body);
+  font-size: var(--yukti-type-label-size);
+  font-weight: var(--yukti-type-label-weight);
+  letter-spacing: var(--yukti-type-label-tracking);
+  text-transform: uppercase;
+  color: var(--yukti-color-yellow-500);
+  margin: 0;
+}
+
+.yukti-type-data {
+  font-family: var(--yukti-font-data);
+  font-size: var(--yukti-type-data-size);
+  font-weight: var(--yukti-type-data-weight);
+  letter-spacing: var(--yukti-type-data-tracking);
+  font-variant-numeric: var(--yukti-type-data-numeric);
+  color: var(--yukti-color-bone-300);
+  margin: 0;
+}
+
+/* ============================================================
+   Quiet Link (component tree: the system's only "action" style)
+   ============================================================ */
+
+.yukti-quiet-link {
+  position: relative;
+  display: inline-block;
+  margin-top: var(--yukti-space-4);
+  font-family: var(--yukti-font-body);
+  font-size: var(--yukti-type-label-size);
+  font-weight: var(--yukti-type-label-weight);
+  letter-spacing: var(--yukti-type-label-tracking);
+  text-transform: uppercase;
+  color: var(--yukti-color-bone-100);
+  text-decoration: none;
+  padding-bottom: var(--yukti-space-1);
+  transition: letter-spacing var(--yukti-duration-quick) var(--yukti-ease-micro);
+}
+
+/* precision-underline, at partial scale by default ("line extends" on hover
+   rather than appearing from nothing) — Motion Addendum §15.2 */
+.yukti-quiet-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: var(--yukti-border-width-hairline);
+  background: var(--yukti-color-yellow-500);
+  transform: scaleX(0.55);
+  transform-origin: left;
+  transition: transform var(--yukti-duration-quick) var(--yukti-ease-micro);
+}
+
+.yukti-quiet-link:hover,
+.yukti-quiet-link:focus-visible {
+  letter-spacing: calc(var(--yukti-type-label-tracking) + 0.02em);
+}
+
+.yukti-quiet-link:hover::after,
+.yukti-quiet-link:focus-visible::after {
+  transform: scaleX(1);
+}
+
+/* ============================================================
+   Scene-specific placeholder structures
+   (structural only — see per-scene HTML comments in index.html)
+   ============================================================ */
+
+.yukti-principle-list,
+.yukti-commitment-list {
+  list-style: none;
+  margin: var(--yukti-space-4) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--yukti-space-3);
+  max-width: 62ch;
+}
+
+.yukti-principle-list li,
+.yukti-commitment-list li {
+  font-family: var(--yukti-font-body);
+  font-size: var(--yukti-type-body-size);
+  color: var(--yukti-color-bone-100);
+  padding-left: var(--yukti-space-4);
+  border-left: var(--yukti-border-width-hairline) solid var(--yukti-color-yellow-500);
+}
+
+/* .yukti-trace-placeholder and .yukti-domain-sequence (Step 2 boxed
+   placeholders) are superseded by evidence.css (.yukti-annotation-trace) and
+   applications.css (.yukti-domain-sequence, sequence variant) — Addendum
+   §15.4/§15.5. Removed here rather than left as dead/conflicting CSS. */
+
+/* ============================================================
+   Addendum §15.3 — Scene Index (section identifiers + numbering rhythm)
+   ============================================================ */
+
+.yukti-scene__index {
+  font-family: var(--yukti-font-data);
+  font-size: var(--yukti-type-data-size);
+  color: var(--yukti-color-yellow-500);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  opacity: 0.85;
+  margin: 0 0 var(--yukti-space-3);
+}
+
+/* ============================================================
+   Addendum §15.3 — Scene rhythm modifiers (vertical spacing variation,
+   token-derived multiples only — never a raw pixel value)
+   ============================================================ */
+
+.yukti-scene--roomy {
+  padding-block: calc(var(--yukti-space-7) * 1.2);
+}
+
+.yukti-scene--center .yukti-shell {
+  display: flex;
+  justify-content: center;
+}
+
+/* ============================================================
+   Addendum §15.3 — Grid column-span utilities (alternating content widths,
+   expressed as grid-column spans within the frozen 12-column grid, never as
+   arbitrary pixel widths). Collapse to full width below the standard
+   breakpoint, consistent with the existing responsive strategy.
+   ============================================================ */
+
+.yukti-col-6 {
+  grid-column: 1 / span 6;
+}
+.yukti-col-6-end {
+  grid-column: 7 / span 6;
+}
+.yukti-col-7 {
+  grid-column: 1 / span 7;
+}
+.yukti-col-9 {
+  grid-column: 1 / span 9;
+}
+.yukti-col-8-offset-2 {
+  grid-column: 3 / span 8;
+}
+.yukti-col-8-offset-3 {
+  grid-column: 4 / span 8;
+}
+
+@media (max-width: 1199px) {
+  .yukti-col-6,
+  .yukti-col-6-end,
+  .yukti-col-7,
+  .yukti-col-9,
+  .yukti-col-8-offset-2,
+  .yukti-col-8-offset-3 {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Hero-specific grid: two columns (copy / ReasoningCanvas) at wide+standard,
+   stacked (copy above canvas, DOM order) below that via the rule above. */
+.yukti-hero-grid {
+  align-items: center;
+}

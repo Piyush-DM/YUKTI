@@ -1,0 +1,136 @@
+/*
+  ReasoningCanvas — reserved, empty visualization container.
+  Architecture Addendum §15.1/§16, Motion Addendum §15.2 (reasoning-canvas-idle).
+  CONTRACT: never render invented graph/node content here. Frame + idle
+  instrumentation only.
+
+  v1.2: corner marks changed from crosses to L-shaped drafting brackets
+  (.yukti-bracket, drafting.css) — a viewfinder/crop-mark feel, distinct from
+  the page-level "+" registration crosses in blueprint.css.
+*/
+
+.yukti-reasoning-canvas {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  border: var(--yukti-border-width-hairline) solid var(--yukti-color-border-hairline-dark);
+  border-radius: var(--yukti-radius-sm);
+  background-color: var(--yukti-color-graphite-700);
+  background-image: repeating-linear-gradient(
+      to right,
+      var(--yukti-color-line-blueprint) 0 1px,
+      transparent 1px 32px
+    ),
+    repeating-linear-gradient(to bottom, var(--yukti-color-line-blueprint) 0 1px, transparent 1px 32px);
+  overflow: hidden;
+}
+
+.yukti-reasoning-canvas__surface {
+  position: absolute;
+  inset: 0;
+}
+
+/* reasoning-canvas-idle — the ONLY motion permitted while the canvas is empty */
+.yukti-reasoning-canvas .yukti-bracket {
+  animation: yukti-reasoning-idle 3800ms var(--yukti-ease-standard) infinite;
+}
+.yukti-reasoning-canvas .yukti-bracket--tr {
+  animation-delay: 950ms;
+}
+.yukti-reasoning-canvas .yukti-bracket--bl {
+  animation-delay: 1900ms;
+}
+.yukti-reasoning-canvas .yukti-bracket--br {
+  animation-delay: 2850ms;
+}
+
+@keyframes yukti-reasoning-idle {
+  0%,
+  100% {
+    opacity: var(--yukti-opacity-muted);
+  }
+  50% {
+    opacity: var(--yukti-opacity-full);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yukti-reasoning-canvas .yukti-bracket {
+    animation: none;
+    opacity: var(--yukti-opacity-muted);
+  }
+}
+
+/* Instrumentation labels — GRAPH MODULE (top-left), REV (top-right),
+   READY status (bottom-left), coordinate readout (bottom-right, motion.js) */
+
+.yukti-reasoning-canvas__label {
+  position: absolute;
+  top: var(--yukti-space-3);
+  left: calc(var(--yukti-space-3) + 20px);
+  font-family: var(--yukti-font-data);
+  font-size: var(--yukti-type-data-size);
+  color: var(--yukti-color-bone-300);
+  opacity: 0.5;
+  text-transform: uppercase;
+  letter-spacing: var(--yukti-type-label-tracking);
+}
+
+.yukti-reasoning-canvas__rev {
+  position: absolute;
+  top: var(--yukti-space-3);
+  right: calc(var(--yukti-space-3) + 20px);
+  font-family: var(--yukti-font-data);
+  font-size: var(--yukti-type-data-size);
+  color: var(--yukti-color-bone-300);
+  opacity: 0.4;
+  text-transform: uppercase;
+  letter-spacing: var(--yukti-type-label-tracking);
+}
+
+.yukti-reasoning-canvas__status {
+  position: absolute;
+  bottom: var(--yukti-space-3);
+  left: calc(var(--yukti-space-3) + 20px);
+  font-family: var(--yukti-font-data);
+  font-size: var(--yukti-type-data-size);
+  color: var(--yukti-color-yellow-500);
+  opacity: 0.55;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.yukti-reasoning-canvas__readout {
+  position: absolute;
+  bottom: var(--yukti-space-3);
+  right: calc(var(--yukti-space-3) + 20px);
+  font-family: var(--yukti-font-data);
+  font-size: var(--yukti-type-data-size);
+  color: var(--yukti-color-yellow-500);
+  opacity: 0.65;
+  font-variant-numeric: var(--yukti-type-data-numeric);
+}
+
+.yukti-reasoning-canvas__hint {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--yukti-space-5);
+  pointer-events: none;
+}
+
+.yukti-reasoning-canvas__hint span {
+  font-family: var(--yukti-font-data);
+  font-size: var(--yukti-type-data-size);
+  color: var(--yukti-color-bone-300);
+  opacity: 0.32;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.yukti-reasoning-canvas.is-mounted .yukti-reasoning-canvas__hint {
+  display: none;
+}

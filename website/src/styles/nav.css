@@ -1,0 +1,107 @@
+/*
+  YUKTI Website — PrimaryNav (Motion System §4.1; Build Order Step 2: static
+  states only). No scroll listener, no .scrolled toggle, and no functioning
+  MenuTrigger/PanelTakeover yet — those are later, explicitly scoped steps.
+  The trigger button exists and is honestly disabled rather than faked.
+*/
+
+.yukti-nav {
+  position: fixed;
+  inset-inline: 0;
+  top: 0;
+  z-index: var(--yukti-z-nav);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--yukti-space-3) var(--yukti-grid-margin);
+  background: transparent;
+  /* .scrolled background/padding transition (Motion §4.1) wired when scroll
+     behavior is built — not part of this step */
+}
+
+.yukti-nav__wordmark {
+  font-family: var(--yukti-font-display);
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--yukti-color-bone-100);
+  text-decoration: none;
+}
+
+.yukti-nav__links {
+  display: flex;
+  gap: var(--yukti-space-4);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.yukti-nav__links a {
+  position: relative;
+  display: inline-block;
+  font-family: var(--yukti-font-body);
+  font-size: var(--yukti-type-label-size);
+  font-weight: var(--yukti-type-label-weight);
+  letter-spacing: var(--yukti-type-label-tracking);
+  text-transform: uppercase;
+  color: var(--yukti-color-bone-300);
+  text-decoration: none;
+  padding-bottom: var(--yukti-space-1);
+  transition:
+    color var(--yukti-duration-quick) var(--yukti-ease-micro),
+    letter-spacing var(--yukti-duration-quick) var(--yukti-ease-micro);
+}
+
+/* precision-underline (Motion Addendum §15.1/§15.2) — supersedes the
+   Motion System's original padding-left-nudge nav grammar. Documented
+   amendment, not silent drift: see Motion System §15.1. */
+.yukti-nav__links a::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: var(--yukti-border-width-hairline);
+  background: var(--yukti-color-yellow-500);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--yukti-duration-quick) var(--yukti-ease-micro);
+}
+
+.yukti-nav__links a:hover,
+.yukti-nav__links a:focus-visible {
+  color: var(--yukti-color-bone-100);
+  letter-spacing: calc(var(--yukti-type-label-tracking) + 0.02em);
+}
+
+.yukti-nav__links a:hover::after,
+.yukti-nav__links a:focus-visible::after {
+  transform: scaleX(1);
+}
+
+.yukti-nav__menu-trigger {
+  display: none;
+  background: none;
+  border: var(--yukti-border-width-hairline) solid var(--yukti-color-border-hairline-dark);
+  border-radius: var(--yukti-radius-sm);
+  padding: var(--yukti-space-1) var(--yukti-space-2);
+  color: var(--yukti-color-bone-300);
+  font-family: var(--yukti-font-body);
+  font-size: var(--yukti-type-label-size);
+  letter-spacing: var(--yukti-type-label-tracking);
+  text-transform: uppercase;
+}
+
+.yukti-nav__menu-trigger:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+@media (max-width: 759px) {
+  .yukti-nav__links {
+    display: none;
+  }
+  .yukti-nav__menu-trigger {
+    display: inline-block;
+  }
+}

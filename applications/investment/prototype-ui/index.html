@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>YUKTI Investment Analysis Prototype</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Investment product prototype</p>
+        <h1>YUKTI Investment Analysis</h1>
+      </div>
+      <div class="mock-boundary">Fixture workspace plus optional local Risk RIK run.</div>
+    </header>
+
+    <main class="layout">
+      <aside class="sidebar" aria-label="Investment cases">
+        <div class="panel-heading">
+          <h2>Cases</h2>
+          <button id="new-case-button" type="button">New Case</button>
+        </div>
+        <div id="case-list" class="case-list"></div>
+      </aside>
+
+      <section class="workspace" aria-live="polite">
+        <section id="intake-panel" class="intake-panel hidden">
+          <div class="section-header">
+            <div>
+              <p class="eyebrow">Step 1</p>
+              <h2>Create Investment Case</h2>
+            </div>
+            <button id="cancel-intake-button" class="secondary" type="button">
+              Cancel
+            </button>
+          </div>
+          <form id="case-form" class="case-form">
+            <label>
+              Company
+              <input id="company-input" name="company" required value="HelioLedger" />
+            </label>
+            <label>
+              Ticker / Type
+              <input id="ticker-input" name="ticker" value="Private" />
+            </label>
+            <label>
+              Sector
+              <input
+                id="sector-input"
+                name="sector"
+                value="Climate finance infrastructure"
+              />
+            </label>
+            <label>
+              Requested Decision
+              <input
+                id="decision-input"
+                name="requestedDecision"
+                value="Decide whether to approve diligence for a $6M allocation"
+              />
+            </label>
+            <label class="wide">
+              Investment Thesis
+              <textarea id="thesis-input" name="investmentThesis" rows="5">
+HelioLedger provides carbon-accounting workflow software for mid-market manufacturers. This draft case is only used to demonstrate the intake-to-workspace product flow.</textarea>
+            </label>
+            <div class="form-actions">
+              <button type="submit">Create Mock Case</button>
+            </div>
+          </form>
+        </section>
+
+        <section id="case-workspace" class="case-workspace"></section>
+      </section>
+    </main>
+
+    <template id="case-card-template">
+      <button class="case-card" type="button">
+        <span class="case-card-title"></span>
+        <span class="case-card-meta"></span>
+      </button>
+    </template>
+
+    <script src="fixtures.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
