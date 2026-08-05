@@ -37,6 +37,8 @@ target-version = "py312"
 testpaths = [
     "daale/tests",
     "applications/investment/prototype_risk_rik/tests",
+    "applications/investment/vertical_slice/tests",
+    "applications/investment/workspace/tests",
     "choir_prototype/tests",
 ]
 

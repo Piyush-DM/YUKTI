@@ -1,5 +1,18 @@
 # YUKTI Investment Analysis Prototype UI
 
+> **Status: superseded, not retired.**
+>
+> The gap this README describes below — "until a future approved implementation
+> connects institutional reasoning to those cases" — has been closed by
+> [`workspace/`](../workspace/README.md), which is Version 1 of the YUKTI
+> application and runs real analysis against user-created cases. The product
+> vocabulary here (Case, Evidence, Positions, Conflicts, Decision Ledger) is
+> what that application was built on.
+>
+> This prototype is kept for reference and is still fixture-backed. Retiring it
+> touches a passing test suite and is scheduled work, not a side effect of
+> building its replacement. Do not extend it.
+
 This directory contains the product prototype for the YUKTI investment analysis
 workflow.
 

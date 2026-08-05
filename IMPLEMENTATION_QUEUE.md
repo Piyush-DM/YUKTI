@@ -9,16 +9,25 @@ freeze onward, only maintenance work is permitted unless an explicit
 specification or direct architectural instruction authorizes implementation
 work.
 
-Last updated: 2026-08-04
+Last updated: 2026-08-05
 
-Current validation gate status: Passed on 2026-08-04.
+Current validation gate status: Passed on 2026-08-05.
 
-**Known governance gap.** `choir_prototype/` and
-`applications/investment/prototype_risk_rik/` contain runtime behavior that was
+Narrative record of implementation work, including assumptions and open review
+points, is kept in `docs/development/IMPLEMENTATION_LOG.md`. This file remains
+the backlog.
+
+**Known governance gap.** `choir_prototype/`,
+`applications/investment/prototype_risk_rik/` and
+`applications/investment/vertical_slice/` contain runtime behavior that was
 implemented while every `choir/specifications/SPEC-*.md` file is empty. Under
 the rules below, that work was not authorized by an approved specification.
 Recorded here rather than resolved: the rule and the repository disagree, and
 which one gives way is an architectural decision, not a maintenance task.
+
+The vertical slice was authorized by direct architectural instruction, which the
+rules below permit as an alternative to a specification. It widens the gap
+rather than creating a new kind of one.
 
 ## Operating Rules
 
@@ -128,4 +137,30 @@ Build the chain from specifications to implementation artifacts.
 
 ### Priority 7: Execution Engine
 
-- [ ] Blocked until approved execution behavior exists.
+- [x] First complete vertical slice: one document to a rendered report, every
+  stage persisted (`applications/investment/vertical_slice/`). Built by direct
+  architectural instruction; composes frozen V0.1 components and adds document
+  intake only.
+- [ ] Blocked on `DECISION-002` approval: any second document, any document that
+  is not the frozen sample, and any change to what intake is allowed to do.
+- [ ] Blocked until approved execution behavior exists for anything beyond the
+  above.
+
+### Priority 8: Product Application
+
+Added when the engine was declared stable and the product instruction was
+issued. Product work is governed by
+`docs/architecture/DECISION-003_product_application_architecture.md`.
+
+- [x] YUKTI application V1: case register, intake, diligence schedule,
+  institutional judgment, audit trail, decision ledger
+  (`applications/investment/workspace/`).
+- [ ] Blocked on `DECISION-003` approval, in particular the "RIK Positions" to
+  "Review areas" rename.
+- [ ] Retire `applications/investment/prototype-ui/` once the rename is settled.
+  Superseded by the workspace; not removed, because removal touches a passing
+  test suite.
+- [ ] Authentication and access control. Required before the workspace records
+  real institutional decisions attributed to named people.
+- [ ] Concurrent-edit handling. Material is replaced wholesale, so two analysts
+  editing one case overwrite each other silently.

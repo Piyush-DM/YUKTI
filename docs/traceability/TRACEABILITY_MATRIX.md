@@ -11,12 +11,16 @@ accepted content.
 | Pending | Pending | DAALE ontology scaffold | `daale/ontology/` | `daale/tests/test_ontology_scaffold.py` | Pending | `daale/ontology/README.md` | Scaffold only; no behavior approved. |
 | **None — see note** | Executable reasoning pipeline | CHOIR prototype (frozen V0.1) | `choir_prototype/` | `choir_prototype/tests/` (75) | `--audit`, portability 1.00 | `choir_prototype/README.md`, `FROZEN.md` | **Outside the approved chain.** Built from research drafts, not from an accepted SPEC. |
 | **None — see note** | Model-backed vertical slice | Investment prototype | `applications/investment/prototype_risk_rik/` | `.../tests/` | None | `.../README.md` | **Outside the approved chain, and legacy** per `DECISION-001`. |
+| **None — see note** | Document intake | Vertical slice parsing layer | `applications/investment/vertical_slice/parse.py` | `.../tests/test_vertical_slice.py` (`TestDocumentIntake`) | None | `DECISION-002`, `.../README.md` | **Blocked on `DECISION-002`**, which is pending approval. |
+| **None — see note** | End-to-end execution path | Vertical slice run and artifacts | `applications/investment/vertical_slice/run.py` | `.../tests/test_vertical_slice.py` (`TestSliceExecution`, `TestSliceDeterminism`) | Reuses `--replay`; no new metric | `.../README.md` | Downstream of intake it composes frozen V0.1 components only; adds no reasoning. |
+| **None — see note** | Institutional workflow (case → material → judgment → decision) | Investment committee workspace | `applications/investment/workspace/` | `.../tests/test_workspace.py` (26) | None | `DECISION-003`, `.../README.md` | **Blocked on `DECISION-003`**, which is pending approval. Product layer; computes no judgment. |
+| **None — see note** | Engine boundary (product must not reason) | Workspace analysis projection | `applications/investment/workspace/analysis.py` | `TestJudgment.test_judgment_matches_the_engine_directly`, `TestSynthesisBoundary` | None | `.../README.md` | Judgment is a projection of the persisted record, extending commitment E9 into the product. |
 
 ## Unlinked Implementation
 
 This matrix exists to record approved links from specifications to artifacts.
 It currently cannot, because **every `choir/specifications/SPEC-*.md` file is
-empty** while two executable code areas exist.
+empty** while four executable code areas exist.
 
 The traceability chain therefore has no upstream end. This is recorded rather
 than hidden, per the maintenance note below about keeping `Pending` visible —

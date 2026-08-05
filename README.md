@@ -28,8 +28,9 @@ logic.
   tooling.
 - `docs/`: Architecture decision notes, development and validation procedure,
   repository-health process, and the traceability matrix.
-- `applications/`: Domain applications. Currently the investment prototype
-  vertical slice.
+- `applications/`: Domain applications. The investment committee workspace
+  (the YUKTI application, V1), the vertical slice that is its reasoning
+  reference implementation, and two superseded prototypes.
 - `reports/`: Reserved for generated report output. Generated files are not
   committed.
 - `website/`: YUKTI public website. Static HTML, CSS, and vanilla JavaScript,
@@ -70,10 +71,36 @@ docstrings that name planned boundaries and define no behavior. The executable
 code in `daale/` is configuration, environment diagnostics, logging, and report
 plumbing. DAALE currently contains no reasoning logic.
 
-**`applications/investment/` — prototype vertical slice.** A UI and an
-executable Risk RIK path, isolated from DAALE engine architecture. Its
-model-backed provider is retained only as legacy; see
-`docs/architecture/DECISION-001_reasoning_execution_substrate.md`.
+**`applications/investment/` — the application, the reference implementation,
+and two superseded prototypes.**
+
+`workspace/` is **Version 1 of the YUKTI application**: institutional software
+for carrying an investment case from intake through an institutional judgment to
+a recorded committee decision. It treats CHOIR as infrastructure — it calls the
+vertical slice and reads back the record it wrote, and a user never sees a
+kernel, a translator or an intermediate representation outside the audit view.
+Run it with `python -m applications.investment.workspace`. Its architecture is
+recorded in `docs/architecture/DECISION-003_product_application_architecture.md`
+and is **pending approval**.
+
+`vertical_slice/` is the repository's first complete end-to-end execution path
+and the canonical reference implementation for how the engine is called:
+one fixed sample document is parsed into a packet, carried through the frozen
+prototype's translation, kernels and synthesis, and rendered as the canonical
+execution report, with every intermediate stage persisted to `reports/` for
+inspection. It adds a document intake layer and nothing else — `choir_prototype/`
+is called as a library and is not modified, so `--frozen` still reports INTACT
+and `--audit` still reports portability 1.00. The one architectural choice it
+required, what a "document" is for v0.1, is recorded in
+`docs/architecture/DECISION-002_document_intake_for_the_vertical_slice.md` and
+is **pending approval**.
+
+`prototype-ui/` and `prototype_risk_rik/` are a fixture-backed product prototype
+and an executable Risk RIK path, isolated from DAALE engine architecture. Both
+are superseded — the prototype UI by `workspace/`, the model-backed provider by
+`docs/architecture/DECISION-001_reasoning_execution_substrate.md` — and neither
+has been retired yet. Retirement is scheduled work, not a side effect of
+building the replacement.
 
 CHOIR research under `choir/research/phase-*/` is drafted but **not accepted**.
 Every `SPEC-*` file is empty. Because `IMPLEMENTATION_QUEUE.md` forbids
