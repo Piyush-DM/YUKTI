@@ -1,0 +1,137 @@
+{
+  "document_version": "yukti-investment-document/0.1",
+  "id": "orbital-series-b",
+  "title": "Orbital Logistics -- Series B",
+  "company_name": "Orbital Logistics Inc.",
+  "sector": "supply chain software",
+  "stage": "Series B",
+  "sources": [
+    {
+      "label": "SRC-AUDIT-FY24",
+      "origin": "Independent audit of FY2024 statements",
+      "kind": "audit"
+    },
+    {
+      "label": "SRC-DECK",
+      "origin": "Management investor deck, Q1",
+      "kind": "management"
+    },
+    {
+      "label": "SRC-CAPTABLE",
+      "origin": "Certified capitalisation table",
+      "kind": "audit"
+    },
+    {
+      "label": "SRC-MARKET",
+      "origin": "Third-party market sizing report",
+      "kind": "third_party"
+    },
+    {
+      "label": "SRC-CUSTOMER",
+      "origin": "Reference calls with six customers",
+      "kind": "interview"
+    }
+  ],
+  "data_points": [
+    {
+      "metric": "arr_usd",
+      "value": "18000000",
+      "source_labels": ["SRC-AUDIT-FY24"],
+      "status": "confirmed"
+    },
+    {
+      "metric": "yoy_growth_pct",
+      "value": "62",
+      "source_labels": ["SRC-AUDIT-FY24", "SRC-DECK"],
+      "status": "confirmed"
+    },
+    {
+      "metric": "gross_margin_pct",
+      "value": "74",
+      "source_labels": ["SRC-AUDIT-FY24"],
+      "status": "confirmed"
+    },
+    {
+      "metric": "net_burn_monthly_usd",
+      "value": "1400000",
+      "source_labels": ["SRC-AUDIT-FY24"],
+      "status": "confirmed"
+    },
+    {
+      "metric": "cash_usd",
+      "value": "21000000",
+      "source_labels": ["SRC-AUDIT-FY24"],
+      "status": "confirmed"
+    },
+    {
+      "metric": "top_customer_revenue_pct",
+      "value": "38",
+      "source_labels": ["SRC-DECK"],
+      "status": "reported"
+    },
+    {
+      "metric": "net_revenue_retention_pct",
+      "value": "104",
+      "source_labels": ["SRC-DECK"],
+      "status": "disputed"
+    },
+    {
+      "metric": "logo_churn_pct",
+      "value": "11",
+      "source_labels": ["SRC-DECK", "SRC-CUSTOMER"],
+      "status": "reported"
+    },
+    {
+      "metric": "tam_usd",
+      "value": "8400000000",
+      "source_labels": ["SRC-MARKET"],
+      "status": "estimated"
+    },
+    {
+      "metric": "market_growth_pct",
+      "value": "19",
+      "source_labels": ["SRC-MARKET"],
+      "status": "estimated"
+    },
+    {
+      "metric": "competitor_count",
+      "value": "14",
+      "source_labels": ["SRC-MARKET"],
+      "status": "estimated"
+    },
+    {
+      "metric": "founder_voting_control_pct",
+      "value": "56",
+      "source_labels": ["SRC-CAPTABLE"],
+      "status": "confirmed"
+    },
+    {
+      "metric": "independent_board_seats",
+      "value": "1",
+      "source_labels": ["SRC-CAPTABLE"],
+      "status": "confirmed"
+    },
+    {
+      "metric": "audit_status",
+      "value": "audited",
+      "source_labels": ["SRC-AUDIT-FY24"],
+      "status": "confirmed"
+    },
+    {
+      "metric": "reporting_cadence",
+      "value": "monthly",
+      "source_labels": ["SRC-DECK"],
+      "status": "reported"
+    }
+  ],
+  "stated_assumptions": [
+    "The FY2024 audit scope covers all operating subsidiaries.",
+    "Market sizing uses the vendor's own segment definition."
+  ],
+  "noted_conflicts": [
+    {
+      "metric": "net_revenue_retention_pct",
+      "note": "Customer reference calls describe contraction at two accounts, which is inconsistent with the retention figure in the deck."
+    }
+  ]
+}

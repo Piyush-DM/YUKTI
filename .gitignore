@@ -29,6 +29,11 @@ film/node_modules/*
 # Local dev-server logs.
 *.log
 
+# Generated report output. Keep the note that documents the conventions.
+# See reports/README.md.
+reports/*
+!reports/README.md
+
 # Remotion render output and bundle cache.
 film/out/
 .remotion/
