@@ -1,5 +1,14 @@
 # Prototype Risk RIK
 
+> **Status: legacy. Not canonical architecture.**
+>
+> The model-backed provider in this package is retained for reference only.
+> Deterministic kernels are the architecture, per
+> [`DECISION-001`](../../../docs/architecture/DECISION-001_reasoning_execution_substrate.md).
+> The running reference for how a kernel is meant to execute is
+> [`choir_prototype/`](../../../choir_prototype/README.md), which makes no model
+> calls. Do not extend the model-backed path.
+
 This package contains a prototype-only executable vertical slice:
 
 ```text

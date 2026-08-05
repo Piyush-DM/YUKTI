@@ -1,0 +1,26 @@
+# Line-ending policy.
+#
+# This is not a style preference. `choir_prototype/freeze.py` pins non-Python
+# files by content hash, so a CRLF conversion on checkout changes those hashes
+# and makes `python -m choir_prototype --frozen` report the frozen architecture
+# as MODIFIED on a machine that has changed nothing.
+#
+# Without this file, a fresh clone on Windows (core.autocrlf=true, the default)
+# fails the project's own freeze verification. Python modules survive, because
+# they are pinned by normalised syntax tree rather than by bytes; Markdown does
+# not. Normalising to LF everywhere keeps the archival record verifiable off
+# the machine that produced it.
+
+* text=auto eol=lf
+
+# Binary assets must never be line-ending converted.
+*.png binary
+*.jpg binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.pdf binary
+*.docx binary
+*.exe binary
+*.node binary

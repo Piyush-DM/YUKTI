@@ -4,15 +4,21 @@ This file is the working backlog for implementation engineering. It records
 repository-health work that can be done without inventing architecture or
 execution logic.
 
-Codex should inspect this file after each completed task. From the repository
-organization freeze onward, Codex may only perform maintenance work unless an
-explicit specification or direct architectural instruction authorizes
-implementation work.
+Inspect this file after each completed task. From the repository organization
+freeze onward, only maintenance work is permitted unless an explicit
+specification or direct architectural instruction authorizes implementation
+work.
 
-Last updated: 2026-07-10
+Last updated: 2026-08-04
 
-Current validation gate status: Passed on 2026-07-10 after installing developer
-tooling from `requirements-dev.txt`.
+Current validation gate status: Passed on 2026-08-04.
+
+**Known governance gap.** `choir_prototype/` and
+`applications/investment/prototype_risk_rik/` contain runtime behavior that was
+implemented while every `choir/specifications/SPEC-*.md` file is empty. Under
+the rules below, that work was not authorized by an approved specification.
+Recorded here rather than resolved: the rule and the repository disagree, and
+which one gives way is an architectural decision, not a maintenance task.
 
 ## Operating Rules
 

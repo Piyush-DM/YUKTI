@@ -15,6 +15,24 @@ htmlcov/
 build/
 dist/
 
+# Node dependency trees. Restored locally with `npm install`; never committed.
+node_modules/
+
+# Keep the placeholders that document where dependencies belong.
+!website/node_modules/
+website/node_modules/*
+!website/node_modules/README.md
+!film/node_modules/
+film/node_modules/*
+!film/node_modules/README.md
+
+# Local dev-server logs.
+*.log
+
+# Remotion render output and bundle cache.
+film/out/
+.remotion/
+
 # Local virtual environments and machine-specific environment files.
 .venv/
 venv/

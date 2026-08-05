@@ -1,0 +1,25 @@
+{
+  "name": "yukti-choir-film",
+  "version": "1.0.0",
+  "private": true,
+  "description": "YUKTI — CHOIR explainer film. Remotion implementation of the approved visual language and movement structure. Implements approved decisions only.",
+  "scripts": {
+    "dev": "remotion studio",
+    "studio": "remotion studio",
+    "render": "remotion render",
+    "still": "remotion still",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.209",
+    "@remotion/google-fonts": "^4.0.209",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "remotion": "4.0.209"
+  },
+  "devDependencies": {
+    "@types/react": "18.3.3",
+    "@types/react-dom": "18.3.0",
+    "typescript": "5.5.4"
+  }
+}
