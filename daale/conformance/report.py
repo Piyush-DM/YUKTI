@@ -21,6 +21,7 @@ from __future__ import annotations
 import json
 from typing import Any
 
+from daale.conformance.classification import classification_for
 from daale.conformance.lock import CommitmentResult, ConformanceReport, Outcome
 
 _RULE = "=" * 78
@@ -107,6 +108,16 @@ def render(report: ConformanceReport) -> str:
             )
         lines.append("")
 
+    if report.unexercised:
+        lines.append("UNEXERCISED, CLASSIFIED -- why each gap exists, not a work list:")
+        for result in report.unexercised:
+            entry = classification_for(result.commitment.commitment_id)
+            label = entry.category.value if entry else "unclassified"
+            lines.append(f"  {result.commitment.commitment_id:<4} {label}")
+            if entry is not None:
+                lines.append(f"       source: {entry.source}")
+        lines.append("")
+
     lines.extend(
         [
             _THIN,
@@ -123,6 +134,18 @@ def render(report: ConformanceReport) -> str:
     )
 
     return "\n".join(lines)
+
+
+def _classification_of(commitment_id: str) -> dict[str, str] | None:
+    """Return the recorded classification for a commitment, if it has one."""
+    entry = classification_for(commitment_id)
+    if entry is None:
+        return None
+    return {
+        "category": entry.category.value,
+        "source": entry.source,
+        "rationale": entry.rationale,
+    }
 
 
 def as_dict(report: ConformanceReport) -> dict[str, Any]:
@@ -145,6 +168,7 @@ def as_dict(report: ConformanceReport) -> dict[str, Any]:
                 "statement": result.commitment.statement,
                 "status": result.commitment.status.value,
                 "outcome": result.outcome.value,
+                "classification": _classification_of(result.commitment.commitment_id),
                 "evidence": [
                     {
                         "kind": item.evidence.kind.value,

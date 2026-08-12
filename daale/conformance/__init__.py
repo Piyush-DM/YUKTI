@@ -13,6 +13,14 @@ python -m daale conformance
 ```
 """
 
+from daale.conformance.classification import (
+    CATEGORY_MEANINGS,
+    CLASSIFICATIONS,
+    Category,
+    Classification,
+    by_category,
+    classification_for,
+)
 from daale.conformance.commitments import (
     COMMITMENTS,
     Commitment,
@@ -32,7 +40,11 @@ from daale.conformance.lock import (
 from daale.conformance.report import as_dict, as_json, render
 
 __all__ = [
+    "CATEGORY_MEANINGS",
+    "CLASSIFICATIONS",
     "COMMITMENTS",
+    "Category",
+    "Classification",
     "Commitment",
     "CommitmentResult",
     "ConformanceReport",
@@ -44,6 +56,8 @@ __all__ = [
     "as_dict",
     "as_json",
     "build_evidence_index",
+    "by_category",
+    "classification_for",
     "evaluate",
     "lock",
     "render",

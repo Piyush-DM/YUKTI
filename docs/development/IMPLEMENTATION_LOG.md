@@ -636,3 +636,123 @@ drift nobody notices.
 - Carried forward unchanged: authentication, concurrent-edit handling,
   `prototype-ui/` retirement, per-document identity, the decision-proposition
   object.
+
+---
+
+## 2026-08-13 — DAALE v0 Phases 1–2, and the classification of the eight
+
+**Instruction.** DAALE v0 execution authorization. Phase 0 accepted as the v0
+baseline. Implement all subsequent v0 work not requiring the evaluator choice in
+`DECISION-005`; stop at that boundary and present it rather than choosing A or B
+implicitly. Classify the eight unexercised commitments rather than implementing
+them. Preserve `E12` as an evidence discrepancy. `DECISION-003` remains
+authoritative for repository organization; the proposal's §14 top-level `yukti/`
+is not authorized. Do not backport CHOIR v1.
+
+### Completed
+
+**Phases 1–2 — `daale/execution/`.**
+
+- `identity.py` — execution identity computed over the **input** package at full
+  fidelity, never over a result.
+- `contract.py` — CHOIR contract validation. Required sections transcribed from
+  commitment A2; identifier uniqueness; referential integrity, which is X4
+  applied one step earlier, at the input boundary.
+- `state.py` — the Reasoning State Store. Six areas per plan §6, versioned
+  canonical objects, provenance and dependents, append-only snapshots.
+  Canonical writes require an `ExecutionLease`; executions are serialised;
+  stale reads are refused.
+- `trace.py` — append-only ordered events, no clock.
+- `commit.py` — the candidate lifecycle and the seven-check gate.
+- `dcore.py` — the D-Core.
+- `tests/test_execution.py` — 37 tests.
+
+**Classification — `daale/conformance/classification.py`.** The eight
+unexercised commitments, each with the source that says why it is unimplemented,
+across five categories: `research-open` (E4, E5, E7), `prototype-limit` (E6),
+`specified-not-implemented` (E3, E11), `decision-required` (E10),
+`evidence-discrepancy` (E12). Surfaced in the conformance artifact. 7 tests.
+
+Suite: **77 for `daale/`, 237 for the repository** (was 193).
+
+**Validation gate:** ruff check, ruff format --check, 237 unittest, compileall
+all pass. `mypy --strict` clean across 44 files. `--frozen` INTACT, `--audit`
+portability 1.00.
+
+**Verified live**, not only by test. Three candidates through one execution:
+`rfabric` committed, `llm` escalated to review, one without provenance rejected.
+Ten trace events, `emits_judgment: False` with its reason attached.
+
+### The boundary, and why nothing was stubbed
+
+The D-Core implements eight of the plan's nine listed responsibilities. The
+ninth, emitting a judgment, requires evaluated results, and evaluation requires
+deciding whether DAALE calls the frozen kernels or evaluates for itself —
+options B and A of `DECISION-005` verbatim.
+
+**No evaluator was written and no placeholder was left in its place.** A stub
+raising `NotImplementedError` would still assert that the evaluator belongs
+inside DAALE, which is one of the answers. The candidate-to-commit protocol
+means the commit authority never needs to evaluate: it takes candidates from
+whoever produced them and decides admissibility. `test_the_d_core_has_no_
+evaluator` guards the boundary mechanically, because a boundary defended only
+by a docstring erodes one convenient method at a time.
+
+### Assumptions
+
+**G1 — Execution identity is input-bound and order-sensitive.** Directly
+inherited from the `DECISION-006` collision: an identifier derived from what a
+computation emitted collides when the computation does not observe part of its
+input. `test_inputs_the_engine_would_flatten_are_still_distinct` is the
+regression, using the same `reported`/`estimated` pair that collided before.
+
+**G2 — Contract validation is structural only.** It transcribes A2 and checks
+referential integrity. It makes no semantic judgement, because that is CHOIR's
+and reaching it needs the evaluator.
+
+**G3 — A non-deterministic origin escalates rather than commits.** The plan
+states `REVIEW_REQUIRED` exists and that model output requires review, but does
+not enumerate which origins escalate. The conservative reading is taken:
+`dcore`, `rfabric` and `algorithm` may commit; anything else escalates. This is
+the plan's LLM-authority-leakage control made mechanical, and it is the
+assumption in this cycle most worth an explicit ruling.
+
+**G4 — Check 4 is `INACTIVE`, not passing.** Plan conformance needs the Phase 3
+planner. A check that returns `True` because it has nothing to check makes a
+gate look stronger than it is, so it is reported as not-run in every record.
+
+**G5 — `INSUFFICIENT_BASIS` here is the floor case, not CHOIR's basis rule.**
+Emitted when nothing was committed. CHOIR's full rule lives in the frozen
+synthesizer and needs the evaluator. Stated on the summary rather than left for
+a reader to infer.
+
+**G6 — Classification is not a work list.** Recorded because the failure mode is
+obvious in hindsight: "unexercised" reads like a to-do, and closing a §4
+research programme to tidy a report is precisely what research freeze §1 exists
+to prevent. `test_research_open_items_are_not_treated_as_tasks` pins it.
+
+### Findings
+
+- **No CHOIR v1 exists in this repository.** Verified: the only `v1` matches are
+  website, film and motion-system assets. "Do not backport CHOIR v1" is
+  satisfied by absence, and reconciliation remains a post-v0 act against
+  something not present here.
+- **`E12` remains an evidence discrepancy** and was not closed. Finding
+  something plausible to cite would have manufactured the traceability the lock
+  exists to measure.
+
+### Remaining v0 work
+
+- **Phase 3 — planner and dependency index.** The dependency index over IR
+  objects is structural and unblocked. The *planner* is not: an execution plan
+  is a plan over units of evaluation, which is the `DECISION-005` choice.
+- **Phase 4 — R-Fabric parallelism.** Blocked: there are no kernels to
+  parallelise without the evaluator.
+- **Phase 5 — shadow/replay lanes.** Blocked for the same reason. The snapshot
+  and lease machinery they need is already in place.
+- **Phase 6 — coprocessor adapters.** Partially unblocked: the gate already
+  distinguishes origins and escalates non-deterministic ones. Actual adapters
+  are proposal *producers*, which is where the boundary bites.
+- **Phase 7 — YUKTI debugger integration.** Product layer, governed by
+  `DECISION-003`. Not started.
+- **Phase 8 — institutional pilot.** Not code.

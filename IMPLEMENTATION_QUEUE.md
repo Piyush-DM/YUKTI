@@ -150,10 +150,29 @@ Build the chain from specifications to implementation artifacts.
   Built under direct architectural instruction, with no `DECISION-005`
   dependency: the commitments are CHOIR's and identical under all four options
   that ADR leaves open.
-- [ ] **DAALE v0 Phase 1 — single-threaded D-Core. Blocked on `DECISION-005`.**
-  The dependency is exact: a deterministic executor must either call the frozen
-  prototype's kernels or evaluate for itself, and those are options B and A of
-  that ADR verbatim. Nothing else in the plan is blocked by it.
+- [x] **DAALE v0 Phases 1–2 — D-Core and commit protocol** (`daale/execution/`).
+  Execution identity, CHOIR contract validation, Reasoning State Store, trace,
+  and the seven-check candidate-to-commit gate. Implemented to the
+  `DECISION-005` boundary and no further: **no evaluator and no stub for one.**
+- [x] **The eight unexercised commitments are classified, not implemented**
+  (`daale/conformance/classification.py`). Five categories, each citing its
+  source. Four are §4 research programmes and are not tasks.
+- [ ] **`E12` — evidence discrepancy, open.** The freeze marks it demonstrated;
+  the repository cites nothing. Requires architect adjudication: either the
+  evidence is named, or the recorded status is corrected. Not to be closed by
+  finding something plausible to cite.
+- [ ] **DAALE v0 Phase 3 — planner. Blocked on `DECISION-005`.** The dependency
+  is exact: an execution plan is a plan over units of evaluation, and whether
+  DAALE calls the frozen kernels or evaluates for itself is options B and A of
+  that ADR. The *dependency index* half of Phase 3 is unblocked.
+- [ ] **DAALE v0 Phases 4–5 — R-Fabric parallelism, shadow/replay lanes.**
+  Blocked by the same choice; there is nothing to parallelise or fork without
+  an evaluator. The snapshot and lease machinery they need already exists.
+- [ ] **DAALE v0 Phase 6 — coprocessor adapters.** Partially unblocked: the gate
+  already distinguishes origins and escalates non-deterministic ones.
+- [ ] **DAALE v0 Phase 7 — YUKTI debugger integration.** Product layer,
+  governed by `DECISION-003`. The proposal's §14 top-level `yukti/` structure
+  is **not authorized**; `applications/investment/workspace/` stands.
 - [ ] Blocked until approved execution behavior exists for anything beyond the
   above.
 

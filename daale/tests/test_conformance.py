@@ -23,7 +23,10 @@ from datetime import date
 from pathlib import Path
 
 from daale.conformance import (
+    CATEGORY_MEANINGS,
+    CLASSIFICATIONS,
     COMMITMENTS,
+    Category,
     Commitment,
     Evidence,
     EvidenceKind,
@@ -31,6 +34,7 @@ from daale.conformance import (
     Status,
     as_dict,
     build_evidence_index,
+    by_category,
     evaluate,
     lock,
     render,
@@ -254,6 +258,58 @@ class TestProjection(unittest.TestCase):
         mechanism ends up working only on the machine that produced it.
         """
         self.assertTrue(render(self.report).isascii())
+
+
+class TestClassification(unittest.TestCase):
+    """The eight unexercised commitments are classified, not queued for work."""
+
+    def setUp(self) -> None:
+        self.report = lock(ROOT, COMMITMENTS)
+
+    def test_every_unexercised_commitment_is_classified(self) -> None:
+        """A gap with no stated reason is indistinguishable from an oversight."""
+        unexercised = {r.commitment.commitment_id for r in self.report.unexercised}
+        classified = {entry.commitment_id for entry in CLASSIFICATIONS}
+        self.assertEqual(unexercised, classified)
+
+    def test_nothing_with_evidence_is_classified(self) -> None:
+        """Classification describes gaps; a conforming commitment has none."""
+        conforming = {r.commitment.commitment_id for r in self.report.conforming}
+        for entry in CLASSIFICATIONS:
+            with self.subTest(commitment=entry.commitment_id):
+                self.assertNotIn(entry.commitment_id, conforming)
+
+    def test_every_classification_cites_a_source(self) -> None:
+        """The reason a commitment is unimplemented is recorded, not inferred."""
+        for entry in CLASSIFICATIONS:
+            with self.subTest(commitment=entry.commitment_id):
+                self.assertTrue(entry.source.strip())
+                self.assertTrue(entry.rationale.strip())
+
+    def test_e12_is_the_only_evidence_discrepancy(self) -> None:
+        """E12 stays surfaced as a discrepancy until an architect adjudicates it."""
+        discrepancies = by_category()[Category.EVIDENCE_DISCREPANCY]
+        self.assertEqual(discrepancies, ("E12",))
+
+    def test_research_open_items_are_not_treated_as_tasks(self) -> None:
+        """Freeze §9: a §4 item is a research programme, not a task.
+
+        Pinned so that a later cycle cannot quietly reclassify one as ordinary
+        work in order to close it.
+        """
+        self.assertEqual(by_category()[Category.RESEARCH_OPEN], ("E4", "E5", "E7"))
+
+    def test_every_category_has_a_stated_meaning(self) -> None:
+        for category in Category:
+            with self.subTest(category=category):
+                self.assertTrue(CATEGORY_MEANINGS[category].strip())
+
+    def test_classifications_reach_the_rendered_artifact(self) -> None:
+        """A classification nobody can see does not do its job."""
+        text = render(self.report)
+        for entry in CLASSIFICATIONS:
+            with self.subTest(commitment=entry.commitment_id):
+                self.assertIn(entry.category.value, text)
 
 
 class TestEngineBoundary(unittest.TestCase):
