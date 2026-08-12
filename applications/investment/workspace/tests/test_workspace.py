@@ -25,7 +25,7 @@ from choir_prototype.core.synthesizer import synthesize
 from choir_prototype.domains import investment
 
 from applications.investment.vertical_slice.parse import parse_document
-from applications.investment.workspace import analysis, diligence
+from applications.investment.workspace import analysis, diligence, material
 from applications.investment.workspace.cases import (
     CaseStore,
     Figure,
@@ -81,6 +81,45 @@ class WorkspaceTestCase(unittest.TestCase):
         )
         return case.case_id
 
+    def decide(
+        self,
+        case_id: str,
+        judgment: analysis.Judgment,
+        decision: str = "Approved with conditions",
+        recorded_on: str = "2026-08-06",
+    ) -> LedgerEntry:
+        """Record a committee decision against the judgment in force."""
+        case = self.store.load(case_id)
+        entry = LedgerEntry(
+            entry_id=f"LEDGER-{len(case.ledger) + 1:03d}",
+            judgment_id=judgment.judgment_id,
+            decision=decision,
+            decided_by="Investment Committee",
+            rationale="Recorded by test.",
+            recorded_on=recorded_on,
+            judgment_recommendation=judgment.recommendation,
+            judgment_confidence=judgment.confidence,
+            record_digest=judgment.record_digest,
+            material_digest=judgment.material_digest,
+            snapshot_id=judgment.snapshot_id,
+        )
+        self.store.append_ledger_entry(case_id, entry)
+        return entry
+
+    def change_material(self, case_id: str, arr: str) -> None:
+        """Edit one figure, so the next analysis reaches a different record."""
+        sources, figures, assumptions, conflicts = reference_tuples()
+        edited = tuple(
+            Figure(
+                figure.metric,
+                arr if figure.metric == "arr_usd" else figure.value,
+                figure.status,
+                figure.source_labels,
+            )
+            for figure in figures
+        )
+        self.store.record_material(case_id, sources, edited, assumptions, conflicts)
+
 
 class TestCaseLifecycle(WorkspaceTestCase):
     """A case moves through the states an institution recognises."""
@@ -96,7 +135,7 @@ class TestCaseLifecycle(WorkspaceTestCase):
             owner="J. Okafor",
             opened_on="2026-08-05",
         )
-        self.assertEqual(case.status(analysed=False), "Draft")
+        self.assertEqual(case.status(), "Draft")
 
     def test_case_ids_are_readable_and_unique(self) -> None:
         """Two cases for the same company do not collide."""
@@ -119,24 +158,13 @@ class TestCaseLifecycle(WorkspaceTestCase):
     def test_status_follows_the_record(self) -> None:
         """Status is derived, so it cannot disagree with what is on file."""
         case_id = self.open_reference_case()
-        case = self.store.load(case_id)
-        self.assertEqual(case.status(analysed=False), "Material assembled")
-        self.assertEqual(case.status(analysed=True), "Analysed")
+        self.assertEqual(self.store.load(case_id).status(), "Material assembled")
 
-        self.store.append_ledger_entry(
-            case_id,
-            LedgerEntry(
-                entry_id="LEDGER-001",
-                decision="Approved with conditions",
-                decided_by="Investment Committee",
-                rationale="Conditions accepted.",
-                recorded_on="2026-08-05",
-                judgment_recommendation="Proceed With Conditions",
-                judgment_confidence="Low",
-                record_digest="abc",
-            ),
-        )
-        self.assertEqual(self.store.load(case_id).status(analysed=True), "Decided")
+        judgment = analysis.request_judgment(self.store, case_id, "2026-08-06")
+        self.assertEqual(self.store.load(case_id).status(), "Analysed")
+
+        self.decide(case_id, judgment, "Approved with conditions")
+        self.assertEqual(self.store.load(case_id).status(), "Decided")
 
     def test_cases_survive_a_restart(self) -> None:
         """A second store over the same directory reads the same cases."""
@@ -422,13 +450,19 @@ class TestJudgment(WorkspaceTestCase):
     def test_the_audit_trail_is_written_beside_the_case(self) -> None:
         """A judgment can be defended without leaving the case directory."""
         case_id = self.open_reference_case()
-        analysis.request_judgment(self.store, case_id)
-        directory = self.store.directory(case_id)
+        judgment = analysis.request_judgment(self.store, case_id, "2026-08-06")
+
+        self.assertTrue((self.store.directory(case_id) / "case.json").is_file())
+
+        # Each judgment's artifacts sit in their own directory under the case,
+        # written once and never rewritten, so a superseded judgment stays
+        # defendable alongside the one that replaced it.
+        directory = self.store.judgment_directory(case_id, judgment.judgment_id)
         for name in (
-            "case.json",
             "01-document.json",
             "05-record.json",
             "06-report.txt",
+            "metadata.json",
         ):
             with self.subTest(artifact=name):
                 self.assertTrue((directory / name).is_file())
@@ -466,21 +500,8 @@ class TestDecisionLedger(WorkspaceTestCase):
     def test_a_decision_is_appended_and_never_replaces_the_judgment(self) -> None:
         """An override must remain visible as an override."""
         case_id = self.open_reference_case()
-        judgment = analysis.request_judgment(self.store, case_id)
-
-        self.store.append_ledger_entry(
-            case_id,
-            LedgerEntry(
-                entry_id="LEDGER-001",
-                decision="Declined",
-                decided_by="Investment Committee",
-                rationale="Concentration risk is outside mandate.",
-                recorded_on="2026-08-05",
-                judgment_recommendation=judgment.recommendation,
-                judgment_confidence=judgment.confidence,
-                record_digest=judgment.record_digest,
-            ),
-        )
+        judgment = analysis.request_judgment(self.store, case_id, "2026-08-06")
+        self.decide(case_id, judgment, "Declined")
 
         case = self.store.load(case_id)
         self.assertEqual(len(case.ledger), 1)
@@ -492,22 +513,420 @@ class TestDecisionLedger(WorkspaceTestCase):
     def test_ledger_entries_accumulate(self) -> None:
         """Nothing is deleted; a revisited decision is a second entry."""
         case_id = self.open_reference_case()
-        judgment = analysis.request_judgment(self.store, case_id)
-        for index in range(2):
+        judgment = analysis.request_judgment(self.store, case_id, "2026-08-06")
+        self.decide(case_id, judgment)
+        self.decide(case_id, judgment, "Deferred pending further diligence")
+        self.assertEqual(len(self.store.load(case_id).ledger), 2)
+
+    def test_a_decision_cannot_cite_a_judgment_that_never_existed(self) -> None:
+        """A decision bound to nothing is not a decision."""
+        case_id = self.open_reference_case()
+        judgment = analysis.request_judgment(self.store, case_id, "2026-08-06")
+        with self.assertRaises(ValueError):
             self.store.append_ledger_entry(
                 case_id,
                 LedgerEntry(
-                    entry_id=f"LEDGER-{index + 1:03d}",
-                    decision="Deferred pending further diligence",
-                    decided_by="Investment Committee",
-                    rationale="More material requested.",
-                    recorded_on="2026-08-05",
+                    entry_id="LEDGER-001",
+                    judgment_id="JUDGMENT-099",
+                    decision="Approved",
+                    decided_by="IC",
+                    rationale="",
+                    recorded_on="2026-08-06",
                     judgment_recommendation=judgment.recommendation,
                     judgment_confidence=judgment.confidence,
                     record_digest=judgment.record_digest,
                 ),
             )
-        self.assertEqual(len(self.store.load(case_id).ledger), 2)
+
+
+class TestSupersession(WorkspaceTestCase):
+    """Re-analysis supersedes a judgment. It never invalidates a decision.
+
+    This class is the architect's ruling made checkable. Each test defends one
+    of the invariants the ruling names, and the first one is the defect that
+    prompted it: before supersession, re-running an analysis overwrote the
+    record a recorded decision pointed at, and the decision silently stopped
+    resolving.
+    """
+
+    def test_a_decision_survives_re_analysis(self) -> None:
+        """The invariant. A decision stays verifiable after the material moves on."""
+        case_id = self.open_reference_case()
+        first = analysis.request_judgment(self.store, case_id, "2026-08-06")
+        entry = self.decide(case_id, first, "Approved with conditions")
+
+        self.change_material(case_id, "999")
+        second = analysis.request_judgment(self.store, case_id, "2026-08-07")
+
+        self.assertNotEqual(first.record_digest, second.record_digest)
+        self.assertNotEqual(first.judgment_id, second.judgment_id)
+
+        checks = analysis.verify_ledger(self.store, case_id)
+        self.assertEqual(len(checks), 1)
+        self.assertTrue(checks[0].resolves, checks[0])
+        self.assertEqual(checks[0].cited_digest, entry.record_digest)
+
+    def test_a_superseded_judgment_still_reads_in_full(self) -> None:
+        """Provenance is complete: the old judgment is readable, not just recorded."""
+        case_id = self.open_reference_case()
+        first = analysis.request_judgment(self.store, case_id, "2026-08-06")
+        self.decide(case_id, first)
+        self.change_material(case_id, "999")
+        analysis.request_judgment(self.store, case_id, "2026-08-07")
+
+        case = self.store.load(case_id)
+        reread = analysis.read_judgment(self.store, case, first.judgment_id)
+        self.assertEqual(reread.record_digest, first.record_digest)
+        self.assertEqual(reread.recommendation, first.recommendation)
+        self.assertEqual(reread.rationale, first.rationale)
+        self.assertFalse(reread.is_current)
+        self.assertEqual(reread.superseded_by, "JUDGMENT-002")
+
+        report = analysis.rendered_report(self.store, case_id, first.judgment_id)
+        self.assertIn("INSTITUTIONAL REASONING REPORT", report)
+
+    def test_history_is_append_only(self) -> None:
+        """Judgments accumulate. None is removed, none is rewritten."""
+        case_id = self.open_reference_case()
+        analysis.request_judgment(self.store, case_id, "2026-08-06")
+        self.change_material(case_id, "999")
+        analysis.request_judgment(self.store, case_id, "2026-08-07")
+        self.change_material(case_id, "12345")
+        analysis.request_judgment(self.store, case_id, "2026-08-08")
+
+        case = self.store.load(case_id)
+        self.assertEqual(
+            [record.judgment_id for record in case.judgments],
+            ["JUDGMENT-001", "JUDGMENT-002", "JUDGMENT-003"],
+        )
+        self.assertEqual(
+            [record.superseded_by for record in case.judgments],
+            ["JUDGMENT-002", "JUDGMENT-003", ""],
+        )
+        current = case.current_judgment()
+        assert current is not None
+        self.assertEqual(current.judgment_id, "JUDGMENT-003")
+
+    def test_every_judgment_ever_reached_keeps_its_artifacts(self) -> None:
+        """Historical digests resolve for every judgment, not only cited ones."""
+        case_id = self.open_reference_case()
+        analysis.request_judgment(self.store, case_id, "2026-08-06")
+        self.change_material(case_id, "999")
+        analysis.request_judgment(self.store, case_id, "2026-08-07")
+
+        case = self.store.load(case_id)
+        for record in case.judgments:
+            with self.subTest(judgment=record.judgment_id):
+                directory = self.store.judgment_directory(case_id, record.judgment_id)
+                metadata = json.loads(
+                    (directory / "metadata.json").read_text(encoding="utf-8")
+                )
+                self.assertEqual(metadata["record_digest"], record.record_digest)
+                for name in ("01-document.json", "05-record.json", "06-report.txt"):
+                    self.assertTrue((directory / name).is_file())
+
+    def test_re_running_unchanged_material_creates_no_new_judgment(self) -> None:
+        """Determinism means an identical record is the same judgment, not a new one."""
+        case_id = self.open_reference_case()
+        first = analysis.request_judgment(self.store, case_id, "2026-08-06")
+        second = analysis.request_judgment(self.store, case_id, "2026-08-07")
+
+        self.assertEqual(first.judgment_id, second.judgment_id)
+        self.assertEqual(first.record_digest, second.record_digest)
+        self.assertEqual(len(self.store.load(case_id).judgments), 1)
+
+    def test_decisions_against_different_judgments_all_resolve(self) -> None:
+        """A case decided twice, across two judgments, verifies at both points."""
+        case_id = self.open_reference_case()
+        first = analysis.request_judgment(self.store, case_id, "2026-08-06")
+        self.decide(case_id, first, "Deferred pending further diligence")
+
+        self.change_material(case_id, "999")
+        second = analysis.request_judgment(self.store, case_id, "2026-08-07")
+        self.decide(case_id, second, "Approved with conditions")
+
+        checks = analysis.verify_ledger(self.store, case_id)
+        self.assertEqual(len(checks), 2)
+        self.assertTrue(all(check.resolves for check in checks), checks)
+        self.assertEqual(
+            [check.judgment_id for check in checks],
+            ["JUDGMENT-001", "JUDGMENT-002"],
+        )
+        self.assertNotEqual(checks[0].cited_digest, checks[1].cited_digest)
+
+    def test_the_material_that_produced_each_judgment_is_kept(self) -> None:
+        """Provenance runs back to the exact document each judgment saw."""
+        case_id = self.open_reference_case()
+        first = analysis.request_judgment(self.store, case_id, "2026-08-06")
+        self.change_material(case_id, "999")
+        second = analysis.request_judgment(self.store, case_id, "2026-08-07")
+
+        def arr_in(judgment_id: str) -> str:
+            document = json.loads(
+                (
+                    self.store.judgment_directory(case_id, judgment_id)
+                    / "01-document.json"
+                ).read_text(encoding="utf-8")
+            )
+            return next(
+                point["value"]
+                for point in document["data_points"]
+                if point["metric"] == "arr_usd"
+            )
+
+        self.assertEqual(arr_in(first.judgment_id), "18000000")
+        self.assertEqual(arr_in(second.judgment_id), "999")
+
+
+class TestMaterialIdentity(WorkspaceTestCase):
+    """A judgment can prove what institutional material it was formed from.
+
+    The load-bearing test is ``test_material_distinguishes_what_reasoning_cannot``.
+    It reproduces the defect that motivated this layer: two materially different
+    diligence packs producing one reasoning record. If material identity ever
+    stops being finer-grained than reasoning identity, that test fails and every
+    guarantee built on top of it is void.
+    """
+
+    def restate(self, case_id: str, status_for_tam: str) -> None:
+        """Re-record the material with one figure's standing changed.
+
+        ``reported`` and ``estimated`` are a real institutional distinction and
+        both collapse to LIKELY inside the frozen translator, so this is the
+        exact edit the reasoning record cannot see.
+        """
+        sources, figures, assumptions, conflicts = reference_tuples()
+        edited = tuple(
+            Figure(
+                figure.metric,
+                figure.value,
+                status_for_tam if figure.metric == "tam_usd" else figure.status,
+                figure.source_labels,
+            )
+            for figure in figures
+        )
+        self.store.record_material(
+            case_id, sources, edited, assumptions, conflicts, "2026-08-06"
+        )
+
+    def test_material_distinguishes_what_reasoning_cannot(self) -> None:
+        """The defect this layer exists to close, asserted directly."""
+        case_id = self.open_reference_case()
+
+        self.restate(case_id, "reported")
+        reported = self.store.load(case_id)
+        reported_material = material.compute_material_digest(reported)
+        reported_judgment = analysis.request_judgment(self.store, case_id, "2026-08-06")
+
+        self.restate(case_id, "estimated")
+        estimated = self.store.load(case_id)
+        estimated_material = material.compute_material_digest(estimated)
+        estimated_judgment = analysis.request_judgment(
+            self.store, case_id, "2026-08-07"
+        )
+
+        # The engine cannot tell these apart -- both statuses map to LIKELY.
+        self.assertEqual(
+            reported_judgment.record_digest, estimated_judgment.record_digest
+        )
+        # The material layer can, and therefore so can the institution.
+        self.assertNotEqual(reported_material, estimated_material)
+        self.assertNotEqual(
+            reported_judgment.material_digest, estimated_judgment.material_digest
+        )
+
+    def test_a_material_change_creates_a_judgment_even_with_one_conclusion(
+        self,
+    ) -> None:
+        """Supersession keys on material. Deliberation is recorded, not just verdicts."""
+        case_id = self.open_reference_case()
+        self.restate(case_id, "reported")
+        first = analysis.request_judgment(self.store, case_id, "2026-08-06")
+
+        self.restate(case_id, "estimated")
+        second = analysis.request_judgment(self.store, case_id, "2026-08-07")
+
+        self.assertNotEqual(first.judgment_id, second.judgment_id)
+        self.assertEqual(first.record_digest, second.record_digest)
+        self.assertEqual(len(self.store.load(case_id).judgments), 2)
+
+    def test_same_material_always_gives_the_same_record(self) -> None:
+        """The invariant, in the direction that must never fail.
+
+        Material identity has to be finer-grained than reasoning identity. If
+        two states share a material digest they must share a record digest,
+        otherwise supersession would suppress a judgment that genuinely differs.
+        """
+        case_id = self.open_reference_case()
+        first = analysis.request_judgment(self.store, case_id, "2026-08-06")
+
+        # Re-record byte-identical material; digest unchanged, so no new snapshot.
+        sources, figures, assumptions, conflicts = reference_tuples()
+        self.store.record_material(
+            case_id, sources, figures, assumptions, conflicts, "2026-08-07"
+        )
+        second = analysis.request_judgment(self.store, case_id, "2026-08-07")
+
+        self.assertEqual(first.material_digest, second.material_digest)
+        self.assertEqual(first.record_digest, second.record_digest)
+        self.assertEqual(first.judgment_id, second.judgment_id)
+        self.assertEqual(len(self.store.load(case_id).snapshots), 1)
+
+    def test_reordering_the_schedule_is_a_material_change(self) -> None:
+        """Order is material, because claim identifiers in the engine are positional.
+
+        A digest that ignored order would be coarser than the reasoning record
+        it must be finer than, breaking the invariant in a case nobody checks.
+        """
+        case_id = self.open_reference_case()
+        sources, figures, assumptions, conflicts = reference_tuples()
+        before = self.store.load(case_id)
+
+        self.store.record_material(
+            case_id,
+            sources,
+            tuple(reversed(figures)),
+            assumptions,
+            conflicts,
+            "2026-08-07",
+        )
+        after = self.store.load(case_id)
+
+        self.assertNotEqual(
+            material.compute_material_digest(before),
+            material.compute_material_digest(after),
+        )
+        self.assertEqual(len(after.snapshots), 2)
+
+    def test_case_metadata_does_not_change_material_identity(self) -> None:
+        """Re-assigning a case must not fabricate new material."""
+        first = self.open_reference_case("Orbital Logistics")
+        second = self.store.open_case(
+            company="Orbital Logistics",
+            sector="supply chain software",
+            stage="Series B",
+            requested_decision="A different question entirely",
+            thesis="A different thesis.",
+            owner="Someone Else",
+            opened_on="2030-01-01",
+        )
+        sources, figures, assumptions, conflicts = reference_tuples()
+        self.store.record_material(
+            second.case_id, sources, figures, assumptions, conflicts, "2026-08-06"
+        )
+
+        self.assertEqual(
+            material.compute_material_digest(self.store.load(first)),
+            material.compute_material_digest(self.store.load(second.case_id)),
+        )
+
+    def test_the_snapshot_registry_is_append_only(self) -> None:
+        """Material states accumulate with stable identity and version."""
+        case_id = self.open_reference_case()
+        self.restate(case_id, "reported")
+        self.restate(case_id, "estimated")
+        self.restate(case_id, "confirmed")
+
+        snapshots = self.store.load(case_id).snapshots
+        self.assertEqual(
+            [entry.snapshot_id for entry in snapshots],
+            ["MATERIAL-001", "MATERIAL-002", "MATERIAL-003", "MATERIAL-004"],
+        )
+        self.assertEqual([entry.version for entry in snapshots], [1, 2, 3, 4])
+
+    def test_reverting_material_is_a_new_state_with_a_recurring_digest(self) -> None:
+        """The registry is a timeline, not a set.
+
+        The reference pack records the addressable market as ``estimated``, so
+        restating it as ``reported`` and back returns the material to a state it
+        already held. That is a new institutional event -- the team changed its
+        mind twice -- and it is recorded as one, while the digest correctly
+        recurs because the material really is identical again.
+        """
+        case_id = self.open_reference_case()
+        self.restate(case_id, "reported")
+        self.restate(case_id, "estimated")
+
+        snapshots = self.store.load(case_id).snapshots
+        self.assertEqual(len(snapshots), 3)
+        self.assertEqual(snapshots[0].material_digest, snapshots[2].material_digest)
+        self.assertNotEqual(snapshots[0].material_digest, snapshots[1].material_digest)
+        self.assertNotEqual(snapshots[0].snapshot_id, snapshots[2].snapshot_id)
+
+    def test_unchanged_material_records_no_snapshot(self) -> None:
+        """Saving the same pack twice is not two states of the material."""
+        case_id = self.open_reference_case()
+        sources, figures, assumptions, conflicts = reference_tuples()
+        for _ in range(3):
+            self.store.record_material(
+                case_id, sources, figures, assumptions, conflicts, "2026-08-06"
+            )
+        self.assertEqual(len(self.store.load(case_id).snapshots), 1)
+
+    def test_a_judgment_binds_to_the_snapshot_in_force(self) -> None:
+        """Provenance: a judgment names the material state it was formed from."""
+        case_id = self.open_reference_case()
+        self.restate(case_id, "estimated")
+        judgment = analysis.request_judgment(self.store, case_id, "2026-08-06")
+
+        case = self.store.load(case_id)
+        current = case.current_snapshot()
+        assert current is not None
+        self.assertEqual(judgment.snapshot_id, current.snapshot_id)
+        self.assertEqual(judgment.material_digest, current.material_digest)
+        self.assertEqual(judgment.material_version, current.version)
+
+    def test_a_decision_verifies_against_material_after_re_analysis(self) -> None:
+        """The full chain: decision to judgment to material, still intact later."""
+        case_id = self.open_reference_case()
+        first = analysis.request_judgment(self.store, case_id, "2026-08-06")
+        self.decide(case_id, first)
+
+        self.restate(case_id, "estimated")
+        analysis.request_judgment(self.store, case_id, "2026-08-07")
+
+        checks = analysis.verify_ledger(self.store, case_id)
+        self.assertEqual(len(checks), 1)
+        self.assertTrue(checks[0].record_resolves, checks[0])
+        self.assertTrue(checks[0].material_resolves, checks[0])
+        self.assertTrue(checks[0].resolves, checks[0])
+        self.assertEqual(checks[0].cited_material, first.material_digest)
+
+    def test_a_decision_citing_no_material_does_not_read_as_verified(self) -> None:
+        """An unverifiable claim must not present as a verified one."""
+        case_id = self.open_reference_case()
+        judgment = analysis.request_judgment(self.store, case_id, "2026-08-06")
+        case = self.store.load(case_id)
+        self.store.append_ledger_entry(
+            case_id,
+            LedgerEntry(
+                entry_id="LEDGER-001",
+                judgment_id=judgment.judgment_id,
+                decision="Approved",
+                decided_by="IC",
+                rationale="Recorded before the material layer existed.",
+                recorded_on="2026-08-06",
+                judgment_recommendation=judgment.recommendation,
+                judgment_confidence=judgment.confidence,
+                record_digest=judgment.record_digest,
+            ),
+        )
+        self.assertTrue(case.judgments)
+
+        check = analysis.verify_ledger(self.store, case_id)[0]
+        self.assertTrue(check.record_resolves)
+        self.assertFalse(check.material_resolves)
+        self.assertFalse(check.resolves)
+
+    def test_material_identity_never_reaches_the_engine(self) -> None:
+        """The layer sits above CHOIR and changes no conclusion."""
+        case_id = self.open_reference_case()
+        judgment = analysis.request_judgment(self.store, case_id, "2026-08-06")
+        document = analysis.compose_document(self.store.load(case_id))
+
+        self.assertNotIn("material_digest", json.dumps(document))
+        self.assertNotIn("snapshot_id", json.dumps(document))
+        self.assertEqual(judgment.recommendation, "Proceed With Conditions")
 
 
 if __name__ == "__main__":

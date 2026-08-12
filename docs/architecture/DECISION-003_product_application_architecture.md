@@ -1,9 +1,7 @@
 # Decision Required: product application architecture
 
-**Status: Pending architect approval.** The Version 1 application described here
-exists, built under the direct instruction to construct the YUKTI product around
-the now-stable reasoning engine. This note records the choices that instruction
-did not settle.
+**Status: Approved 2026-08-06.** All four choices approved, and the §5 scope
+conflict ruled in favour of the reading taken here. See "Approval Status".
 
 ## Decision
 
@@ -32,9 +30,11 @@ engine untouched and verifiably frozen, does not violate it. The most
 conservative available reading of the database exclusion was taken literally —
 there is no database.
 
-If the architect reads §5 as governing the whole repository, this decision is
-wrong and the application should not exist yet. That reading is why this note is
-blocking rather than informational.
+**Ruled 2026-08-06: §5 applies to the reasoning engine, not to product layers.**
+The reading taken here is the approved one. CHOIR, DAALE, kernel interfaces,
+runtime behaviour, translator interfaces, repository governance and the
+deterministic guarantees remain unmodifiable; product layers built outside them
+are approved.
 
 ## Options and choices
 
@@ -134,8 +134,20 @@ changes an existing product name.
 
 ## Approval Status
 
-Pending architect approval.
+**Approved 2026-08-06.** All four choices approved.
 
-If rejected, the reversal is contained: delete
-`applications/investment/workspace/`, its row in the traceability matrix, and
-the `reports/workspace/` output. Nothing outside that directory depends on it.
+- The section 5 conflict is ruled: the research freeze's engineering exclusions
+  apply to the reasoning engine, not to product layers. The workspace and the
+  product application are approved. CHOIR, DAALE, kernel interfaces, runtime
+  behaviour, translator interfaces, repository governance and the deterministic
+  guarantees remain unmodifiable.
+- **"Review areas" is approved as canonical user-facing terminology.**
+- Choice 4 (case state under `reports/workspace/`) is approved as it stands and
+  remains the item most likely to want revisiting once the product has real
+  users and real retention requirements.
+
+A fifth decision followed from putting the application in front of a reviewer
+and is now implemented: **supersession.** A committee decision is permanently
+bound to the judgment it was recorded against; re-analysis creates a new
+judgment and never invalidates a historical one. Institutional history is
+append-only. See `DECISION-004`.

@@ -1,10 +1,8 @@
 # Decision Required: document intake for the vertical slice
 
-**Status: Pending architect approval.** The implementation it describes exists,
-under the direct architectural instruction to build the first complete vertical
-slice. This note records the choice that instruction did not settle, so that
-approving or reversing it is a deliberate act rather than an archaeology
-exercise. See "Approval Status" below for what happens if it is rejected.
+**Status: Approved 2026-08-06, and broadened.** Option A is the architecture.
+Product-generated serialised packet documents are approved on the same terms.
+See "Approval Status" for the ruling as given.
 
 ## Decision
 
@@ -98,9 +96,18 @@ into a plumbing change.
 
 ## Approval Status
 
-Pending architect approval.
+**Approved 2026-08-06, and broadened.** Product-generated serialised
+packet documents are approved, provided they introduce no semantic
+interpretation beyond the canonical packet. The architectural principle is
+unchanged and still binding:
 
-If Option A is rejected, the reversal is contained: delete
-`applications/investment/vertical_slice/` and the two rows referencing it in
-`docs/traceability/TRACEABILITY_MATRIX.md`. Nothing outside that directory
-depends on it, by construction.
+> Documents may represent packets. They may not interpret them.
+
+This settles the boundary overrun recorded in the implementation log: the
+workspace composes a fresh document per case, which is a document that is not
+the frozen sample. It stays inside the approved principle -- the composition is
+a shape mapping with no extraction -- and is now explicitly authorised rather
+than merely defensible.
+
+Option B (prose plus extraction) remains unapproved and is still where the
+provenance work in the research freeze section 4.3 belongs.

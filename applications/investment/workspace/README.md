@@ -138,18 +138,117 @@ With it:
 `clm-007` is still in the audit view, verbatim, which is the one place a reader
 who needs it is looking.
 
+## Material identity — what a judgment was formed from
+
+**Two digests, two different claims.**
+
+| | Proves |
+|---|---|
+| `record_digest` | the *reasoning* was identical |
+| `material_digest` | the *material* was identical |
+
+The second does not follow from the first. The frozen engine flattens
+distinctions the institution records — a figure marked `reported` and the same
+figure marked `estimated` both become `LIKELY`, and status appears nowhere else
+in the intermediate representation. Two materially different diligence packs
+therefore produce one reasoning record, verified:
+
+```
+digest A : 580a5b279f18a7f13b71e5d3
+digest B : 580a5b279f18a7f13b71e5d3
+COLLISION: True
+```
+
+A **Material Snapshot** closes it. Every state of a case's material is hashed at
+full institutional fidelity, given an identity and a version, and appended to the
+case's material register. A judgment binds to the snapshot in force when it ran,
+and says so.
+
+The invariant that makes this safe:
+
+```
+same material  =>  always the same reasoning record
+same record    =>  not necessarily the same material
+```
+
+Material identity is deliberately *finer-grained* than reasoning identity, which
+is why the digest covers the material in recorded order — claim identifiers in
+the engine are positional, so an order-insensitive digest would be coarser than
+the record it must be finer than.
+
+Consequences a committee sees:
+
+- **A material change creates a new judgment even when the conclusion is
+  unchanged.** History records deliberation over material, not only changes of
+  mind. The judgment list marks these "same conclusion, different material".
+- **Decisions verify on both axes independently.** A decision can be *reasoning
+  verified* but *material not identified*; the workspace says exactly that
+  rather than reporting it as verified.
+- **Reverting material is a new state**, with a new snapshot id and a recurring
+  digest. The register is a timeline, not a set.
+
+Sources remain **references** to documents the institution holds elsewhere.
+Nothing is uploaded, stored or ingested — this layer is identity, not document
+management (`DECISION-006`).
+
+## Supersession — how history stays honest
+
+**A decision is permanently bound to the judgment it was taken against.**
+
+Re-analysing a case creates a *new* judgment. The previous one is marked
+superseded and otherwise left completely alone: same id, same digest, same
+artifacts on disk. Any decision citing it keeps resolving, forever.
+
+```text
+JUDGMENT-001  ──superseded by──▶  JUDGMENT-002 (in force)
+     ▲
+     └── LEDGER-001 "Approved with conditions"  ← still verifies
+```
+
+This replaced the product's worst defect. Previously a re-run overwrote the
+record in place, so a recorded decision silently stopped resolving — the exact
+opposite of what the audit trail exists for.
+
+Three rules make it work:
+
+- **Append-only.** No judgment is deleted or rewritten. A case accumulates
+  `JUDGMENT-001`, `-002`, `-003` and keeps all of them.
+- **Identical records do not create a judgment.** The engine is deterministic,
+  so a re-run over unchanged material produces the same digest, which means the
+  same conclusion. Recording it twice would put an event in the institutional
+  history that never happened.
+- **Decisions bind forward only.** A decision can only be recorded against the
+  judgment in force. Recording one against a superseded judgment would be
+  minuting a meeting into the past, and the store rejects a decision citing a
+  judgment the case never reached.
+
+`analysis.verify_ledger` makes the invariant checkable rather than asserted: for
+every decision it confirms the cited judgment is on disk and carries the cited
+digest. The workspace shows the result beside each ledger entry — "verified
+against its record", or a black **RECORD DOES NOT RESOLVE** flag. There is no
+quiet failure mode.
+
 ## Storage
 
-One directory per case under `reports/workspace/<case-id>/`:
+One directory per case, with each judgment written once into its own directory:
 
 ```text
 reports/workspace/orbital-logistics/
-    case.json          the case, its material, and its decision ledger
-    01-document.json   what the engine was given
-    03-ir.json         · 04-artifacts.json · 05-record.json
-    06-report.txt      the full reasoning record
-    metadata.json      digests
+    case.json                    material, material register, judgments, ledger
+    judgments/
+        JUDGMENT-001/            superseded — kept, still resolvable
+            01-document.json     what the engine was given
+            02-packet.json · 03-ir.json · 04-artifacts.json
+            05-record.json       the canonical record
+            06-report.txt        the full reasoning record
+            metadata.json        digests
+        JUDGMENT-002/            in force
+            ...
 ```
+
+Each judgment keeps the exact document it saw, so provenance runs from a
+decision back through its judgment to the material that produced it — even after
+the case material has moved on.
 
 No database. The material is small, a JSON file is readable by a human without
 tooling, and `reports/` is already established as generated output that is not
@@ -174,7 +273,11 @@ Named rather than implied, following the reference implementation's practice:
   documents implies extraction, which is an open architectural question, not a
   product feature.
 - **No editing of a judgment.** A judgment is what the material supported. To
-  change it, change the material and re-run.
+  change it, change the material and re-run — which supersedes rather than
+  overwrites.
+- **No deletion of anything.** Cases, judgments and ledger entries only
+  accumulate. There is no path in the product that removes institutional
+  history.
 - **No cross-case memory.** Precedent and consistency-checking across decisions
   are explicitly out of scope for v0.1.
 
@@ -184,5 +287,7 @@ Named rather than implied, following the reference implementation's practice:
 python -m unittest discover -s applications/investment/workspace -t .
 ```
 
-26 tests. The two that matter most are the boundary tests named above; the rest
-are workflow.
+46 tests. `TestMaterialIdentity` defends the material layer, and its first test reproduces the digest collision that motivated it. `TestSupersession` is the supersession ruling made checkable — each of
+its seven tests defends one named invariant, and the first reproduces the defect
+that prompted the ruling. `TestJudgment`'s two boundary tests defend the engine
+boundary. The rest are workflow.

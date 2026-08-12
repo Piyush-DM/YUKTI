@@ -16,6 +16,9 @@ const state = {
   cases: [],
   selectedId: null,
   detail: null,
+  // Which judgment is on screen. null means the one in force; an id means the
+  // reader has opened a superseded judgment to audit a decision made against it.
+  judgmentId: null,
   tab: "overview",
   message: null,
   busy: false,
@@ -74,6 +77,7 @@ async function selectCase(caseId) {
   try {
     state.detail = await api("GET", `/api/cases/${caseId}`);
     state.selectedId = caseId;
+    state.judgmentId = null;
     state.message = null;
     if (state.tab === "intake") {
       state.tab = "overview";
@@ -313,6 +317,30 @@ function renderOverview() {
   thesis.append(el("p", {}, record.thesis || "No thesis recorded."));
   wrap.append(thesis);
 
+  const snapshots = state.detail.case.snapshots || [];
+  if (snapshots.length) {
+    const panel = el("section", { class: "panel" });
+    panel.append(el("h3", {}, `Material register (${snapshots.length})`));
+    panel.append(
+      el(
+        "p",
+        { class: "panel-note" },
+        "Every state this case's material has held, oldest first. A judgment is " +
+          "formed from exactly one of these, and says which.",
+      ),
+    );
+    snapshots.forEach((snapshot) => {
+      const row = el("div", { class: "position-row" });
+      row.append(
+        el("span", { class: "who" }, `${snapshot.snapshot_id} (v${snapshot.version})`),
+        el("span", { class: "numeric" }, snapshot.recorded_on),
+        el("span", { class: "digest" }, `${snapshot.material_digest.slice(0, 16)}…`),
+      );
+      panel.append(row);
+    });
+    wrap.append(panel);
+  }
+
   wrap.append(renderLedger());
   return wrap;
 }
@@ -329,6 +357,10 @@ function renderLedger() {
     );
     return panel;
   }
+  const verification = new Map(
+    (state.detail.ledger_verification || []).map((check) => [check.entry_id, check]),
+  );
+
   entries.forEach((entry) => {
     const block = el("div", { class: "finding" });
     block.append(
@@ -337,6 +369,39 @@ function renderLedger() {
       el("p", { class: "cites" },
         `Against judgment: ${entry.judgment_recommendation} at ${entry.judgment_confidence} confidence`),
     );
+
+    // A decision is only worth having if it still resolves to the judgment it
+    // was taken against. That is checked, not assumed, and shown either way.
+    const check = verification.get(entry.entry_id);
+    const line = el("p", { class: "cites" });
+    const open = el("button", { class: "link", type: "button" }, entry.judgment_id);
+    open.addEventListener("click", () => {
+      state.tab = "judgment";
+      viewJudgment(entry.judgment_id);
+    });
+    line.append("Bound to ", open, " · ");
+    // Reasoning identity and material identity are separate claims, so they are
+    // reported separately. A decision can verify against its record while its
+    // material is unidentified, and reading that as fully verified would be the
+    // exact overstatement this layer exists to prevent.
+    if (!check) {
+      line.append(el("span", { class: "unverified" }, "NOT VERIFIED"));
+    } else {
+      line.append(
+        check.record_resolves
+          ? el("span", { class: "verified" }, "reasoning verified")
+          : el("span", { class: "unverified" }, "RECORD DOES NOT RESOLVE"),
+        " · ",
+        check.material_resolves
+          ? el("span", { class: "verified" }, "material verified")
+          : el(
+              "span",
+              { class: "unverified" },
+              check.cited_material ? "MATERIAL DOES NOT RESOLVE" : "MATERIAL NOT IDENTIFIED",
+            ),
+      );
+    }
+    block.append(line);
     panel.append(block);
   });
   return panel;
@@ -592,6 +657,8 @@ function renderJudgment() {
   }
 
   wrap.append(renderVerdict(judgment));
+  const history = renderJudgmentHistory();
+  if (history) wrap.append(history);
 
   if (judgment.conditions.length) {
     const panel = el("section", { class: "panel" });
@@ -662,6 +729,19 @@ function renderJudgment() {
 
 function renderVerdict(judgment) {
   const box = el("section", { class: "verdict" });
+
+  if (!judgment.is_current) {
+    box.append(
+      el(
+        "p",
+        { class: "superseded-banner" },
+        `Superseded by ${judgment.superseded_by}. This is how the case read on ` +
+          `${judgment.recorded_on}, kept unchanged so decisions taken against it ` +
+          `stay defendable.`,
+      ),
+    );
+  }
+
   box.append(el("h2", {}, judgment.recommendation));
   box.append(el("p", { class: "guidance" }, judgment.outcome_guidance));
   if (judgment.rationale.length) {
@@ -671,9 +751,73 @@ function renderVerdict(judgment) {
   meta.append(
     metric("Institutional confidence", judgment.confidence),
     metric("Limited by", judgment.confidence_note),
+    metric("Judgment", `${judgment.judgment_id} · ${judgment.recorded_on}`),
+    metric(
+      "Material",
+      judgment.snapshot_id
+        ? `${judgment.snapshot_id} (v${judgment.material_version})`
+        : "not identified",
+    ),
   );
   box.append(meta);
   return box;
+}
+
+function renderJudgmentHistory() {
+  const records = state.detail.case.judgments;
+  if (records.length < 2) return null;
+
+  const panel = el("section", { class: "panel" });
+  panel.append(el("h3", {}, `Judgment history (${records.length})`));
+  panel.append(
+    el(
+      "p",
+      { class: "panel-note" },
+      "Every analysis this case has reached, oldest first. A new analysis " +
+        "supersedes the one before it and never replaces it — decisions keep " +
+        "pointing at the judgment they were taken against.",
+    ),
+  );
+
+  const viewing = state.detail.judgment ? state.detail.judgment.judgment_id : null;
+  records.forEach((record, index) => {
+    const row = el("div", { class: "position-row" });
+    const open = el(
+      "button",
+      { class: "link", type: "button" },
+      record.judgment_id === viewing
+        ? `${record.judgment_id} (viewing)`
+        : record.judgment_id,
+    );
+    open.addEventListener("click", () => viewJudgment(record.judgment_id));
+
+    // Two judgments can reach the same conclusion from different material.
+    // That is worth saying plainly: it means the committee deliberated again,
+    // not that nothing happened.
+    const previous = index > 0 ? records[index - 1] : null;
+    let note = record.superseded_by
+      ? `superseded by ${record.superseded_by}`
+      : "in force";
+    if (previous && previous.record_digest === record.record_digest) {
+      note += " · same conclusion, different material";
+    }
+
+    row.append(
+      open,
+      el("span", { class: "numeric" }, `${record.recorded_on} · ${record.snapshot_id || "—"}`),
+      el("span", { class: "cites" }, note),
+    );
+    panel.append(row);
+  });
+  return panel;
+}
+
+async function viewJudgment(judgmentId) {
+  const caseId = state.detail.case.case_id;
+  await act(async () => {
+    state.detail = await api("GET", `/api/cases/${caseId}/judgments/${judgmentId}`);
+    state.judgmentId = judgmentId;
+  });
 }
 
 function areaCard(area) {
@@ -726,6 +870,7 @@ function topicBlock(view, contested) {
 async function requestJudgment(caseId) {
   await act(async () => {
     state.detail = await api("POST", `/api/cases/${caseId}/analysis`, {});
+    state.judgmentId = null;
     await refreshCases();
   });
 }
@@ -733,6 +878,20 @@ async function requestJudgment(caseId) {
 function renderDecisionForm() {
   const panel = el("section", { class: "panel" });
   panel.append(el("h3", {}, "Record the committee decision"));
+
+  // Decisions bind to the judgment in force. Recording one against a superseded
+  // judgment would be minuting a meeting into the past.
+  const judgment = state.detail.judgment;
+  if (judgment && !judgment.is_current) {
+    panel.append(
+      el("p", { class: "panel-note" },
+        `You are reading ${judgment.judgment_id}, which ${judgment.superseded_by} ` +
+        "has superseded. Decisions are recorded against the judgment in force. " +
+        "Open the current judgment to record one."),
+    );
+    return panel;
+  }
+
   panel.append(
     el("p", { class: "panel-note" },
       "The decision is recorded against the judgment, not merged into it. A " +
@@ -804,8 +963,29 @@ function renderAudit() {
       "reasoning record itself, not a description of it — re-running the same " +
       "material reproduces this digest exactly."),
   );
-  panel.append(el("p", { class: "metric-label" }, "Record digest (SHA-256)"));
+  panel.append(
+    el("p", { class: "metric-label" },
+      `${judgment.judgment_id} · recorded ${judgment.recorded_on}` +
+        (judgment.is_current ? " · in force" : ` · superseded by ${judgment.superseded_by}`)),
+  );
+  panel.append(el("p", { class: "metric-label" }, "Record digest (SHA-256) — the reasoning"));
   panel.append(el("p", { class: "digest" }, judgment.record_digest));
+  panel.append(
+    el("p", { class: "metric-label" }, "Material digest (SHA-256) — what it was formed from"),
+  );
+  panel.append(
+    el("p", { class: "digest" }, judgment.material_digest || "not identified"),
+  );
+  panel.append(
+    el(
+      "p",
+      { class: "panel-note" },
+      "Two separate claims. The record digest proves the reasoning; the " +
+        "material digest proves what was reasoned over. The engine can reach " +
+        "one conclusion from materially different packs, so the second does " +
+        "not follow from the first.",
+    ),
+  );
   wrap.append(panel);
 
   const reportPanel = el("section", { class: "panel" });
@@ -814,7 +994,10 @@ function renderAudit() {
   reportPanel.append(holder);
   wrap.append(reportPanel);
 
-  api("GET", `/api/cases/${state.detail.case.case_id}/report`)
+  const reportPath = state.judgmentId
+    ? `/api/cases/${state.detail.case.case_id}/judgments/${state.judgmentId}/report`
+    : `/api/cases/${state.detail.case.case_id}/report`;
+  api("GET", reportPath)
     .then((payload) => {
       holder.textContent = payload.report;
     })

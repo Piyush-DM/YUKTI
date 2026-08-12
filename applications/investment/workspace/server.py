@@ -114,8 +114,19 @@ class WorkspaceHandler(SimpleHTTPRequestHandler):
             return self._case_detail(segments[2])
         if len(segments) == 4 and segments[:2] == ["api", "cases"]:
             if segments[3] == "report":
-                self.store.load(segments[2])
                 return {"report": analysis.rendered_report(self.store, segments[2])}
+        # A superseded judgment reads exactly as it did the day it was reached.
+        # This is the route an auditor uses to check an old decision.
+        if len(segments) == 5 and segments[:2] == ["api", "cases"]:
+            if segments[3] == "judgments":
+                return self._case_detail(segments[2], segments[4])
+        if len(segments) == 6 and segments[:2] == ["api", "cases"]:
+            if segments[3] == "judgments" and segments[5] == "report":
+                return {
+                    "report": analysis.rendered_report(
+                        self.store, segments[2], segments[4]
+                    )
+                }
         raise LookupError(self.path)
 
     def _case_action(
@@ -180,14 +191,18 @@ class WorkspaceHandler(SimpleHTTPRequestHandler):
 
     def _record_decision(self, case_id: str, body: dict[str, Any]) -> None:
         case = self.store.load(case_id)
-        if not analysis.has_judgment(self.store, case_id):
+        if not case.judgments:
             raise ValueError("Request an institutional judgment before deciding.")
 
+        # The decision binds to the judgment in force when it was taken, and
+        # keeps pointing there for good. Later analyses supersede that judgment;
+        # they never reach back into a decision already recorded against it.
         judgment = analysis.read_judgment(self.store, case)
         self.store.append_ledger_entry(
             case_id,
             LedgerEntry(
                 entry_id=f"LEDGER-{len(case.ledger) + 1:03d}",
+                judgment_id=judgment.judgment_id,
                 decision=_text(body, "decision"),
                 decided_by=_text(body, "decided_by"),
                 rationale=_text(body, "rationale"),
@@ -195,26 +210,40 @@ class WorkspaceHandler(SimpleHTTPRequestHandler):
                 judgment_recommendation=judgment.recommendation,
                 judgment_confidence=judgment.confidence,
                 record_digest=judgment.record_digest,
+                material_digest=judgment.material_digest,
+                snapshot_id=judgment.snapshot_id,
             ),
         )
 
     # -- reads -------------------------------------------------------------
 
-    def _case_detail(self, case_id: str) -> dict[str, Any]:
+    def _case_detail(
+        self, case_id: str, judgment_id: str | None = None
+    ) -> dict[str, Any]:
         case = self.store.load(case_id)
-        analysed = analysis.has_judgment(self.store, case_id)
         payload: dict[str, Any] = {
             "case": asdict(case),
             "title": case.title,
-            "status": case.status(analysed),
+            "status": case.status(),
             "outstanding": [
                 asdict(entry)
                 for entry in diligence.outstanding(case.recorded_metrics())
             ],
             "judgment": None,
+            "ledger_verification": [
+                asdict(check)
+                | {
+                    "resolves": check.resolves,
+                    "record_resolves": check.record_resolves,
+                    "material_resolves": check.material_resolves,
+                }
+                for check in analysis.verify_ledger(self.store, case_id)
+            ],
         }
-        if analysed:
-            payload["judgment"] = asdict(analysis.read_judgment(self.store, case))
+        if case.judgments:
+            payload["judgment"] = asdict(
+                analysis.read_judgment(self.store, case, judgment_id)
+            )
         return payload
 
     # -- transport ---------------------------------------------------------
@@ -248,8 +277,9 @@ def _case_summary(case: Case) -> dict[str, Any]:
         "owner": case.owner,
         "opened_on": case.opened_on,
         "requested_decision": case.requested_decision,
-        "status": case.status(analysis.has_judgment(STORE, case.case_id)),
+        "status": case.status(),
         "decisions": len(case.ledger),
+        "judgments": len(case.judgments),
     }
 
 

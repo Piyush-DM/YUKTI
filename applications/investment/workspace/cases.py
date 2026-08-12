@@ -26,10 +26,17 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
+from applications.investment.workspace.material import (
+    MaterialSnapshot,
+    compute_material_digest,
+    next_snapshot,
+)
+
 REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_STORE_ROOT = REPOSITORY_ROOT / "reports" / "workspace"
 
 CASE_FILE = "case.json"
+JUDGMENTS_DIRECTORY = "judgments"
 
 # What the institution has done with the case so far. Status is derived from
 # the record rather than set by hand, so it cannot drift from reality.
@@ -67,6 +74,36 @@ class FlaggedConflict:
 
 
 @dataclass(frozen=True)
+class JudgmentRecord:
+    """One analysis of this case, kept for as long as the case exists.
+
+    Judgments are **superseded, never replaced.** A later analysis marks this
+    one superseded and takes its place as current; this one keeps its
+    identifier, its digest, and its artifacts on disk forever, because a
+    decision recorded against it must stay verifiable after the material has
+    moved on.
+
+    ``superseded_by`` is the id of the judgment that replaced this one, or the
+    empty string while this is the current judgment.
+    """
+
+    judgment_id: str
+    record_digest: str
+    recorded_on: str
+    superseded_by: str = ""
+    # What the judgment was formed from. ``record_digest`` proves two judgments
+    # reasoned identically; these prove they read the same material, which is a
+    # separate and stronger claim. See material.py.
+    material_digest: str = ""
+    snapshot_id: str = ""
+
+    @property
+    def is_current(self) -> bool:
+        """True while no later analysis has replaced this one."""
+        return not self.superseded_by
+
+
+@dataclass(frozen=True)
 class LedgerEntry:
     """One decision the institution recorded against an analysis.
 
@@ -74,9 +111,15 @@ class LedgerEntry:
     institution chose to do about it. They are stored separately and on purpose:
     a committee that overrides a recommendation is the most important thing the
     ledger can record, and collapsing the two would erase it.
+
+    ``judgment_id`` binds the decision to the exact analysis it was taken
+    against. That binding is permanent. Re-analysing the case creates a new
+    judgment and leaves this one — and therefore this decision — untouched and
+    still resolvable.
     """
 
     entry_id: str
+    judgment_id: str
     decision: str
     decided_by: str
     rationale: str
@@ -84,6 +127,11 @@ class LedgerEntry:
     judgment_recommendation: str
     judgment_confidence: str
     record_digest: str
+    # Recorded on the decision as well as on the judgment, so verification does
+    # not depend on the judgment record still being intact to check the
+    # material. A decision should be able to state, by itself, what it rested on.
+    material_digest: str = ""
+    snapshot_id: str = ""
 
 
 @dataclass(frozen=True)
@@ -102,6 +150,8 @@ class Case:
     figures: tuple[Figure, ...] = ()
     assumptions: tuple[str, ...] = ()
     flagged_conflicts: tuple[FlaggedConflict, ...] = ()
+    snapshots: tuple[MaterialSnapshot, ...] = ()
+    judgments: tuple[JudgmentRecord, ...] = ()
     ledger: tuple[LedgerEntry, ...] = ()
 
     @property
@@ -117,16 +167,38 @@ class Case:
         """True once there is something to analyse."""
         return bool(self.sources) and bool(self.figures)
 
-    def status(self, analysed: bool) -> str:
+    def current_snapshot(self) -> MaterialSnapshot | None:
+        """The material in force, or None before any material was recorded."""
+        return self.snapshots[-1] if self.snapshots else None
+
+    def snapshot(self, snapshot_id: str) -> MaterialSnapshot | None:
+        """Look up any material state this case has ever held."""
+        for record in self.snapshots:
+            if record.snapshot_id == snapshot_id:
+                return record
+        return None
+
+    def current_judgment(self) -> JudgmentRecord | None:
+        """The judgment in force, or None if the case has never been analysed."""
+        return self.judgments[-1] if self.judgments else None
+
+    def judgment(self, judgment_id: str) -> JudgmentRecord | None:
+        """Look up any judgment this case has ever reached, current or not."""
+        for record in self.judgments:
+            if record.judgment_id == judgment_id:
+                return record
+        return None
+
+    def status(self) -> str:
         """Derive the case status from the record.
 
-        ``analysed`` is passed in rather than stored, because whether an
-        analysis exists is a fact about the artifacts on disk and duplicating it
-        onto the case would create a second answer that can go stale.
+        Every input is on the case itself, so status cannot disagree with what
+        is on file. The judgment history is part of the case now, which is why
+        this no longer has to be told whether an analysis exists.
         """
         if self.ledger:
             return STATUS_DECIDED
-        if analysed:
+        if self.judgments:
             return STATUS_ANALYSED
         if self.has_material():
             return STATUS_MATERIAL_ASSEMBLED
@@ -217,28 +289,100 @@ class CaseStore:
         figures: tuple[Figure, ...],
         assumptions: tuple[str, ...],
         flagged_conflicts: tuple[FlaggedConflict, ...],
+        recorded_on: str | None = None,
     ) -> Case:
-        """Replace the case material wholesale.
+        """Replace the case material wholesale and snapshot it if it changed.
 
         Whole-record replacement rather than per-item editing: the diligence
         pack is assembled and then submitted, and a half-applied set of figures
         is not a state the institution should be able to reach.
+
+        A snapshot is appended whenever the material digest moves, whether or
+        not anyone runs an analysis afterwards. The registry is a record of what
+        the institution assembled and when -- deliberation over material, not
+        only the states that happened to be analysed.
         """
         case = self.load(case_id)
         _validate_material(sources, figures)
-        return self.save(
-            replace(
-                case,
-                sources=sources,
-                figures=figures,
-                assumptions=assumptions,
-                flagged_conflicts=flagged_conflicts,
-            )
+        updated = replace(
+            case,
+            sources=sources,
+            figures=figures,
+            assumptions=assumptions,
+            flagged_conflicts=flagged_conflicts,
         )
+
+        digest = compute_material_digest(updated)
+        current = updated.current_snapshot()
+        if current is None or current.material_digest != digest:
+            snapshot = next_snapshot(
+                updated, digest, recorded_on or date.today().isoformat()
+            )
+            updated = replace(updated, snapshots=updated.snapshots + (snapshot,))
+
+        return self.save(updated)
+
+    def judgments_directory(self, case_id: str) -> Path:
+        """Where every judgment this case has ever reached is kept."""
+        return self.directory(case_id) / JUDGMENTS_DIRECTORY
+
+    def judgment_directory(self, case_id: str, judgment_id: str) -> Path:
+        """Where one judgment's artifacts live. Written once, never rewritten."""
+        return self.judgments_directory(case_id) / judgment_id
+
+    def append_judgment(
+        self, case_id: str, record_digest: str, recorded_on: str
+    ) -> tuple[Case, JudgmentRecord]:
+        """Record a new judgment, superseding the current one.
+
+        **Keyed on material, not on reasoning.** A change to what the
+        institution assembled creates a new judgment even when the conclusion is
+        unchanged, because institutional history records deliberation over
+        material rather than only changes of mind.
+
+        Returns the existing judgment unchanged only when the material is
+        byte-identical -- which, the engine being deterministic, also means the
+        reasoning is. Recording that twice would put an event in the record that
+        never happened.
+
+        Keying on ``record_digest`` here would be wrong and was the earlier
+        behaviour: two materially different diligence packs can produce one
+        reasoning record, so a real material change could pass unrecorded.
+
+        The previous judgment is marked superseded and otherwise left alone. Its
+        artifacts stay on disk and any decision citing it keeps resolving.
+        """
+        case = self.load(case_id)
+        snapshot = case.current_snapshot()
+        material_digest = snapshot.material_digest if snapshot else ""
+        snapshot_id = snapshot.snapshot_id if snapshot else ""
+
+        current = case.current_judgment()
+        if current is not None and current.material_digest == material_digest:
+            return case, current
+
+        judgment_id = f"JUDGMENT-{len(case.judgments) + 1:03d}"
+        superseded = tuple(
+            replace(record, superseded_by=judgment_id) if record.is_current else record
+            for record in case.judgments
+        )
+        record = JudgmentRecord(
+            judgment_id=judgment_id,
+            record_digest=record_digest,
+            recorded_on=recorded_on,
+            material_digest=material_digest,
+            snapshot_id=snapshot_id,
+        )
+        return self.save(replace(case, judgments=superseded + (record,))), record
 
     def append_ledger_entry(self, case_id: str, entry: LedgerEntry) -> Case:
         """Add a decision to the case's ledger. Entries are never removed."""
         case = self.load(case_id)
+        if case.judgment(entry.judgment_id) is None:
+            raise ValueError(
+                f"Decision cites judgment '{entry.judgment_id}', which this case "
+                "has never reached. A decision must bind to a real judgment."
+            )
         return self.save(replace(case, ledger=case.ledger + (entry,)))
 
     def _allocate_id(self, company: str) -> str:
@@ -323,5 +467,41 @@ def _case_from_dict(raw: dict[str, Any]) -> Case:
         flagged_conflicts=tuple(
             FlaggedConflict(**entry) for entry in raw.get("flagged_conflicts", [])
         ),
-        ledger=tuple(LedgerEntry(**entry) for entry in raw.get("ledger", [])),
+        snapshots=tuple(
+            MaterialSnapshot(
+                snapshot_id=entry["snapshot_id"],
+                material_digest=entry["material_digest"],
+                version=entry["version"],
+                recorded_on=entry["recorded_on"],
+                case_id=entry["case_id"],
+            )
+            for entry in raw.get("snapshots", [])
+        ),
+        judgments=tuple(
+            JudgmentRecord(
+                judgment_id=entry["judgment_id"],
+                record_digest=entry["record_digest"],
+                recorded_on=entry["recorded_on"],
+                superseded_by=entry.get("superseded_by", ""),
+                material_digest=entry.get("material_digest", ""),
+                snapshot_id=entry.get("snapshot_id", ""),
+            )
+            for entry in raw.get("judgments", [])
+        ),
+        ledger=tuple(
+            LedgerEntry(
+                entry_id=entry["entry_id"],
+                judgment_id=entry.get("judgment_id", ""),
+                decision=entry["decision"],
+                decided_by=entry["decided_by"],
+                rationale=entry["rationale"],
+                recorded_on=entry["recorded_on"],
+                judgment_recommendation=entry["judgment_recommendation"],
+                judgment_confidence=entry["judgment_confidence"],
+                record_digest=entry["record_digest"],
+                material_digest=entry.get("material_digest", ""),
+                snapshot_id=entry.get("snapshot_id", ""),
+            )
+            for entry in raw.get("ledger", [])
+        ),
     )

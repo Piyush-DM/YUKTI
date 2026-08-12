@@ -673,6 +673,36 @@ textarea {
   color: var(--ink-muted);
 }
 
+/* A superseded judgment must read as historical at a glance, without
+   suggesting it is invalid — it is still the record a past decision rests on. */
+.superseded-banner {
+  font-family: var(--yukti-font-data);
+  font-size: 12px;
+  line-height: 1.5;
+  padding: var(--yukti-space-2);
+  margin-bottom: var(--yukti-space-2);
+  background: var(--surface-sunken);
+  border-radius: var(--yukti-radius-sm);
+  color: var(--ink-muted);
+}
+
+.verified {
+  font-family: var(--yukti-font-data);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+
+.unverified {
+  font-family: var(--yukti-font-data);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  background: var(--yukti-color-ink-900);
+  color: var(--yukti-color-bone-100);
+  padding: 1px 6px;
+  border-radius: var(--yukti-radius-sm);
+}
+
 ul.plain {
   margin: 0;
   padding-left: 1.1rem;

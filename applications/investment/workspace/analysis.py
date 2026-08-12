@@ -23,8 +23,10 @@ wording rather than inventing one.
 from __future__ import annotations
 
 import json
+import shutil
 import tempfile
 from dataclasses import dataclass
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -38,7 +40,7 @@ from applications.investment.vertical_slice.run import (
     execute_slice,
 )
 from applications.investment.workspace import diligence
-from applications.investment.workspace.cases import Case, CaseStore
+from applications.investment.workspace.cases import Case, CaseStore, JudgmentRecord
 
 # Stances the engine reports, in institutional wording.
 _STANCE_LABELS = {
@@ -110,8 +112,20 @@ class TopicPositionView:
 
 @dataclass(frozen=True)
 class Judgment:
-    """The institutional judgment, as the workspace presents it."""
+    """The institutional judgment, as the workspace presents it.
 
+    Identified, dated, and marked with whether a later analysis has replaced it.
+    A superseded judgment is still readable in full -- that is the point of
+    keeping it.
+    """
+
+    judgment_id: str
+    recorded_on: str
+    superseded_by: str
+    is_current: bool
+    material_digest: str
+    snapshot_id: str
+    material_version: int
     recommendation: str
     outcome_guidance: str
     confidence: str
@@ -131,11 +145,19 @@ class MaterialIncomplete(ValueError):
     """The case cannot be analysed yet, and the reason is the user's to fix."""
 
 
-def request_judgment(store: CaseStore, case_id: str) -> Judgment:
-    """Run the engine over one case and return the judgment it reached.
+def request_judgment(
+    store: CaseStore, case_id: str, recorded_on: str | None = None
+) -> Judgment:
+    """Run the engine over one case and record the judgment it reached.
 
-    The engine artifacts land beside the case file, so the audit trail for a
-    judgment sits next to the material that produced it.
+    **Nothing is ever overwritten.** Each judgment is written once, into its own
+    directory, and stays there. A later analysis supersedes it and leaves it
+    resolvable, so a decision recorded against it can still be verified after
+    the material has moved on.
+
+    An analysis that reproduces the current judgment's record returns that
+    judgment rather than creating a second one. The engine is deterministic, so
+    an identical digest means the material reached exactly the same conclusion.
     """
     case = store.load(case_id)
     if not case.sources:
@@ -150,28 +172,49 @@ def request_judgment(store: CaseStore, case_id: str) -> Judgment:
 
     document = compose_document(case)
 
-    # The slice reads a document from disk, so the composed document is written
-    # to a temporary file and the slice's own verbatim copy becomes the record.
+    # The slice reads a document from disk and writes its artifacts under
+    # <output_root>/<packet id>. Both happen inside a scratch directory here, so
+    # a failed run cannot leave a half-written judgment in the case, and the
+    # finished artifacts are moved into place in one step.
     with tempfile.TemporaryDirectory() as scratch:
-        document_path = Path(scratch) / f"{case.case_id}.json"
+        document_path = Path(scratch) / "document.json"
         document_path.write_text(
             json.dumps(document, indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
             newline="\n",
         )
-        execute_slice(document_path, output_root=store.root)
+        produced = Path(scratch) / "produced"
+        run = execute_slice(document_path, output_root=produced)
 
-    return read_judgment(store, case)
+        _, record = store.append_judgment(
+            case_id,
+            record_digest=run.record_digest,
+            recorded_on=recorded_on or date.today().isoformat(),
+        )
+        destination = store.judgment_directory(case_id, record.judgment_id)
+        if not destination.exists():
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.move(str(run.output_directory), str(destination))
+
+    return read_judgment(store, store.load(case_id), record.judgment_id)
 
 
 def has_judgment(store: CaseStore, case_id: str) -> bool:
-    """True when an analysis has been run and its record is on disk."""
-    return (store.directory(case_id) / RECORD_FILE).is_file()
+    """True when the case has reached at least one judgment."""
+    return bool(store.load(case_id).judgments)
 
 
-def rendered_report(store: CaseStore, case_id: str) -> str:
-    """Return the full execution report for the audit view, verbatim."""
-    return (store.directory(case_id) / REPORT_FILE).read_text(encoding="utf-8")
+def rendered_report(
+    store: CaseStore, case_id: str, judgment_id: str | None = None
+) -> str:
+    """Return one judgment's execution report, verbatim.
+
+    Defaults to the judgment in force. Pass an id to read a superseded one --
+    which is what a reader auditing an old decision is doing.
+    """
+    return _judgment_file(store, case_id, judgment_id, REPORT_FILE).read_text(
+        encoding="utf-8"
+    )
 
 
 def compose_document(case: Case) -> dict[str, Any]:
@@ -212,6 +255,94 @@ def compose_document(case: Case) -> dict[str, Any]:
     }
 
 
+@dataclass(frozen=True)
+class DigestCheck:
+    """Whether one recorded decision can still be verified.
+
+    Two independent claims, deliberately not collapsed:
+
+    - **Reasoning identity** -- the judgment's record is on disk and carries the
+      digest the decision cited.
+    - **Material identity** -- the judgment was formed from the material the
+      decision cited, and that material state is still in the case's registry.
+
+    A decision can satisfy the first and fail the second. That is precisely the
+    failure this layer exists to make visible, so ``resolves`` requires both.
+    """
+
+    entry_id: str
+    judgment_id: str
+    cited_digest: str
+    found_digest: str
+    artifacts_present: bool
+    cited_material: str = ""
+    found_material: str = ""
+    snapshot_present: bool = False
+
+    @property
+    def record_resolves(self) -> bool:
+        """True when the judgment's reasoning record is present and matches."""
+        return self.artifacts_present and self.cited_digest == self.found_digest
+
+    @property
+    def material_resolves(self) -> bool:
+        """True when the material the decision rested on is identified and intact.
+
+        Decisions predating the material layer cite no material digest. They are
+        reported as unresolved on this axis rather than silently passed: an
+        unverifiable claim should not read as a verified one.
+        """
+        return (
+            bool(self.cited_material)
+            and self.snapshot_present
+            and self.cited_material == self.found_material
+        )
+
+    @property
+    def resolves(self) -> bool:
+        """True when both the reasoning and the material behind a decision hold."""
+        return self.record_resolves and self.material_resolves
+
+
+def verify_ledger(store: CaseStore, case_id: str) -> tuple[DigestCheck, ...]:
+    """Check that every decision on this case still resolves to its judgment.
+
+    This is the institutional invariant made checkable. A decision cites a
+    judgment id and a record digest; both must still lead to artifacts on disk
+    that carry that digest, however many times the case has been re-analysed
+    since. If this ever returns a failing check, a committee decision has become
+    undefendable, which is the one failure this product cannot absorb.
+    """
+    case = store.load(case_id)
+    checks: list[DigestCheck] = []
+    for entry in case.ledger:
+        directory = store.judgment_directory(case_id, entry.judgment_id)
+        metadata_path = directory / "metadata.json"
+        present = metadata_path.is_file() and (directory / RECORD_FILE).is_file()
+        found = ""
+        if present:
+            found = str(
+                json.loads(metadata_path.read_text(encoding="utf-8")).get(
+                    "record_digest", ""
+                )
+            )
+
+        snapshot = case.snapshot(entry.snapshot_id) if entry.snapshot_id else None
+        checks.append(
+            DigestCheck(
+                entry_id=entry.entry_id,
+                judgment_id=entry.judgment_id,
+                cited_digest=entry.record_digest,
+                found_digest=found,
+                artifacts_present=present,
+                cited_material=entry.material_digest,
+                found_material=snapshot.material_digest if snapshot else "",
+                snapshot_present=snapshot is not None,
+            )
+        )
+    return tuple(checks)
+
+
 def reference_material() -> dict[str, Any]:
     """Return the worked example's material, in the shape the intake form posts.
 
@@ -238,11 +369,38 @@ def reference_material() -> dict[str, Any]:
     }
 
 
-def read_judgment(store: CaseStore, case: Case) -> Judgment:
-    """Project the persisted record into the institutional judgment view."""
-    record = json.loads(
-        (store.directory(case.case_id) / RECORD_FILE).read_text(encoding="utf-8")
-    )
+def _resolve(case: Case, judgment_id: str | None) -> JudgmentRecord:
+    """Return the requested judgment, or the one in force by default."""
+    if judgment_id is None:
+        current = case.current_judgment()
+        if current is None:
+            raise KeyError(f"{case.case_id} has no judgment")
+        return current
+    found = case.judgment(judgment_id)
+    if found is None:
+        raise KeyError(f"{case.case_id} has no judgment '{judgment_id}'")
+    return found
+
+
+def _judgment_file(
+    store: CaseStore, case_id: str, judgment_id: str | None, name: str
+) -> Path:
+    """Locate one file inside one judgment's immutable artifact directory."""
+    record = _resolve(store.load(case_id), judgment_id)
+    return store.judgment_directory(case_id, record.judgment_id) / name
+
+
+def read_judgment(
+    store: CaseStore, case: Case, judgment_id: str | None = None
+) -> Judgment:
+    """Project one judgment's persisted record into the institutional view.
+
+    Defaults to the judgment in force. A superseded judgment reads exactly as it
+    did the day it was reached, because its record was never rewritten.
+    """
+    entry = _resolve(case, judgment_id)
+    directory = store.judgment_directory(case.case_id, entry.judgment_id)
+    record = json.loads((directory / RECORD_FILE).read_text(encoding="utf-8"))
     synthesis = record["synthesis"]
     artifacts = record["artifacts"]
     evidence_labels = _evidence_labels(record["ir"])
@@ -269,7 +427,16 @@ def read_judgment(store: CaseStore, case: Case) -> Judgment:
 
     recommendation = str(synthesis["recommendation"])
 
+    snapshot = case.snapshot(entry.snapshot_id)
+
     return Judgment(
+        judgment_id=entry.judgment_id,
+        recorded_on=entry.recorded_on,
+        superseded_by=entry.superseded_by,
+        is_current=entry.is_current,
+        material_digest=entry.material_digest,
+        snapshot_id=entry.snapshot_id,
+        material_version=snapshot.version if snapshot else 0,
         recommendation=recommendation.title(),
         outcome_guidance=_OUTCOME_GUIDANCE.get(recommendation, ""),
         confidence=_band(synthesis["confidence"]),
@@ -284,17 +451,7 @@ def read_judgment(store: CaseStore, case: Case) -> Judgment:
             _prose(line) for line in synthesis["remaining_uncertainty"]
         ),
         outstanding_schedule_items=outstanding,
-        record_digest=_digest_from_metadata(store, case.case_id),
-    )
-
-
-def _digest_from_metadata(store: CaseStore, case_id: str) -> str:
-    """Read the record digest the slice already computed, rather than re-hashing."""
-    metadata_path = store.directory(case_id) / "metadata.json"
-    if not metadata_path.is_file():
-        return ""
-    return str(
-        json.loads(metadata_path.read_text(encoding="utf-8")).get("record_digest", "")
+        record_digest=entry.record_digest,
     )
 
 
