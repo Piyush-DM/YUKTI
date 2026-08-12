@@ -9,9 +9,9 @@ freeze onward, only maintenance work is permitted unless an explicit
 specification or direct architectural instruction authorizes implementation
 work.
 
-Last updated: 2026-08-05
+Last updated: 2026-08-13
 
-Current validation gate status: Passed on 2026-08-05.
+Current validation gate status: Passed on 2026-08-13.
 
 Narrative record of implementation work, including assumptions and open review
 points, is kept in `docs/development/IMPLEMENTATION_LOG.md`. This file remains
@@ -141,8 +141,19 @@ Build the chain from specifications to implementation artifacts.
   stage persisted (`applications/investment/vertical_slice/`). Built by direct
   architectural instruction; composes frozen V0.1 components and adds document
   intake only.
-- [ ] Blocked on `DECISION-002` approval: any second document, any document that
-  is not the frozen sample, and any change to what intake is allowed to do.
+- [x] `DECISION-002` approved and broadened 2026-08-06. Product-generated
+  serialised packet documents are authorised. Documents may represent packets;
+  they may not interpret them. Prose plus extraction remains unapproved.
+- [x] **DAALE v0 Phase 0 — conformance lock** (`daale/conformance/`). The 28
+  frozen §3 commitments as a machine-readable register, every citation resolved
+  mechanically. 28 commitments: 20 conforming, 8 unexercised, 0 unresolved.
+  Built under direct architectural instruction, with no `DECISION-005`
+  dependency: the commitments are CHOIR's and identical under all four options
+  that ADR leaves open.
+- [ ] **DAALE v0 Phase 1 — single-threaded D-Core. Blocked on `DECISION-005`.**
+  The dependency is exact: a deterministic executor must either call the frozen
+  prototype's kernels or evaluate for itself, and those are options B and A of
+  that ADR verbatim. Nothing else in the plan is blocked by it.
 - [ ] Blocked until approved execution behavior exists for anything beyond the
   above.
 
@@ -155,11 +166,19 @@ issued. Product work is governed by
 - [x] YUKTI application V1: case register, intake, diligence schedule,
   institutional judgment, audit trail, decision ledger
   (`applications/investment/workspace/`).
-- [ ] Blocked on `DECISION-003` approval, in particular the "RIK Positions" to
-  "Review areas" rename.
-- [ ] Retire `applications/investment/prototype-ui/` once the rename is settled.
-  Superseded by the workspace; not removed, because removal touches a passing
-  test suite.
+- [x] `DECISION-003` approved 2026-08-06, including "Review areas" as canonical
+  product terminology. Research freeze section 5 applies to the engine, not to
+  product layers.
+- [x] Judgment supersession (`DECISION-004`). Decisions bind permanently to the
+  judgment they were recorded against; institutional history is append-only.
+- [x] Material Snapshot layer (`DECISION-006`). Institutional material has an
+  immutable identity; supersession keys on material; ledger verification
+  covers reasoning and material as separate claims.
+- [ ] **Blocked on `DECISION-005`** (open ADR): anything that assumes a
+  definition of DAALE, or moves code into or out of `daale/`.
+- [ ] Retire `applications/investment/prototype-ui/`. Now unblocked: the rename
+  it was waiting on is approved. Superseded by the workspace; removal touches a
+  passing test suite, so it is scheduled work.
 - [ ] Authentication and access control. Required before the workspace records
   real institutional decisions attributed to named people.
 - [ ] Concurrent-edit handling. Material is replaced wholesale, so two analysts

@@ -297,3 +297,342 @@ Not started, and deliberately out of scope for this slice:
   memory, precedent, calibration, committee workflow optimisation, human roles
   and accountability. Named here only so it is clear they were considered and
   excluded rather than forgotten.
+
+---
+
+## 2026-08-06 — Supersession, and the close of the product cycle
+
+**Instruction.** The architect ruled on every open question from the previous
+entry. Implement the supersession model and verify its invariants before
+continuing.
+
+### Rulings received, and what they closed
+
+| Ruling | Closed |
+|---|---|
+| Implement supersession; history is append-only; do not freeze cases | The audit-trail defect. `DECISION-004`. |
+| Research freeze §5 applies to the engine, not to product layers | Assumption B1 and the specification conflict. `DECISION-003` approved. |
+| `DECISION-002` broadened: product-generated packet documents approved | The boundary overrun recorded in the previous entry. |
+| "Review areas" approved as canonical product terminology | Assumption B2. |
+
+Every assumption carried by the previous two entries is now either approved or
+superseded by a ruling. Nothing from those entries remains open.
+
+### Completed
+
+- **Supersession implemented.** Judgments are append-only, identified,
+  dated, and marked superseded rather than replaced. Artifacts moved to
+  `reports/workspace/<case>/judgments/<judgment-id>/`, written once. Decisions
+  bind to a `judgment_id` permanently. Full rationale and the invariant-to-test
+  map are in `DECISION-004`.
+- `analysis.verify_ledger` — the invariant made checkable, surfaced in the
+  workspace beside every ledger entry with a visible failure state.
+- UI: judgment history with supersession chain, a banner on superseded
+  judgments, per-decision verification status, and navigation from a decision to
+  the exact judgment it was taken against.
+- `TestSupersession` — 7 tests, one per named invariant. Suite is 34 tests for
+  the workspace, 160 for the repository.
+- `DECISION-002`, `DECISION-003` marked approved; `DECISION-004` written.
+
+**Validation gate:** ruff check, ruff format --check, 160 unittest, compileall
+all pass. `--frozen` INTACT, `--audit` portability 1.00.
+
+**Verified by use.** In the running application: open case → material → analyse
+→ decide → edit a figure → re-analyse. `JUDGMENT-001` is superseded by
+`JUDGMENT-002`, digests differ, and `LEDGER-001` still binds to `JUDGMENT-001`
+and still verifies. The superseded judgment reads in full, report included.
+
+### Assumptions
+
+**C1 — An analysis reproducing the current digest returns the existing judgment
+rather than creating a duplicate.** The engine is deterministic, so an identical
+digest means the material reached the same conclusion. The alternative records
+an event in institutional history that never happened. Reviewable: an
+institution that wants "we re-checked on the 12th and it still held" as a
+first-class event would need a re-affirmation record, which this is not.
+
+**C2 — Decisions bind forward only.** A decision can only be recorded against
+the judgment in force. Recording one against a superseded judgment would be
+minuting a meeting into the past.
+
+**C3 — No migration path was written for the storage layout change.** The only
+data in the old layout was generated development data, which was deleted. A
+deployed system would have required one; this is the first change that would
+have.
+
+**C4 — Retention is unbounded.** Every distinct analysis is kept forever, at
+roughly 70 KB per judgment. Retention is institutional policy, not an
+engineering decision, and is deliberately unanswered.
+
+### Questions requiring human review
+
+Carried forward, unchanged and still open:
+
+1. **Authentication and access control.** Still the first thing standing between
+   this and real use, now more so: the product records attributed, permanent,
+   append-only institutional history with no identity layer beneath it.
+2. **Concurrent edits overwrite silently.** Material is replaced wholesale.
+3. **`prototype-ui/` retirement**, now unblocked — the "Review areas" rename it
+   was waiting on has been approved.
+4. **The decision-proposition object.** Unchanged by this cycle and still the
+   most product-visible gap.
+
+### Remaining work
+
+The product cycle is closed. No further feature work was started, per
+instruction. The next entry should be the outcome of the architectural proposal
+requested at the close of this cycle.
+
+---
+
+## 2026-08-06 — The Material Snapshot layer
+
+**Instruction.** Authorizations 1–8. Implement the first immutable institutional
+identity layer: material identity, `material_digest`, snapshot registry,
+supersession re-keying, ledger verification against material identity.
+
+### The defect this cycle closed
+
+An independent architectural review claimed an execution ID derived from emitted
+output can collide when input fields go unobserved. Rather than accepting or
+dismissing it, the claim was tested against the actual translator:
+
+```
+STATUS reported vs estimated
+  document differs : True
+  digest A         : 580a5b279f18a7f13b71e5d3
+  digest B         : 580a5b279f18a7f13b71e5d3
+  COLLISION        : True
+```
+
+`_STATUS_TO_UNCERTAINTY` maps both `reported` and `estimated` to
+`Uncertainty.LIKELY`, and a figure's status appears nowhere else in the IR. Two
+materially different diligence packs, one hash.
+
+Compounding: supersession, shipped the previous cycle, keyed history on the
+record digest. Restating a figure's standing — a real change to what the
+institution claims about its own evidence — produced **no new judgment**. The
+material moved and the record said nothing happened. The comment in that code
+claimed "an identical digest means the material reached the same conclusion";
+true, but it was written as though it meant identical *material*.
+
+### Completed
+
+- `workspace/material.py` — `MaterialSnapshot`, `compute_material_digest`,
+  `next_snapshot`, hash scheme `yukti-material/1`.
+- Append-only snapshot registry on `Case`; `JudgmentRecord` and `LedgerEntry`
+  gain `material_digest` and `snapshot_id`.
+- Supersession re-keyed on material identity.
+- `DigestCheck` reports `record_resolves` and `material_resolves` as
+  independent claims.
+- Product surfaces: material register on the overview, snapshot and both digests
+  on judgment and audit views, per-decision verification on both axes, judgment
+  history marking "same conclusion, different material".
+- `DECISION-006` (this layer) and `DECISION-005` (open ADR on DAALE).
+- `TestMaterialIdentity` — 12 tests. Suite: 46 workspace, **172 repository**.
+
+**Validation gate:** ruff check, ruff format --check, 172 unittest, compileall
+all pass. `--frozen` INTACT, `--audit` portability 1.00.
+
+**Verified live**, not only by test. In the running application: material stated
+as `reported`, analysed, decided; the same figure restated as `estimated` and
+re-analysed. Result — `reasoning_identical: true`, `material_differs: true`,
+`JUDGMENT-001 -> JUDGMENT-002`, register `MATERIAL-001`/`MATERIAL-002`, and the
+decision still bound to `JUDGMENT-001`/`MATERIAL-001` verifying on both axes.
+Under the previous behaviour no second judgment would have existed.
+
+### On the independent review
+
+Its diagnosis converged with ours; its prescription would have broken the
+freeze. Recorded because the distinction is the reusable lesson.
+
+**It does not describe this repository.** Verified: `authority/lock.py`,
+`engine/core.py`, `experiments/runner.py`, `trace/events.py`,
+`provenance/model.py`, `judgment/basis.py`, `contract/` and `evaluators.py` are
+all absent; `daale/` contains no `evaluate`, no `judgment`, no
+`INSUFFICIENT_BASIS`; its suite is 12 tests, not the 5 the review cites.
+
+Its **configurable hybrid evaluator** (forward / backward / certificate / Rete)
+would replace CHOIR v0.1 outright, and its Pydantic-strict recommendation would
+break the engine's deliberate standard-library-only constraint. Adopted where it
+was right — input-bound identity — and declined where it assumed a different
+codebase. `DECISION-005` exists so that distinction cannot be lost.
+
+### Assumptions
+
+**D1 — Material identity is finer-grained than reasoning identity, and the
+digest is order-sensitive.** Claim ids in the engine are positional, so an
+order-insensitive digest would be *coarser* than the record it must be finer
+than, and supersession would suppress genuinely different judgments. Defended by
+`test_reordering_the_schedule_is_a_material_change`.
+
+**D2 — Snapshots are appended on material save, not on analysis.** The registry
+records what the institution assembled and when, per Authorization 3, including
+states never analysed.
+
+**D3 — Material digests may recur.** Reverting material is a new institutional
+event with a new snapshot id and the earlier digest. The register is a timeline,
+not a set.
+
+**D4 — Case metadata is excluded from material identity.** Re-assigning a case
+must not fabricate new material. Asserted by test.
+
+**D5 — Pre-existing decisions are not back-filled.** They verify on reasoning
+and read as *material not identified*, because back-filling would assert
+something nobody attested.
+
+**D6 — Sources remain references.** Per Authorization 6, no document is stored,
+hashed or ingested. Material identity covers the assembled material, not
+per-document identity.
+
+### Numbering (Authorization 8)
+
+**No renumbering was required.** Verified: `DECISION-001`, `-002`, `-003` are in
+git history with no duplicates; `-004` was uncommitted and is the correct next
+number. The "DECISION-003 — Supersession" reference in the authorization was
+prose; renumbering supersession to 003 would have collided with the committed
+product-architecture note. `-005` and `-006` continue the sequence.
+
+### Remaining unresolved uncertainties
+
+1. **`DECISION-005` is open.** No implementation may assume a definition of
+   DAALE. This cycle was deliberately built with no DAALE dependency.
+2. **Per-document identity does not exist.** A source is a reference; nothing
+   binds it to a specific version of a specific file. This is the next layer of
+   the provenance floor and needs Authorization 6 revisited.
+3. **Evidence formation is still unrecorded.** A human typing `status:
+   estimated` performs an unaudited judgement. Material identity now records
+   *that they did it and when*, but not *why* or *from what*.
+4. **Authentication is still absent** beneath an append-only attributed record.
+5. **Concurrent edits still overwrite silently.**
+
+---
+
+## 2026-08-13 — DAALE v0, Phase 0: the conformance lock
+
+**Instruction.** Implement the established DAALE v0 execution plan while
+remaining compliant with `DECISION-005`. Treat that ADR as an implementation
+constraint rather than a blanket prohibition: proceed unless the specific step
+requires an assumption it prohibits, and if one does, stop at that dependency
+rather than halting the programme.
+
+### The boundary, located before any code was written
+
+The v0 plan's Phase 0 is "map each frozen CHOIR commitment to executable
+contract + test." That step needs no answer to *what DAALE is*: the commitments
+are CHOIR's, they are frozen, and they are identical under all four options
+`DECISION-005` leaves open. It is also the route the research freeze §9 already
+prescribed — "until it is resolved, DAALE implementation should attach to §3
+commitments rather than to prototype internals."
+
+**Phase 1 is where the boundary actually falls, and it falls at one point.** A
+D-Core is a deterministic executor, and to execute it must either call the
+frozen prototype's kernels or evaluate for itself. Those are options B and A of
+`DECISION-005` verbatim. There is no neutral third choice, because *who
+evaluates* is precisely the question the ADR asks. Phase 1 is therefore blocked
+on that ADR and nothing else; Phases 0 is not.
+
+### Completed
+
+- `daale/conformance/` — Phase 0.
+  - `commitments.py` — all 28 frozen §3 commitments (E1–E13, A1–A11, X1–X4) as
+    a machine-readable register: identifier, statement, support status, and the
+    evidence that exercises it. A transcription, not an interpretation.
+  - `lock.py` — resolves every citation against the repository by parsing source
+    into syntax trees. Three evidence kinds: `test`, `check` (a CLI flag or one
+    of the four replay checks), `decision` (an ADR, which must be *approved* to
+    resolve).
+  - `report.py` — a pure projection. Deterministic text and JSON.
+  - `daale conformance` CLI subcommand; artifacts to
+    `reports/daale/conformance/`.
+- `daale/tests/test_conformance.py` — 21 tests. Suite: 33 for `daale/`,
+  **193 for the repository** (was 172).
+
+**Result:** 28 commitments — 20 conforming, 8 unexercised, **0 unresolved.**
+
+**Validation gate:** ruff check, ruff format --check, 193 unittest, compileall
+all pass. `mypy --strict` clean across 36 files. `--frozen` INTACT (tree digest
+unchanged), `--audit` portability 1.00.
+
+### What the lock is for, and what it deliberately is not
+
+It is a tripwire in the sense `FROZEN.md` uses the word. It does **not** re-run
+the reasoning — `--replay` and the prototype suite already do, and a second
+answer to the same question is worse than none. It catches the failure those
+cannot see: a frozen commitment whose evidence has quietly stopped existing.
+Rename `TestKernelIndependence` today and every test passes, `--frozen` still
+reports INTACT, and commitment A3 silently loses the only thing demonstrating
+it. The lock fails.
+
+### Two defects found while building it
+
+Both found the same way the Material Snapshot cycle found its collision — by
+testing a claim rather than asserting it.
+
+1. **A negative result from a broken instrument.** The first repository-wide
+   search for the v0 plan's vocabulary returned zero hits for *everything*,
+   including `INSUFFICIENT_BASIS`, which §3 A11 demonstrably contains. The
+   search tool was failing silently. Re-run through a different one:
+   `INSUFFICIENT_BASIS` 27 hits, `D-Core`/`R-Fabric` 0. Only then was the zero
+   worth anything. `test_a_fabricated_citation_does_not_resolve` and its two
+   siblings institutionalise that lesson — a resolver that always answers
+   "found" is indistinguishable from a working one until it is handed something
+   that does not exist.
+2. **Decision-status parsing swallowed the following sentence.** Reading to end
+   of line reported `DECISION-001`'s status as "Approved 2026-08-04.** Recorded
+   retrospectively — the repository", which both misquoted the note and dragged
+   non-ASCII prose into an artifact that must print on any console. Truncated at
+   the bold run, and typographic characters are now normalised. Research freeze
+   §9 names locale as one of the ways an integrity mechanism ends up working
+   only on the machine that produced it; this was that failure mode, caught
+   early.
+
+### Assumptions
+
+**F1 — `daale/conformance/` is a new package inside `daale/`, not a move.**
+`DECISION-005` forbids moving anything *into or out of* `daale/` on an assumed
+answer. Nothing was moved. `daale/README.md` already declares named subpackages
+reserved for approved work, so adding one follows the existing declared pattern
+rather than changing repository organization. Reviewable: someone reading the
+ADR strictly may still consider any new code in `daale/` to presume the name
+survives, which is option C's concern.
+
+**F2 — Evidence is resolved by reading source, never by importing it.** This is
+the mechanical form of the no-engine-dependency claim and is asserted in a
+subprocess by `test_conformance_never_imports_the_engine`. It is also how
+`freeze.py` already works, so the mechanism is idiomatic here.
+
+**F3 — An unexercised commitment is never reported as conforming.** The three
+outcomes partition the register and `UNEXERCISED` is not a softer pass.
+
+**F4 — A commitment marked demonstrated that cites nothing is reported, not
+failed.** It is a hole in the chain rather than a broken link, and failing on it
+would assert the commitment is *not* demonstrated, which the lock does not know.
+
+**F5 — The unexercised set is pinned by test.** Closing one of those holes, or
+opening a new one, is now a deliberate act that changes a test rather than a
+drift nobody notices.
+
+### Questions requiring human review
+
+1. **`DECISION-005` still needs acceptance before Phase 1.** The exact
+   dependency is named above: a D-Core cannot be written without ruling whether
+   DAALE calls the frozen kernels or evaluates for itself.
+2. **E12 is marked demonstrated and cites nothing.** Either evidence exists and
+   was never recorded, or §3's status for it is optimistic. This is a question
+   about the freeze, not about the lock, and the lock should not answer it.
+3. **The v0 plan's §14 repository structure conflicts with an approved
+   decision.** It proposes a top-level `yukti/`; `DECISION-003` explicitly
+   rejected one and approved `applications/investment/workspace/`. Adopting §14
+   as written would reverse an approved choice. Flagged, not acted on.
+4. **The v0 plan itself is recorded nowhere in this repository.** It exists as
+   an external document whose own status line reads "DAALE implementation
+   proposal". Phase 0 was implemented under direct architectural instruction,
+   which the rules permit; the plan's disposition is still unrecorded.
+
+### Remaining work
+
+- Phases 1–8. Phase 1 is blocked on `DECISION-005` at the point named above.
+- Carried forward unchanged: authentication, concurrent-edit handling,
+  `prototype-ui/` retirement, per-document identity, the decision-proposition
+  object.
