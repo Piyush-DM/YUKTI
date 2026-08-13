@@ -27,15 +27,20 @@ comes to look stronger than it is.
 Escalation
 ----------
 
-A candidate that passes every active check is not automatically canonical. The
-plan's control for LLM authority leakage is that model and human output "remain
-proposals until commit validation succeeds" and "require validation/human
-review where appropriate". Origins are therefore declared as either
-deterministic or not, and a non-deterministic origin escalates to
-``REVIEW_REQUIRED`` instead of committing. Recorded as assumption **G3**: the
-plan states escalation exists and states that model output needs review, but
-does not enumerate which origins escalate, so the conservative reading is
-taken.
+A candidate that passes every active check is not automatically canonical. Its
+origin decides: a deterministic origin commits, anything else escalates to
+``REVIEW_REQUIRED``.
+
+The rule is an **allow-list, and that is the substance of it.** Under a
+deny-list, an origin nobody thought to name -- a new adapter, a new tool, a
+coprocessor added in Phase 6 -- would commit to canonical state silently, and
+the gate would report a pass. Under an allow-list the same unnamed origin
+escalates and somebody has to decide about it.
+
+Codified in ``docs/architecture/DECISION-007_candidate_escalation_rule.md``,
+which supersedes the assumption this was first recorded as. Changing
+``DETERMINISTIC_ORIGINS`` grants canonical write authority to a new class of
+producer and requires an approved decision.
 """
 
 from __future__ import annotations
@@ -75,7 +80,8 @@ class CheckStatus(Enum):
 
 
 # Origins whose output is reproducible and may commit directly. Anything not
-# listed escalates for review; see assumption G3 in the module docstring.
+# listed escalates for review. Allow-list by decision, not by convenience:
+# DECISION-007. Adding to it grants canonical write authority and needs approval.
 DETERMINISTIC_ORIGINS: frozenset[str] = frozenset({"dcore", "rfabric", "algorithm"})
 
 REFERENCES_CURRENT_EXECUTION = "references-current-execution"

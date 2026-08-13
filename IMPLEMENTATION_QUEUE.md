@@ -161,20 +161,36 @@ Build the chain from specifications to implementation artifacts.
   the repository cites nothing. Requires architect adjudication: either the
   evidence is named, or the recorded status is corrected. Not to be closed by
   finding something plausible to cite.
-- [ ] **DAALE v0 Phase 3 — planner. Blocked on `DECISION-005`.** The dependency
-  is exact: an execution plan is a plan over units of evaluation, and whether
+- [x] **Escalation rule codified** as `DECISION-007`. Allow-list, default-deny:
+  an origin nobody named escalates rather than committing. Closes assumption G3.
+- [x] **DAALE v0 is CLOSED**, 2026-08-14. See `DAALE_v0_CLOSURE.md` for what is
+  in it, what is frozen, and what is carried out of it unresolved.
+
+### Priority 9: After v0 closure
+
+DAALE v0 is frozen. Nothing below is started, and the first item gates most of
+the rest.
+
+- [ ] **Rule on `DECISION-005`.** This is the next act, not Phase 3. The exact
+  dependency: an execution plan is a plan over units of evaluation, and whether
   DAALE calls the frozen kernels or evaluates for itself is options B and A of
-  that ADR. The *dependency index* half of Phase 3 is unblocked.
-- [ ] **DAALE v0 Phases 4–5 — R-Fabric parallelism, shadow/replay lanes.**
-  Blocked by the same choice; there is nothing to parallelise or fork without
-  an evaluator. The snapshot and lease machinery they need already exists.
-- [ ] **DAALE v0 Phase 6 — coprocessor adapters.** Partially unblocked: the gate
-  already distinguishes origins and escalates non-deterministic ones.
-- [ ] **DAALE v0 Phase 7 — YUKTI debugger integration.** Product layer,
-  governed by `DECISION-003`. The proposal's §14 top-level `yukti/` structure
-  is **not authorized**; `applications/investment/workspace/` stands.
-- [ ] Blocked until approved execution behavior exists for anything beyond the
-  above.
+  that ADR.
+- [ ] **Adjudicate `E12`.** Either name the evidence, or correct the recorded
+  status in the freeze. Not to be closed by finding something plausible to cite.
+- [ ] **DAALE v0 Phases 3–5** — planner, R-Fabric parallelism, shadow/replay
+  lanes. Blocked on `DECISION-005`. The *dependency index* half of Phase 3 is
+  not blocked. The snapshot and lease machinery Phase 5 needs already exists.
+- [ ] **Phase 6 — coprocessor adapters.** Partially unblocked: the gate already
+  routes by origin and `DECISION-007` governs which may commit. Adapters are
+  proposal *producers*, which is where the boundary bites.
+- [ ] **Phase 7 — YUKTI debugger integration.** Product layer, governed by
+  `DECISION-003`. The proposal's §14 top-level `yukti/` structure is **not
+  authorized**; `applications/investment/workspace/` stands.
+- [ ] **A review workflow behind escalation.** `DECISION-007` marks a candidate
+  and stops. Who reviews, how the outcome is recorded, and how a reviewed
+  candidate re-enters the gate are unanswered.
+- [ ] **Reconcile DAALE against CHOIR v1.** Deliberately not begun; no CHOIR v1
+  exists in this repository.
 
 ### Priority 8: Product Application
 

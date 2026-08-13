@@ -23,9 +23,12 @@ logic.
 - `choir_prototype/`: Executable CHOIR prototype, **frozen at V0.1**. The only
   running reasoning pipeline in the repository. Deterministic, no network, no
   model calls. See `choir_prototype/README.md` and `choir_prototype/FROZEN.md`.
-- `daale/`: DAALE implementation scaffold. Ontology modules are documented
-  boundaries with no behavior; the working code is environment and reporting
-  tooling.
+- `DAALE_v0_CLOSURE.md`: **Canonical reference for DAALE v0.** The closure note
+  and architectural freeze — what v0 contains, what is frozen, what it does not
+  do, and what is carried out of it unresolved. Read this before changing
+  anything under `daale/`.
+- `daale/`: DAALE. `conformance/` and `execution/` are implemented and frozen
+  at v0; the remaining areas are documented boundaries with no behavior.
 - `docs/`: Architecture decision notes, development and validation procedure,
   repository-health process, and the traceability matrix.
 - `applications/`: Domain applications. The investment committee workspace
@@ -40,6 +43,8 @@ logic.
 
 Three code areas exist, at very different stages. They are not yet reconciled
 with one another, and the difference matters when reading the repository.
+Reconciling DAALE against CHOIR is deliberately deferred: it is the first item
+after a ruling on `DECISION-005`.
 
 **`choir_prototype/` — executable, frozen at V0.1.** A deterministic pipeline
 that carries a domain packet through translation, independent reasoning
@@ -66,10 +71,28 @@ instead:
    normalises line endings to LF and is what keeps the freeze verifiable off
    the machine that produced it. Do not delete it.
 
-**`daale/` — scaffold only.** The ontology modules under `daale/ontology/` are
-docstrings that name planned boundaries and define no behavior. The executable
-code in `daale/` is configuration, environment diagnostics, logging, and report
-plumbing. DAALE currently contains no reasoning logic.
+**`daale/` — v0 closed and frozen, 2026-08-14.** A canonical control plane, and
+the conformance machinery that keeps it honest.
+
+`conformance/` holds the twenty-eight frozen CHOIR v0.1 §3 commitments as a
+machine-readable register and a lock that resolves every piece of evidence they
+rest on — 20 conforming, 8 unexercised and classified, 0 unresolved. It gave the
+traceability chain its first real upstream end.
+
+`execution/` holds the D-Core, the Reasoning State Store, the execution trace,
+CHOIR contract validation and the candidate-to-commit gate. Anything may
+propose; only the D-Core commits.
+
+**DAALE still contains no reasoning logic, and that is v0's boundary rather than
+a gap.** Emitting a judgment requires deciding whether DAALE calls the frozen
+prototype's kernels or evaluates for itself — options B and A of
+`DECISION-005`, which is open. There is no evaluator and no placeholder for one;
+a stub would settle the ADR by implication. See `DAALE_v0_CLOSURE.md`.
+
+The remaining areas — `ontology/`, `reasoning/`, `arbitration/`,
+`traceability/`, `runtime/` — are docstrings naming planned boundaries. The rest
+of the executable code in `daale/` is configuration, environment diagnostics,
+logging, and report plumbing.
 
 **`applications/investment/` — the application, the reference implementation,
 and two superseded prototypes.**

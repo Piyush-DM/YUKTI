@@ -1,12 +1,20 @@
 # DAALE
 
-DAALE is the implementation scaffold for the architecture represented in this
+DAALE is the implementation of the reasoning execution substrate for this
 repository.
 
-The current codebase does not define execution logic. Existing packages and
-modules preserve architectural names so future work can add interfaces and
-behavior only after the corresponding CHOIR specifications or approved
-architecture documents exist.
+**v0 is CLOSED and frozen as of 2026-08-14.** See
+[`DAALE_v0_CLOSURE.md`](../DAALE_v0_CLOSURE.md) at the repository root for what
+v0 contains, the ten properties frozen with it, what it deliberately does not
+do, and the five items carried out of it unresolved.
+
+v0 is a **canonical control plane**: it validates, names, orders, versions,
+commits, traces and terminates. It does not reason, and the reason it does not
+is `DECISION-005`, described below.
+
+Areas outside `conformance/` and `execution/` remain scaffold. They preserve
+architectural names so future work can add behavior only after the
+corresponding CHOIR specifications or approved architecture documents exist.
 
 ## Directory Intent
 
@@ -44,6 +52,20 @@ time.
 
 Every `ExecutionSummary` reports `emits_judgment=False` and carries the reason,
 so a completed execution cannot be mistaken for an adjudicated one.
+
+**A ruling on `DECISION-005` is the next act, not Phase 3.**
+
+## Who may commit
+
+A candidate passing every active gate check is decided by its origin:
+`dcore`, `rfabric` and `algorithm` may commit; **anything else escalates** to
+`REVIEW_REQUIRED` and never reaches canonical state.
+
+The rule is an allow-list by decision, not by convenience — an origin nobody
+thought to name escalates rather than committing silently. Codified in
+[`DECISION-007`](../docs/architecture/DECISION-007_candidate_escalation_rule.md).
+Adding to `DETERMINISTIC_ORIGINS` grants canonical write authority and requires
+an approved decision.
 
 ## Implementation Boundary
 

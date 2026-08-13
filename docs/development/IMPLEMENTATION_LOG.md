@@ -756,3 +756,73 @@ to prevent. `test_research_open_items_are_not_treated_as_tasks` pins it.
 - **Phase 7 — YUKTI debugger integration.** Product layer, governed by
   `DECISION-003`. Not started.
 - **Phase 8 — institutional pilot.** Not code.
+
+---
+
+## 2026-08-14 — DAALE v0 closure
+
+**Instruction.** Stop building. Package the v0 closure note, codify the
+escalation rule, freeze, document only.
+
+No runtime behaviour was added or changed in this cycle. Two docstrings and one
+comment in `daale/execution/commit.py` were repointed from an assumption to the
+decision that now supersedes it; nothing else in the packages was touched.
+
+### Completed
+
+- **`DAALE_v0_CLOSURE.md`** — the closure note and the freeze, in one document,
+  following the precedent of `CHOIR_v0.1_RESEARCH_FREEZE.md` serving both roles.
+  Records what v0 is, what was built, the ten frozen properties, what v0
+  deliberately does not do, and the five things carried out of it unresolved.
+- **`DECISION-007`** — the candidate escalation rule, codified. Supersedes
+  assumption **G3**, which is closed.
+- Queue: v0 marked closed; a new Priority 9 records post-closure work, headed by
+  the `DECISION-005` ruling.
+- Traceability matrix and `daale/README.md` updated to point at both.
+
+### What the codification actually decided
+
+G3 named three deterministic origins and escalated everything else. The
+codification kept the list and made explicit the thing that was implicit in it:
+**the rule is an allow-list, and that is its substance.**
+
+Under a deny-list, an origin nobody thought to name — a new adapter, a tool, a
+Phase 6 coprocessor — commits to canonical state silently, and the gate reports
+a pass. Under an allow-list the same origin escalates and somebody has to decide
+about it. That is the same direction as commitment E13 (an unevaluated thing is
+never a false thing) applied to authority rather than to evidence.
+
+Recorded because the list was the visible part of G3 and the default was the
+load-bearing part.
+
+### The freeze, and why it needed no new machinery
+
+Three mechanisms already in the repository enforce it: the conformance lock
+(exits non-zero when cited evidence goes missing), the test suite (237 tests,
+one per frozen property), and `test_the_d_core_has_no_evaluator` (the
+`DECISION-005` boundary).
+
+Building a hash-pinning freeze for `daale/` was considered and not done. The
+prototype's freeze exists because that package is an *archival evidence
+artefact* whose value depends on it being unchanged. DAALE v0 is not that — it
+is a component expected to change on a `DECISION-005` ruling. Pinning it by hash
+would assert a permanence nobody intends and would trip on the first authorized
+change. The freeze here is architectural, in the sense `FROZEN.md` §1 uses, and
+the tripwires are behavioural.
+
+### Validation gate
+
+ruff check, ruff format --check, 237 unittest, compileall all pass.
+`mypy --strict` clean across 44 files. `--frozen` INTACT, `--audit` portability
+1.00. Conformance lock: 28 commitments, 20 conforming, 8 unexercised, 0
+unresolved.
+
+### Carried out of v0, unresolved
+
+Unchanged by this cycle and restated in `DAALE_v0_CLOSURE.md` §7:
+
+1. `DECISION-005` is open. It is the next act, not Phase 3.
+2. `E12` remains an evidence discrepancy.
+3. Seven further commitments remain unexercised, classified.
+4. No review workflow behind escalation.
+5. The v0 plan itself is recorded nowhere in this repository.
