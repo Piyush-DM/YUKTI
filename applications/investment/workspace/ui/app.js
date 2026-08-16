@@ -656,13 +656,36 @@ function applyReference() {
 
 /* -------------------------------------------------------------- judgment */
 
-function renderExecution() {
+function renderExecution(collapsed) {
   const execution = state.execution;
-  const panel = el("section", { class: "panel execution" });
   const running = execution.phase === "running";
 
+  // Collapsed once the decision is on screen: it is provenance, not argument.
+  // `<details>` because the platform already has a disclosure control and
+  // hand-rolling one would be a component nobody asked for.
+  const panel = collapsed
+    ? el("details", { class: "panel execution is-collapsed" })
+    : el("section", { class: "panel execution" });
+
+  if (collapsed) {
+    panel.append(
+      el(
+        "summary",
+        {},
+        el("span", { class: "execution-summary-title" }, "Execution record"),
+        el(
+          "span",
+          { class: "execution-summary-meta" },
+          `${execution.stages.length} artifacts`,
+        ),
+      ),
+    );
+  }
+
+  if (!collapsed) {
+    panel.append(el("h3", {}, running ? "Executing" : "Execution record"));
+  }
   panel.append(
-    el("h3", {}, running ? "Executing" : "Execution record"),
     el(
       "p",
       { class: "panel-note" },
@@ -752,14 +775,12 @@ function renderJudgment() {
     return wrap;
   }
 
+  /* Board-packet order. The verdict is the headline; everything after it
+     exists to justify the verdict, in descending order of what a committee
+     needs to challenge first. Nothing is computed here that the record does
+     not already contain. */
+
   wrap.append(renderVerdict(judgment));
-  // The completed record stays on screen under the decision. Every line in it
-  // is evidence from this run, which is worth keeping beside the conclusion.
-  if (state.execution && state.execution.phase === "complete") {
-    wrap.append(renderExecution());
-  }
-  const history = renderJudgmentHistory();
-  if (history) wrap.append(history);
 
   if (judgment.conditions.length) {
     const panel = el("section", { class: "panel" });
@@ -785,6 +806,9 @@ function renderJudgment() {
     judgment.disagreements.forEach((view) => panel.append(topicBlock(view, true)));
     wrap.append(panel);
   }
+
+  const evidence = renderEvidenceReferences(judgment);
+  if (evidence) wrap.append(evidence);
 
   if (judgment.agreements.length) {
     const panel = el("section", { class: "panel" });
@@ -825,7 +849,88 @@ function renderJudgment() {
   }
 
   wrap.append(renderDecisionForm());
+
+  // Secondary. History and the execution read-out are provenance rather than
+  // argument, so they sit below the resolution a committee is being asked for.
+  const history = renderJudgmentHistory();
+  if (history) wrap.append(history);
+
+  if (state.execution && state.execution.phase === "complete") {
+    wrap.append(renderExecution(true));
+  }
+
   return wrap;
+}
+
+/* Every source this judgment actually cited, and which review areas cited it.
+
+   Evidence labels come from the reasoning record; sources come from the case
+   register. They are matched on the recorded origin text, and a citation that
+   matches nothing on the register is still listed — saying "not on the source
+   register" is information, and dropping the row would hide it.
+
+   Nothing here is scored or ranked. A source appears because a finding named
+   it, and the order is the order the findings cite them in. */
+function renderEvidenceReferences(judgment) {
+  const cited = new Map();
+  const note = (label, areaName) => {
+    if (!cited.has(label)) cited.set(label, new Set());
+    if (areaName) cited.get(label).add(areaName);
+  };
+
+  judgment.review_areas.forEach((area) =>
+    area.findings.forEach((finding) =>
+      finding.evidence_labels.forEach((label) => note(label, area.review_area)),
+    ),
+  );
+  judgment.conditions.forEach((finding) =>
+    finding.evidence_labels.forEach((label) => note(label, null)),
+  );
+
+  if (!cited.size) return null;
+
+  const register = new Map(
+    state.detail.case.sources.map((source) => [source.origin, source]),
+  );
+  // The standing vocabulary the product already uses on the Material tab.
+  // Without it this column reads `third_party` on the hero screen.
+  const kinds = new Map(
+    (state.schedule.source_kinds || []).map((kind) => [kind.key, kind.label]),
+  );
+
+  const panel = el("section", { class: "panel" });
+  panel.append(el("h3", {}, `Evidence references (${cited.size})`));
+  panel.append(
+    el("p", { class: "panel-note" },
+      "The sources this judgment cites, with the standing each was recorded " +
+      "under. A source is listed because a finding named it."),
+  );
+
+  const table = el("table", { class: "evidence-table" });
+  table.append(row("th", ["Source", "Recorded as", "Cited by"]));
+  cited.forEach((areas, label) => {
+    const source = register.get(label);
+    const tr = el("tr", {});
+    tr.append(
+      el(
+        "td",
+        {},
+        el("span", { class: "evidence-origin" }, label),
+        source ? el("span", { class: "evidence-ref" }, source.label) : null,
+      ),
+      el(
+        "td",
+        {},
+        source
+          ? kinds.get(source.kind) || source.kind
+          : "not on the source register",
+      ),
+      el("td", { class: "evidence-areas" }, areas.size ? [...areas].join(", ") : "—"),
+    );
+    table.append(tr);
+  });
+  panel.append(table);
+  return panel;
 }
 
 function renderVerdict(judgment) {
@@ -843,25 +948,63 @@ function renderVerdict(judgment) {
     );
   }
 
+  /* Masthead: what this artifact is, then what it says. The reference line is
+     an eyebrow rather than a metric — a board packet names itself at the top
+     and does not spend a headline slot on its own filing reference. */
+  box.append(
+    el(
+      "div",
+      { class: "verdict-head" },
+      el("span", { class: "verdict-kind" }, "Institutional decision"),
+      el(
+        "span",
+        { class: "verdict-ref" },
+        `${judgment.judgment_id} · ${judgment.recorded_on}`,
+      ),
+    ),
+  );
+
   box.append(el("h2", {}, judgment.recommendation));
   box.append(el("p", { class: "guidance" }, judgment.outcome_guidance));
   if (judgment.rationale.length) {
     box.append(list(judgment.rationale, "reason-list"));
   }
+
   const meta = el("div", { class: "verdict-meta" });
   meta.append(
     metric("Institutional confidence", judgment.confidence),
-    metric("Limited by", judgment.confidence_note),
-    metric("Judgment", `${judgment.judgment_id} · ${judgment.recorded_on}`),
     metric(
       "Material",
       judgment.snapshot_id
         ? `${judgment.snapshot_id} (v${judgment.material_version})`
         : "not identified",
     ),
+    metric("Decision status", decisionStatus(judgment)),
   );
   box.append(meta);
+
+  // "Limited by" is prose, not a figure. It was sitting in the metric strip
+  // where its length broke the row and it read as a measurement.
+  if (judgment.confidence_note) {
+    box.append(
+      el(
+        "p",
+        { class: "verdict-limit" },
+        el("span", { class: "metric-label" }, "Limited by"),
+        judgment.confidence_note,
+      ),
+    );
+  }
   return box;
+}
+
+/* Whether the committee has actually recorded anything against this judgment.
+   Read off the ledger; a decision binds to a judgment_id permanently. */
+function decisionStatus(judgment) {
+  const entry = state.detail.case.ledger.find(
+    (item) => item.judgment_id === judgment.judgment_id,
+  );
+  return entry ? `${entry.decision} · ${entry.recorded_on}` : "Not yet recorded";
 }
 
 function renderJudgmentHistory() {
@@ -987,11 +1130,11 @@ function topicBlock(view, contested) {
    One stage is genuinely sequential rather than paced: the execution report is
    a second real request, and it completes when the server answers.
 
-   `REVEAL_STEP_MS` is presentation pacing for facts that are already true, not
+   `ARTIFACT_REVEAL_MS` is presentation pacing for facts that are already true, not
    a measurement of anything. Under reduced motion the reveal is skipped
    entirely and every stage appears at once. */
 
-const REVEAL_STEP_MS = 140;
+const ARTIFACT_REVEAL_MS = 140;
 
 function pause(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -1064,14 +1207,14 @@ async function revealExecution(caseId) {
     if (stage.resolve) {
       stage.detail = await stage.resolve(caseId).catch(() => "unavailable");
     } else {
-      await pause(REVEAL_STEP_MS);
+      await pause(ARTIFACT_REVEAL_MS);
     }
     state.execution.revealed = index + 1;
     render();
   }
 
   // The institutional decision is the last thing to appear.
-  if (!prefersReducedMotion()) await pause(REVEAL_STEP_MS);
+  if (!prefersReducedMotion()) await pause(ARTIFACT_REVEAL_MS);
   state.execution.phase = "complete";
   render();
 }

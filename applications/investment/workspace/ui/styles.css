@@ -650,6 +650,36 @@ button.link {
   background: var(--surface-raised);
 }
 
+/* The masthead. A board packet names itself at the top and spends its
+   headline on the finding, not on its own filing reference. */
+.verdict-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--yukti-space-3);
+  padding-bottom: var(--yukti-space-3);
+  margin-bottom: var(--yukti-space-3);
+  border-bottom: var(--yukti-border-width-hairline) solid
+    var(--yukti-color-border-hairline-light);
+}
+
+.verdict-kind,
+.verdict-ref {
+  font-family: var(--yukti-font-data);
+  font-size: var(--type-label);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+.verdict-kind {
+  color: var(--yukti-color-ink-900);
+  font-weight: 500;
+}
+
+.verdict-ref {
+  color: var(--ink-faint);
+}
+
 .verdict h2 {
   font-size: var(--type-hero);
   line-height: var(--leading-tight);
@@ -662,14 +692,28 @@ button.link {
   max-width: 74ch;
 }
 
+/* Three figures, evenly ruled. Previously a flex row that a long
+   `confidence_note` broke, which made the whole strip read as prose. */
 .verdict-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--yukti-space-5);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--yukti-space-3) var(--yukti-space-4);
   margin-top: var(--yukti-space-4);
   padding-top: var(--yukti-space-3);
   border-top: var(--yukti-border-width-hairline) solid
     var(--yukti-color-border-hairline-light);
+}
+
+/* Prose, and marked as prose. It is the one qualifier on the headline, so it
+   sits under the figures rather than inside them. */
+.verdict-limit {
+  margin-top: var(--yukti-space-3);
+  padding-top: var(--yukti-space-3);
+  border-top: var(--yukti-border-width-hairline) dotted
+    var(--yukti-color-border-hairline-light);
+  font-size: var(--type-secondary);
+  color: var(--ink-muted);
+  max-width: 88ch;
 }
 
 .metric-label {
@@ -888,6 +932,95 @@ button.link {
   font-size: var(--type-data);
   color: var(--ink-faint);
   margin-top: var(--yukti-space-1);
+}
+
+/* ---------- evidence references ---------- */
+
+.evidence-table td {
+  font-size: var(--type-secondary);
+}
+
+.evidence-origin {
+  display: block;
+  color: var(--yukti-color-ink-900);
+}
+
+.evidence-ref,
+.evidence-areas {
+  font-family: var(--yukti-font-data);
+  font-size: var(--type-label);
+  letter-spacing: 0.04em;
+  color: var(--ink-faint);
+}
+
+.evidence-ref {
+  display: block;
+  margin-top: var(--space-hair);
+}
+
+/* ---------- collapsed execution record ---------- */
+
+.execution.is-collapsed {
+  padding: 0;
+}
+
+.execution.is-collapsed > summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--yukti-space-3);
+  padding: var(--yukti-space-3) var(--yukti-space-4);
+  cursor: pointer;
+  list-style: none;
+  transition: background-color var(--yukti-duration-quick)
+    var(--yukti-ease-micro);
+}
+
+.execution.is-collapsed > summary::-webkit-details-marker {
+  display: none;
+}
+
+.execution.is-collapsed > summary:hover {
+  background: var(--surface-sunken);
+}
+
+.execution.is-collapsed > summary:focus-visible {
+  outline-offset: calc(var(--yukti-focus-ring-offset) * -1);
+}
+
+.execution-summary-title {
+  font-family: var(--yukti-font-data);
+  font-size: var(--type-label);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+/* The disclosure affordance. A caret drawn in CSS rather than an icon
+   dependency, and it does not rotate — the panel opening is the feedback. */
+.execution-summary-meta {
+  font-family: var(--yukti-font-data);
+  font-size: var(--type-label);
+  letter-spacing: 0.04em;
+  color: var(--ink-faint);
+}
+
+.execution-summary-meta::after {
+  content: " +";
+}
+
+.execution.is-collapsed[open] > .execution-summary-meta::after,
+.execution.is-collapsed[open] > summary .execution-summary-meta::after {
+  content: " −";
+}
+
+.execution.is-collapsed > *:not(summary) {
+  padding-left: var(--yukti-space-4);
+  padding-right: var(--yukti-space-4);
+}
+
+.execution.is-collapsed > .execution-stages {
+  padding-bottom: var(--yukti-space-4);
 }
 
 /* ---------- disagreement ---------- */
