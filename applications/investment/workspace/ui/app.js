@@ -121,7 +121,17 @@ function renderRegister() {
   registerList.replaceChildren();
   if (!state.cases.length) {
     registerList.append(
-      el("p", { class: "register-empty" }, "No cases yet. Open one to begin."),
+      el(
+        "div",
+        { class: "register-empty" },
+        el("p", { class: "register-empty-lead" }, "No cases yet"),
+        el(
+          "p",
+          {},
+          "A case is one decision the committee has to make. Open one to " +
+            "start assembling material against the diligence schedule.",
+        ),
+      ),
     );
     return;
   }
@@ -131,9 +141,20 @@ function renderRegister() {
       type: "button",
       "aria-current": String(item.case_id === state.selectedId),
     });
+    // Status is split from owner so the register can be scanned by state
+    // without reading each line. Same two values as before, same order.
     card.append(
       el("span", { class: "name" }, item.title),
-      el("span", { class: "meta" }, `${item.status} · ${item.owner}`),
+      el(
+        "span",
+        { class: "meta" },
+        el(
+          "span",
+          { class: `case-status is-${item.status.toLowerCase().replace(/\s+/g, "-")}` },
+          item.status,
+        ),
+        el("span", { class: "case-owner" }, item.owner),
+      ),
     );
     card.addEventListener("click", () => selectCase(item.case_id));
     registerList.append(card);
@@ -634,7 +655,9 @@ function renderJudgment() {
   const wrap = el("div", {});
 
   if (!judgment) {
-    const panel = el("section", { class: "panel" });
+    // `is-empty` opts this panel out of the uppercase-mono eyebrow treatment.
+    // This heading is an empty-state title, not a section label.
+    const panel = el("section", { class: "panel is-empty" });
     panel.append(el("h3", {}, "No judgment on file"));
     panel.append(
       el("p", { class: "panel-note" },

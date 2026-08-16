@@ -119,6 +119,30 @@
   --control-pad-x: var(--yukti-space-3);
   --control-pad-y-compact: var(--yukti-space-1);
   --control-pad-x-compact: var(--yukti-space-2);
+
+  /* Motion, restated from `website/src/styles/tokens.motion.css`.
+
+     Only the two shortest tiers are used here. Motion System §1.3 permits
+     motion triggered by user intent, visibility, or state change, and forbids
+     motion that runs to fill time; §3.2 sets the Investigation Workspace
+     posture as "near-zero ambient motion ... once a user is working, motion
+     should defer entirely to their input". Everything below is a hover, press
+     or focus response — user intent, nothing else. No figure animates as it
+     changes; that rule at the top of this file still holds. */
+  --yukti-duration-instant: 120ms;
+  --yukti-duration-quick: 200ms;
+  --yukti-ease-standard: cubic-bezier(0.2, 0.7, 0, 1);
+  --yukti-ease-micro: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Motion System §8: reduced motion "disables structurally, not just shortens
+   ... an institutional tool has a stronger obligation here than a marketing
+   site does." Zeroed, not shortened. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --yukti-duration-instant: 0ms;
+    --yukti-duration-quick: 0ms;
+  }
 }
 
 * {
@@ -184,6 +208,14 @@ button {
   background: transparent;
   color: inherit;
   padding: var(--control-pad-y) var(--control-pad-x);
+  transition:
+    background-color var(--yukti-duration-quick) var(--yukti-ease-micro),
+    border-color var(--yukti-duration-quick) var(--yukti-ease-micro),
+    color var(--yukti-duration-quick) var(--yukti-ease-micro);
+}
+
+button:hover:not(:disabled):not(.primary):not(.link) {
+  border-color: var(--yukti-color-ink-900);
 }
 
 button:focus-visible,
@@ -263,7 +295,7 @@ button.link {
 .register {
   border-right: var(--yukti-border-width-hairline) solid
     var(--yukti-color-border-hairline-dark);
-  padding: var(--yukti-space-3);
+  padding: var(--yukti-space-3) var(--yukti-space-2);
   overflow-y: auto;
   color: var(--yukti-color-bone-300);
 }
@@ -273,39 +305,97 @@ button.link {
   align-items: center;
   justify-content: space-between;
   gap: var(--yukti-space-2);
-  margin-bottom: var(--yukti-space-3);
+  padding: 0 var(--yukti-space-2) var(--yukti-space-3);
+  margin-bottom: var(--yukti-space-2);
+  border-bottom: var(--yukti-border-width-hairline) solid
+    var(--yukti-color-border-hairline-dark);
 }
 
 .register-head h2 {
   color: rgba(216, 212, 198, 0.65);
 }
 
+/* The register's primary action is bordered, not filled.
+
+   Yellow is the only accent in the system (D14), and in this panel it already
+   carries one meaning: "this is the case you are looking at". A filled yellow
+   button beside it makes the same colour mean two things a foot apart, and the
+   selected-case rail loses the fight. Bordered keeps the action obvious and
+   leaves the accent doing one job. */
+.register-head button {
+  border-color: var(--yukti-color-border-hairline-dark);
+  background: transparent;
+  color: var(--yukti-color-bone-100);
+  font-weight: 500;
+  padding: var(--control-pad-y-compact) var(--control-pad-x-compact);
+}
+
+.register-head button:hover {
+  border-color: var(--yukti-color-bone-300);
+  background: var(--yukti-color-graphite-700);
+}
+
 .register-list {
   display: flex;
   flex-direction: column;
-  gap: var(--yukti-space-1);
+  gap: var(--space-hair);
 }
 
 .register-card {
+  position: relative;
   display: block;
   width: 100%;
   text-align: left;
   font-size: var(--type-body);
-  border: var(--yukti-border-width-hairline) solid transparent;
-  border-left: 2px solid transparent;
+  line-height: var(--leading-snug);
+  border: 0;
   border-radius: var(--yukti-radius-sm);
-  padding: var(--yukti-space-2);
+  padding: var(--yukti-space-2) var(--yukti-space-2) var(--yukti-space-2)
+    var(--yukti-space-3);
   color: var(--yukti-color-bone-300);
 }
 
+/* The selection rail. Drawn as a pseudo-element rather than a border so that
+   hover and selection cannot compete for the same property — before this, a
+   hover set all four border colours and quietly overwrote the accent rail. */
+.register-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: var(--yukti-space-1);
+  bottom: var(--yukti-space-1);
+  width: 2px;
+  border-radius: var(--yukti-radius-sm);
+  background: transparent;
+  transition: background-color var(--yukti-duration-quick)
+    var(--yukti-ease-micro);
+}
+
 .register-card:hover {
-  border-color: var(--yukti-color-border-hairline-dark);
-  background: rgba(242, 239, 230, 0.03);
+  background: rgba(242, 239, 230, 0.045);
+}
+
+.register-card:hover::before {
+  background: var(--yukti-color-border-hairline-dark);
 }
 
 .register-card[aria-current="true"] {
   background: var(--yukti-color-graphite-700);
-  border-left-color: var(--yukti-color-yellow-500);
+}
+
+.register-card[aria-current="true"]::before,
+.register-card[aria-current="true"]:hover::before {
+  background: var(--yukti-color-yellow-500);
+}
+
+.register-card[aria-current="true"] .name {
+  font-weight: 600;
+}
+
+/* The focus ring is inset. The register scrolls, and an outset ring on a
+   full-width card is clipped by the scroll container's edge. */
+.register-card:focus-visible {
+  outline-offset: calc(var(--yukti-focus-ring-offset) * -1);
 }
 
 .register-card .name {
@@ -315,17 +405,66 @@ button.link {
 }
 
 .register-card .meta {
-  display: block;
+  display: flex;
+  align-items: baseline;
+  gap: var(--yukti-space-2);
   font-family: var(--yukti-font-data);
   font-size: var(--type-label);
   letter-spacing: 0.04em;
   color: rgba(216, 212, 198, 0.55);
-  margin-top: var(--space-hair);
+  margin-top: var(--yukti-space-1);
+}
+
+/* Status reads before owner, so the register can be scanned by state.
+
+   The four statuses are a progression — Draft, Material assembled, Analysed,
+   Decided — and they are encoded as brightness along that progression rather
+   than as four colours. Yellow is deliberately *not* used here: in this panel
+   it already means "the case you are looking at", and a case being decided is
+   a different fact from a case being selected. One accent, one meaning. */
+.case-status {
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-label);
+  color: rgba(216, 212, 198, 0.45);
+}
+
+.case-status.is-material-assembled {
+  color: rgba(216, 212, 198, 0.62);
+}
+
+.case-status.is-analysed {
+  color: rgba(216, 212, 198, 0.8);
+}
+
+.case-status.is-decided {
+  color: var(--yukti-color-bone-100);
+  font-weight: 500;
+}
+
+.case-owner {
+  color: rgba(216, 212, 198, 0.45);
 }
 
 .register-empty {
+  padding: var(--yukti-space-2);
   font-size: var(--type-secondary);
-  color: rgba(216, 212, 198, 0.55);
+  color: rgba(216, 212, 198, 0.5);
+}
+
+.register-empty p {
+  margin-bottom: var(--yukti-space-2);
+}
+
+.register-empty p:last-child {
+  margin-bottom: 0;
+}
+
+.register-empty-lead {
+  font-family: var(--yukti-font-data);
+  font-size: var(--type-label);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: rgba(216, 212, 198, 0.7);
 }
 
 /* ---------- stage ---------- */
@@ -341,9 +480,13 @@ button.link {
   margin: 0 auto;
 }
 
+/* The register is the way in, so the no-selection state sits high enough to
+   read as an instruction rather than as a page that failed to load. */
 .empty-state {
-  max-width: 46ch;
-  margin: 12vh auto 0;
+  max-width: 48ch;
+  margin: var(--yukti-space-6) auto 0;
+  padding-left: var(--yukti-space-3);
+  border-left: 2px solid var(--yukti-color-border-hairline-light);
   text-align: left;
   color: var(--ink-muted);
 }
@@ -353,6 +496,10 @@ button.link {
   line-height: var(--leading-snug);
   color: var(--yukti-color-ink-900);
   margin-bottom: var(--yukti-space-2);
+}
+
+.empty-state p:last-child {
+  margin-bottom: 0;
 }
 
 /* ---------- case header ---------- */
@@ -414,6 +561,9 @@ button.link {
 
 .tab {
   border: 0;
+  /* The underline is always present and always 2px; only its colour changes.
+     A border that appears on selection shifts every other tab by 2px, which
+     is a layout change dressed up as a state change. */
   border-bottom: 2px solid transparent;
   border-radius: 0;
   padding: var(--yukti-space-2) var(--yukti-space-3);
@@ -422,13 +572,22 @@ button.link {
   letter-spacing: 0.04em;
   text-transform: uppercase;
   font-family: var(--yukti-font-data);
+  transition:
+    color var(--yukti-duration-quick) var(--yukti-ease-micro),
+    border-bottom-color var(--yukti-duration-quick) var(--yukti-ease-micro);
 }
 
 .tab:hover {
   color: var(--yukti-color-ink-900);
+  border-bottom-color: var(--yukti-color-border-hairline-light);
 }
 
-.tab[aria-selected="true"] {
+.tab:focus-visible {
+  outline-offset: calc(var(--yukti-focus-ring-offset) * -1);
+}
+
+.tab[aria-selected="true"],
+.tab[aria-selected="true"]:hover {
   color: var(--yukti-color-ink-900);
   border-bottom-color: var(--yukti-color-ink-900);
 }
@@ -453,6 +612,31 @@ button.link {
   font-size: var(--type-secondary);
   color: var(--ink-muted);
   max-width: 76ch;
+}
+
+/* An empty state is not a section label.
+
+   `.panel > h3` is the uppercase-mono eyebrow, which is right for "Decision
+   ledger" and wrong for "No judgment on file" — the latter is the title of the
+   screen a user is actually looking at, and it was rendering at 11px. This
+   opts one panel out. */
+.panel.is-empty {
+  padding: var(--yukti-space-5) var(--yukti-space-4);
+}
+
+.panel.is-empty > h3 {
+  font-family: var(--yukti-font-body);
+  font-size: var(--type-section);
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-heading);
+  text-transform: none;
+  font-weight: 600;
+  color: var(--yukti-color-ink-900);
+  margin-bottom: var(--yukti-space-2);
+}
+
+.panel.is-empty .panel-note {
+  max-width: 56ch;
 }
 
 /* ---------- judgment ---------- */
