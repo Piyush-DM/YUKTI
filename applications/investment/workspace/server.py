@@ -54,6 +54,21 @@ class WorkspaceHandler(SimpleHTTPRequestHandler):
     def log_message(self, format: str, *args: Any) -> None:
         """Keep the console readable; the server is a development tool."""
 
+    def end_headers(self) -> None:
+        """Never serve a stale build.
+
+        `SimpleHTTPRequestHandler` revalidates static files with
+        `Last-Modified`, and a browser holding `app.js` in memory will keep
+        using it — so a last-minute change before a demo can silently show the
+        previous build. Verified while building the staged reveal: the browser
+        served the old `app.js` until the fetch was forced.
+
+        Demo reliability, not a caching strategy. This server is local
+        development only; there is nothing here worth caching.
+        """
+        self.send_header("Cache-Control", "no-store")
+        super().end_headers()
+
     def do_GET(self) -> None:
         """Serve JSON reads, or fall through to the static UI."""
         if not self.path.startswith("/api/"):

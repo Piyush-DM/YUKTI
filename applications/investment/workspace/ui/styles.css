@@ -694,6 +694,124 @@ button.link {
   margin-bottom: var(--yukti-space-1);
 }
 
+/* ---------- staged execution ---------- */
+
+/* The read-out of one analysis run.
+
+   There is no percentage anywhere in here, deliberately. The client cannot
+   observe the engine mid-request, so a bar filling to 62% would be a number
+   nobody measured — in a product whose whole claim is that its reasoning is
+   auditable, that is the worst possible thing to draw. While the request is
+   open there is an indeterminate sweep, which says "working" and claims
+   nothing else. */
+
+.execution-bar {
+  height: 2px;
+  margin: var(--yukti-space-3) 0;
+  background: var(--surface-sunken);
+  border-radius: var(--yukti-radius-sm);
+  overflow: hidden;
+}
+
+.execution-bar > span {
+  display: block;
+  height: 100%;
+  width: 32%;
+  background: var(--yukti-color-yellow-500);
+  animation: execution-sweep 1.15s var(--yukti-ease-standard) infinite;
+}
+
+@keyframes execution-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(340%);
+  }
+}
+
+.execution-stages {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.execution-stage {
+  display: grid;
+  grid-template-columns: var(--yukti-space-2) minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: var(--yukti-space-3);
+  padding: var(--yukti-space-2) 0;
+  border-bottom: var(--yukti-border-width-hairline) dotted
+    var(--yukti-color-border-hairline-light);
+}
+
+.execution-stage:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.execution-marker {
+  width: var(--yukti-space-2);
+  height: var(--yukti-space-2);
+  border: var(--yukti-border-width-hairline) solid var(--ink-faint);
+  border-radius: 1px;
+  transform: translateY(1px);
+}
+
+.execution-stage[data-state="pending"] {
+  color: var(--ink-faint);
+}
+
+.execution-stage[data-state="complete"] {
+  color: var(--yukti-color-ink-900);
+}
+
+.execution-stage[data-state="complete"] .execution-marker {
+  background: var(--yukti-color-ink-900);
+  border-color: var(--yukti-color-ink-900);
+}
+
+.execution-detail {
+  font-family: var(--yukti-font-data);
+  font-size: var(--type-data);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-muted);
+  text-align: right;
+}
+
+/* Entrance for the row that just landed. A state change, which Motion System
+   §1.3 permits, and §3.2 asks to keep sparing in a workspace. */
+.execution-stage.is-latest {
+  animation: execution-arrive var(--yukti-duration-quick)
+    var(--yukti-ease-standard) both;
+}
+
+@keyframes execution-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Motion System §8 — removed, not shortened. The sweep becomes a static rule
+   so the panel still reads as busy without anything moving. */
+@media (prefers-reduced-motion: reduce) {
+  .execution-bar > span {
+    width: 100%;
+    animation: none;
+    background: var(--ink-faint);
+  }
+
+  .execution-stage.is-latest {
+    animation: none;
+  }
+}
+
 /* ---------- review areas ---------- */
 
 .area-grid {

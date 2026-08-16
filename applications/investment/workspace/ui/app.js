@@ -22,6 +22,9 @@ const state = {
   tab: "overview",
   message: null,
   busy: false,
+  // The staged read-out of one analysis run. null except during and just after
+  // a run; cleared whenever the reader moves somewhere else.
+  execution: null,
 };
 
 const registerList = document.querySelector("#register-list");
@@ -79,6 +82,7 @@ async function selectCase(caseId) {
     state.selectedId = caseId;
     state.judgmentId = null;
     state.message = null;
+    state.execution = null;
     if (state.tab === "intake") {
       state.tab = "overview";
     }
@@ -300,6 +304,9 @@ function renderTabs() {
     }, label);
     button.addEventListener("click", () => {
       state.tab = key;
+      // Leaving the judgment view ends the read-out; coming back shows the
+      // settled judgment rather than replaying an execution that is over.
+      state.execution = null;
       render();
     });
     nav.append(button);
@@ -649,10 +656,76 @@ function applyReference() {
 
 /* -------------------------------------------------------------- judgment */
 
+function renderExecution() {
+  const execution = state.execution;
+  const panel = el("section", { class: "panel execution" });
+  const running = execution.phase === "running";
+
+  panel.append(
+    el("h3", {}, running ? "Executing" : "Execution record"),
+    el(
+      "p",
+      { class: "panel-note" },
+      running
+        ? "The engine is running. Stages are listed as they are reached in the " +
+            "pipeline; nothing is reported until the run returns what it produced."
+        : "What this run produced, in the order it was produced.",
+    ),
+  );
+
+  if (running) {
+    panel.append(el("div", { class: "execution-bar" }, el("span", {})));
+  }
+
+  const list = el("ol", { class: "execution-stages" });
+  const stages = execution.stages.length
+    ? execution.stages
+    : PENDING_STAGE_LABELS.map((label) => ({ label }));
+
+  stages.forEach((stage, index) => {
+    const done = index < execution.revealed;
+    // Only the row that just landed animates. The view is rebuilt on every
+    // step, so animating every completed row would re-run the whole list each
+    // time and read as flicker rather than as arrival.
+    const latest = done && index === execution.revealed - 1;
+    const row = el("li", {
+      class: `execution-stage${latest ? " is-latest" : ""}`,
+      "data-state": done ? "complete" : "pending",
+    });
+    row.append(
+      el("span", { class: "execution-marker" }),
+      el("span", { class: "execution-label" }, stage.label),
+      el("span", { class: "execution-detail" }, done ? stage.detail || "" : ""),
+    );
+    list.append(row);
+  });
+
+  panel.append(list);
+  return panel;
+}
+
+// Shown only while the request is open, so the panel is not an empty box. The
+// labels match the stages the response is then read out against.
+const PENDING_STAGE_LABELS = [
+  "Material snapshot",
+  "Document composed",
+  "Reasoning record",
+  "Review areas",
+  "Cross-area positions",
+  "Execution report",
+];
+
 function renderJudgment() {
   const record = state.detail.case;
   const judgment = state.detail.judgment;
   const wrap = el("div", {});
+
+  // Mid-run and mid-reveal, the execution panel is the whole view. The
+  // institutional decision appears only once every stage has been read out.
+  if (state.execution && state.execution.phase !== "complete") {
+    wrap.append(renderExecution());
+    return wrap;
+  }
 
   if (!judgment) {
     // `is-empty` opts this panel out of the uppercase-mono eyebrow treatment.
@@ -680,6 +753,11 @@ function renderJudgment() {
   }
 
   wrap.append(renderVerdict(judgment));
+  // The completed record stays on screen under the decision. Every line in it
+  // is evidence from this run, which is worth keeping beside the conclusion.
+  if (state.execution && state.execution.phase === "complete") {
+    wrap.append(renderExecution());
+  }
   const history = renderJudgmentHistory();
   if (history) wrap.append(history);
 
@@ -890,12 +968,138 @@ function topicBlock(view, contested) {
   return block;
 }
 
+/* ------------------------------------------------------- staged execution
+
+   What this is, and what it deliberately is not.
+
+   The analysis runs as one synchronous request. The client therefore cannot
+   observe the engine mid-flight, and this code never pretends otherwise:
+   while the request is open, the panel shows the stages as *pending* and an
+   indeterminate indicator. There is no percentage, because a percentage would
+   be a number nobody measured.
+
+   When the response lands, every artifact below is a fact on it. The panel
+   then reads out as a completed execution record, in causal order, and each
+   line carries evidence taken from the response — a snapshot id, a digest, a
+   count. A stage is only ever displayed as complete, never as "now running",
+   because we did not watch it run.
+
+   One stage is genuinely sequential rather than paced: the execution report is
+   a second real request, and it completes when the server answers.
+
+   `REVEAL_STEP_MS` is presentation pacing for facts that are already true, not
+   a measurement of anything. Under reduced motion the reveal is skipped
+   entirely and every stage appears at once. */
+
+const REVEAL_STEP_MS = 140;
+
+function pause(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function prefersReducedMotion() {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+/* The stages, built from the response. Every detail string below is read off
+   the payload; nothing here is computed for effect. */
+function executionStages(detail) {
+  const judgment = detail.judgment;
+  const record = detail.case;
+  const findings = judgment.review_areas.reduce(
+    (total, area) => total + area.findings.length,
+    0,
+  );
+  return [
+    {
+      label: "Material snapshot",
+      detail: `${judgment.snapshot_id} · ${judgment.material_digest.slice(0, 16)}`,
+    },
+    {
+      label: "Document composed",
+      detail: `${record.sources.length} sources · ${record.figures.length} figures`,
+    },
+    {
+      label: "Reasoning record",
+      detail: judgment.record_digest.slice(0, 16),
+    },
+    {
+      label: "Review areas",
+      detail: `${judgment.review_areas.length} areas · ${findings} findings`,
+    },
+    {
+      label: "Cross-area positions",
+      detail:
+        `${judgment.agreements.length} agreed · ` +
+        `${judgment.disagreements.length} disagreed`,
+    },
+    {
+      label: "Execution report",
+      // Not paced — this stage completes when the server answers.
+      resolve: async (caseId) => {
+        const payload = await api("GET", `/api/cases/${caseId}/report`);
+        return `${payload.report.split("\n").length} lines`;
+      },
+    },
+  ];
+}
+
+async function revealExecution(caseId) {
+  const stages = state.execution.stages;
+
+  if (prefersReducedMotion()) {
+    for (const stage of stages) {
+      if (stage.resolve) {
+        stage.detail = await stage.resolve(caseId).catch(() => "unavailable");
+      }
+    }
+    state.execution.revealed = stages.length;
+    state.execution.phase = "complete";
+    render();
+    return;
+  }
+
+  for (let index = 0; index < stages.length; index += 1) {
+    const stage = stages[index];
+    if (stage.resolve) {
+      stage.detail = await stage.resolve(caseId).catch(() => "unavailable");
+    } else {
+      await pause(REVEAL_STEP_MS);
+    }
+    state.execution.revealed = index + 1;
+    render();
+  }
+
+  // The institutional decision is the last thing to appear.
+  if (!prefersReducedMotion()) await pause(REVEAL_STEP_MS);
+  state.execution.phase = "complete";
+  render();
+}
+
 async function requestJudgment(caseId) {
-  await act(async () => {
+  // Synchronous, before the request is even sent: the panel is on screen by
+  // the time the click finishes. Nothing is claimed about the engine yet.
+  state.execution = { phase: "running", revealed: 0, stages: [] };
+  state.message = null;
+  state.tab = "judgment";
+  state.busy = true;
+  render();
+
+  try {
     state.detail = await api("POST", `/api/cases/${caseId}/analysis`, {});
     state.judgmentId = null;
     await refreshCases();
-  });
+    state.execution.stages = executionStages(state.detail);
+    state.execution.phase = "revealing";
+    state.busy = false;
+    render();
+    await revealExecution(caseId);
+  } catch (error) {
+    state.execution = null;
+    state.message = { kind: "error", text: describe(error) };
+    state.busy = false;
+    render();
+  }
 }
 
 function renderDecisionForm() {
