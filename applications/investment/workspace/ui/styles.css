@@ -234,9 +234,30 @@ button.primary {
   font-weight: 600;
 }
 
-button.primary:hover {
+/* `--yukti-color-yellow-600` is documented in `tokens.design.css` as the
+   "pressed/:active state". It was being spent on hover, which left the press
+   with no response at all and misassigned the token. Hover now gains
+   definition by taking an ink border — no new colour, so §2.3 still holds —
+   and 600 does the job it is declared for. */
+button.primary:hover:not(:disabled) {
+  border-color: var(--yukti-color-ink-900);
+}
+
+button.primary:active:not(:disabled) {
   background: var(--yukti-color-yellow-600);
   border-color: var(--yukti-color-yellow-600);
+}
+
+button:active:not(:disabled):not(.primary):not(.link) {
+  background: var(--surface-sunken);
+}
+
+.register-head button:active:not(:disabled) {
+  background: var(--yukti-color-graphite-900);
+}
+
+.register-card:active {
+  background: var(--yukti-color-graphite-700);
 }
 
 button:disabled {
@@ -500,6 +521,112 @@ button.link {
 
 .empty-state p:last-child {
   margin-bottom: 0;
+}
+
+/* ---------- skeletons ---------- */
+
+/* Placeholders, in register.
+
+   Not a shimmering dashboard skeleton: this surface is a drafting table, where
+   the rules are ruled first and the figures entered after. So a placeholder is
+   a blank ruled field. The single slow opacity breath carries the only thing a
+   placeholder owes the reader — that something is still coming — and Motion
+   System §8 removes it rather than shortening it under reduced motion. */
+
+.skeleton-line {
+  display: block;
+  height: var(--yukti-space-2);
+  border-radius: var(--yukti-radius-sm);
+  background: var(--surface-sunken);
+  animation: skeleton-breath 1.8s var(--yukti-ease-standard) infinite;
+}
+
+@keyframes skeleton-breath {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.skeleton-head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--yukti-space-2);
+  padding-bottom: var(--yukti-space-3);
+  margin-bottom: var(--yukti-space-4);
+  border-bottom: var(--yukti-border-width-hairline) solid
+    var(--yukti-color-border-hairline-light);
+}
+
+.skeleton-line.is-title {
+  height: var(--type-title);
+  width: 38%;
+}
+
+.skeleton-line.is-sub {
+  width: 26%;
+}
+
+.skeleton-line.is-facts {
+  width: 54%;
+  height: var(--yukti-space-2);
+}
+
+.skeleton-tabs {
+  display: flex;
+  gap: var(--yukti-space-3);
+  padding-bottom: var(--yukti-space-2);
+  margin-bottom: var(--yukti-space-4);
+  border-bottom: var(--yukti-border-width-hairline) solid
+    var(--yukti-color-border-hairline-light);
+}
+
+.skeleton-line.is-tab {
+  width: 72px;
+}
+
+.skeleton-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--yukti-space-3);
+  border: var(--yukti-border-width-hairline) solid
+    var(--yukti-color-border-hairline-light);
+  border-radius: var(--yukti-radius-sm);
+  background: var(--surface-raised);
+  padding: var(--yukti-space-4);
+}
+
+.skeleton-line.is-label {
+  width: 128px;
+}
+
+/* Register placeholders sit on the dark panel, so they take its surface. */
+.skeleton-card {
+  padding: var(--yukti-space-2) var(--yukti-space-2) var(--yukti-space-2)
+    var(--yukti-space-3);
+}
+
+.skeleton-card .skeleton-line {
+  background: rgba(242, 239, 230, 0.08);
+}
+
+.skeleton-line.is-name {
+  width: 76%;
+  margin-bottom: var(--yukti-space-1);
+}
+
+.skeleton-line.is-meta {
+  width: 48%;
+  height: var(--yukti-space-1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-line {
+    animation: none;
+  }
 }
 
 /* ---------- case header ---------- */

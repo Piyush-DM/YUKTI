@@ -25,6 +25,14 @@ const state = {
   // The staged read-out of one analysis run. null except during and just after
   // a run; cleared whenever the reader moves somewhere else.
   execution: null,
+  // True only while a different case is being fetched — the one situation
+  // where the whole stage is about to be replaced. Deliberately separate from
+  // `busy`, which is also set by saves and would otherwise blank the screen
+  // every time someone edited a figure.
+  loadingCase: false,
+  // True until the first load settles. Distinguishes "no cases yet" from
+  // "we have not asked yet", which look identical and mean opposite things.
+  booting: true,
 };
 
 const registerList = document.querySelector("#register-list");
@@ -42,6 +50,7 @@ document.querySelector("#open-case-button").addEventListener("click", () => {
 boot();
 
 async function boot() {
+  render(); // Draw the frame before asking for anything to put in it.
   try {
     state.schedule = await api("GET", "/api/schedule");
     state.reference = await api("GET", "/api/reference-material");
@@ -49,6 +58,7 @@ async function boot() {
   } catch (error) {
     state.message = { kind: "error", text: describe(error) };
   }
+  state.booting = false;
   render();
 }
 
@@ -76,6 +86,9 @@ async function refreshCases() {
 
 async function selectCase(caseId) {
   state.busy = true;
+  // Only when moving to a different case. Re-selecting the open one would
+  // otherwise blank a screen the reader is already looking at.
+  state.loadingCase = caseId !== state.selectedId;
   render();
   try {
     state.detail = await api("GET", `/api/cases/${caseId}`);
@@ -90,6 +103,7 @@ async function selectCase(caseId) {
     state.message = { kind: "error", text: describe(error) };
   }
   state.busy = false;
+  state.loadingCase = false;
   render();
 }
 
@@ -123,6 +137,23 @@ function renderTopbar() {
 
 function renderRegister() {
   registerList.replaceChildren();
+
+  // "No cases yet" and "we have not asked yet" look identical and mean
+  // opposite things. Until the first load settles, say neither.
+  if (state.booting) {
+    for (let index = 0; index < 3; index += 1) {
+      registerList.append(
+        el(
+          "div",
+          { class: "skeleton-card", "aria-hidden": "true" },
+          el("span", { class: "skeleton-line is-name" }),
+          el("span", { class: "skeleton-line is-meta" }),
+        ),
+      );
+    }
+    return;
+  }
+
   if (!state.cases.length) {
     registerList.append(
       el(
@@ -185,6 +216,14 @@ function renderStage() {
     return;
   }
 
+  // The case really is not here yet, so the screen says so by drawing the
+  // shape it is about to fill rather than by holding the previous case on
+  // screen under a new title.
+  if (state.loadingCase) {
+    inner.append(renderCaseSkeleton());
+    return;
+  }
+
   if (!state.detail) {
     inner.append(renderEmptyState());
     return;
@@ -198,6 +237,41 @@ function renderStage() {
     audit: renderAudit,
   };
   inner.append((views[state.tab] || renderOverview)());
+}
+
+/* The shape of a case, drawn before its values arrive.
+
+   Deliberately not a shimmering dashboard skeleton. This register is a
+   drafting table: the rules are ruled first and the figures are entered after,
+   so a placeholder here is a blank field, not a loading animation. The only
+   motion is a slow opacity breath, which carries the one piece of information
+   a placeholder owes the reader — that something is still coming — and it is
+   removed entirely under reduced motion. */
+function renderCaseSkeleton() {
+  const box = el("div", { class: "skeleton-case", "aria-hidden": "true" });
+
+  const head = el("div", { class: "skeleton-head" });
+  head.append(
+    el("span", { class: "skeleton-line is-title" }),
+    el("span", { class: "skeleton-line is-sub" }),
+    el("span", { class: "skeleton-line is-facts" }),
+  );
+
+  const tabs = el("div", { class: "skeleton-tabs" });
+  for (let index = 0; index < 4; index += 1) {
+    tabs.append(el("span", { class: "skeleton-line is-tab" }));
+  }
+
+  const panel = el("div", { class: "skeleton-panel" });
+  panel.append(el("span", { class: "skeleton-line is-label" }));
+  [90, 76, 82, 58].forEach((width) => {
+    panel.append(
+      el("span", { class: "skeleton-line", style: `width:${width}%` }),
+    );
+  });
+
+  box.append(head, tabs, panel);
+  return box;
 }
 
 function renderEmptyState() {
