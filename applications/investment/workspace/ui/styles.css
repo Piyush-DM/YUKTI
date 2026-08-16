@@ -11,6 +11,30 @@
   Register: drafting table, not dashboard. Hairline rules, 3px radii, tabular
   numerals, one accent hue. Nothing animates on a state change — a figure that
   moves while being read is a figure that cannot be trusted.
+
+  ---------------------------------------------------------------------------
+  Polish pass, Phase 1 — visual foundation.
+
+  The rule this pass works to is §2.3: a literal value is a defect against the
+  system, not a style choice. Before this pass the file carried roughly thirty
+  raw px/rem literals for type and spacing. They are now one documented set of
+  workspace-local derivations, declared once and referenced everywhere.
+
+  Two things were deliberately NOT changed, because they are already right:
+
+  * **Radius.** Already uniform at `--yukti-radius-sm`. The design token carries
+    the comment "never a soft/pill radius", so normalising *upward* to a softer
+    corner would break a ratified decision rather than polish it.
+  * **Accent.** Already exactly one hue. D14 permits one accent in v1, which is
+    why `opposes` is ink-weight rather than red.
+
+  **Elevation is surface-tier, not shadow.** `tokens.design.css` §2.4 defines
+  radius, hairline and focus tokens and no shadow token at all — the elevation
+  language in this system is figure/ground plus a hairline. This pass gets the
+  depth a shadow would have given by sinking the stage one tier and leaving
+  panels on the raised surface, which previously sat on an identical background
+  and read flat. See the note in `README.md`; adding a shadow scale is a change
+  to §2.4 and needs a ruling, not a stylesheet edit.
 */
 
 :root {
@@ -27,21 +51,74 @@
   --yukti-font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
   --yukti-font-data: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
 
-  --yukti-space-1: 0.25rem;
-  --yukti-space-2: 0.5rem;
-  --yukti-space-3: 1rem;
-  --yukti-space-4: 1.5rem;
-  --yukti-space-5: 2.5rem;
+  /* 8px grid. `space-1` is the 4px half-step; nothing below it exists except
+     `--space-hair`, declared under the derivations. */
+  --yukti-space-1: 0.25rem; /* 4px  */
+  --yukti-space-2: 0.5rem; /* 8px  */
+  --yukti-space-3: 1rem; /* 16px */
+  --yukti-space-4: 1.5rem; /* 24px */
+  --yukti-space-5: 2.5rem; /* 40px */
+  --yukti-space-6: 4rem; /* 64px */
 
   --yukti-radius-sm: 3px;
+  --yukti-radius-focus: 2px;
   --yukti-border-width-hairline: 1px;
+  --yukti-focus-ring-width: 2px;
+  --yukti-focus-ring-offset: 2px;
 
-  /* Workspace-local derivations. Stance and standing colours are ink-weight
-     variations rather than a second hue: the design system permits one accent
-     (D14), so "opposes" must not become red. */
+  /* ======================================================================
+     Workspace-local derivations.
+
+     Stance and standing colours are ink-weight variations rather than a
+     second hue: the design system permits one accent (D14), so "opposes"
+     must not become red.
+     ====================================================================== */
+
   --ink-muted: rgba(20, 20, 15, 0.62);
   --ink-faint: rgba(20, 20, 15, 0.42);
   --surface-sunken: #e9e5da;
+
+  /* Surface tiers. The stage sits one tier down so panels resting on
+     bone-100 read as raised without a shadow. */
+  --surface-stage: #ebe7dc;
+  --surface-raised: var(--yukti-color-bone-100);
+
+  /* The one sub-grid step, for inline chips whose box must not exceed the
+     line box of the text beside them. */
+  --space-hair: 2px;
+
+  /* Type scale, at workspace density.
+
+     The website's body tier is 16–18px fluid; a workspace is read closer and
+     denser, so this scale is keyed to the same tiers at 15px body. Declared
+     here so every size in the file references a token rather than a literal.
+
+     Hierarchy note: `section` and `body` were both 15px before this pass,
+     which is why review-area headings did not read as headings. */
+  --type-hero: 32px; /* the institutional recommendation  */
+  --type-title: 24px; /* case name, judgment history heads */
+  --type-section: 17px; /* review-area and panel subheads     */
+  --type-body: 15px; /* prose, table cells                 */
+  --type-secondary: 13px; /* supporting prose, form controls    */
+  --type-data: 12px; /* mono figures, digests              */
+  --type-label: 11px; /* mono uppercase eyebrow labels      */
+  --type-micro: 10px; /* stance chips only                  */
+
+  --leading-tight: 1.15;
+  --leading-snug: 1.3;
+  --leading-body: 1.55;
+
+  --tracking-tight: -0.02em;
+  --tracking-heading: -0.01em;
+  --tracking-label: 0.08em;
+  --tracking-wide: 0.1em;
+
+  /* Control geometry, on the grid. Previously 0.4rem/0.85rem and
+     0.35rem/0.5rem — three different off-grid control heights. */
+  --control-pad-y: var(--yukti-space-2);
+  --control-pad-x: var(--yukti-space-3);
+  --control-pad-y-compact: var(--yukti-space-1);
+  --control-pad-x-compact: var(--yukti-space-2);
 }
 
 * {
@@ -58,10 +135,11 @@ body {
   background: var(--yukti-color-graphite-900);
   color: var(--yukti-color-ink-900);
   font-family: var(--yukti-font-body);
-  font-size: 15px;
-  line-height: 1.55;
+  font-size: var(--type-body);
+  line-height: var(--leading-body);
   display: flex;
   flex-direction: column;
+  -webkit-font-smoothing: antialiased;
 }
 
 h1,
@@ -70,30 +148,51 @@ h3,
 h4 {
   margin: 0;
   font-weight: 600;
-  letter-spacing: -0.01em;
+  letter-spacing: var(--tracking-heading);
 }
 
 p {
   margin: 0 0 var(--yukti-space-2);
 }
 
+/* The uppercase mono eyebrow. Seven selectors declared this independently
+   before this pass, with three different sizes and two different trackings —
+   the single largest source of visual noise in the workspace. */
+.register-head h2,
+.brand-context,
+.topbar-meta,
+.panel > h3,
+.metric-label,
+label > span.field-label,
+th,
+.finding-topic,
+.area-block > h4 {
+  font-family: var(--yukti-font-data);
+  font-size: var(--type-label);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
 button {
   font: inherit;
+  font-size: var(--type-secondary);
   cursor: pointer;
   border-radius: var(--yukti-radius-sm);
   border: var(--yukti-border-width-hairline) solid
     var(--yukti-color-border-hairline-light);
   background: transparent;
   color: inherit;
-  padding: 0.4rem 0.85rem;
+  padding: var(--control-pad-y) var(--control-pad-x);
 }
 
 button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid var(--yukti-color-yellow-500);
-  outline-offset: 2px;
+  outline: var(--yukti-focus-ring-width) solid var(--yukti-color-yellow-500);
+  outline-offset: var(--yukti-focus-ring-offset);
+  border-radius: var(--yukti-radius-focus);
 }
 
 button.primary {
@@ -116,6 +215,7 @@ button:disabled {
 button.link {
   border: 0;
   padding: 0;
+  font-size: inherit;
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -147,11 +247,8 @@ button.link {
 
 .brand-context,
 .topbar-meta {
-  font-size: 12px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: var(--type-label);
   color: rgba(216, 212, 198, 0.65);
-  font-family: var(--yukti-font-data);
 }
 
 .shell {
@@ -175,15 +272,12 @@ button.link {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: var(--yukti-space-2);
   margin-bottom: var(--yukti-space-3);
 }
 
 .register-head h2 {
-  font-size: 12px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
   color: rgba(216, 212, 198, 0.65);
-  font-family: var(--yukti-font-data);
 }
 
 .register-list {
@@ -196,14 +290,17 @@ button.link {
   display: block;
   width: 100%;
   text-align: left;
+  font-size: var(--type-body);
   border: var(--yukti-border-width-hairline) solid transparent;
   border-left: 2px solid transparent;
-  padding: var(--yukti-space-2) var(--yukti-space-2);
+  border-radius: var(--yukti-radius-sm);
+  padding: var(--yukti-space-2);
   color: var(--yukti-color-bone-300);
 }
 
 .register-card:hover {
   border-color: var(--yukti-color-border-hairline-dark);
+  background: rgba(242, 239, 230, 0.03);
 }
 
 .register-card[aria-current="true"] {
@@ -220,23 +317,23 @@ button.link {
 .register-card .meta {
   display: block;
   font-family: var(--yukti-font-data);
-  font-size: 11px;
+  font-size: var(--type-label);
   letter-spacing: 0.04em;
   color: rgba(216, 212, 198, 0.55);
-  margin-top: 2px;
+  margin-top: var(--space-hair);
 }
 
 .register-empty {
-  font-size: 13px;
+  font-size: var(--type-secondary);
   color: rgba(216, 212, 198, 0.55);
 }
 
 /* ---------- stage ---------- */
 
 .stage {
-  background: var(--yukti-color-bone-100);
+  background: var(--surface-stage);
   overflow-y: auto;
-  padding: var(--yukti-space-4);
+  padding: var(--yukti-space-5) var(--yukti-space-4);
 }
 
 .stage-inner {
@@ -252,7 +349,8 @@ button.link {
 }
 
 .empty-state h2 {
-  font-size: 20px;
+  font-size: var(--type-title);
+  line-height: var(--leading-snug);
   color: var(--yukti-color-ink-900);
   margin-bottom: var(--yukti-space-2);
 }
@@ -263,11 +361,12 @@ button.link {
   border-bottom: var(--yukti-border-width-hairline) solid
     var(--yukti-color-border-hairline-light);
   padding-bottom: var(--yukti-space-3);
-  margin-bottom: var(--yukti-space-3);
+  margin-bottom: var(--yukti-space-4);
 }
 
 .case-head h1 {
-  font-size: 26px;
+  font-size: var(--type-title);
+  line-height: var(--leading-snug);
   margin-bottom: var(--yukti-space-1);
 }
 
@@ -281,7 +380,7 @@ button.link {
   flex-wrap: wrap;
   gap: var(--yukti-space-3);
   font-family: var(--yukti-font-data);
-  font-size: 12px;
+  font-size: var(--type-data);
   color: var(--ink-muted);
   margin-top: var(--yukti-space-2);
 }
@@ -289,10 +388,10 @@ button.link {
 .status-chip {
   display: inline-block;
   font-family: var(--yukti-font-data);
-  font-size: 11px;
-  letter-spacing: 0.08em;
+  font-size: var(--type-label);
+  letter-spacing: var(--tracking-label);
   text-transform: uppercase;
-  padding: 2px 8px;
+  padding: var(--space-hair) var(--yukti-space-2);
   border: var(--yukti-border-width-hairline) solid
     var(--yukti-color-border-hairline-light);
   border-radius: var(--yukti-radius-sm);
@@ -319,10 +418,14 @@ button.link {
   border-radius: 0;
   padding: var(--yukti-space-2) var(--yukti-space-3);
   color: var(--ink-muted);
-  font-size: 13px;
+  font-size: var(--type-secondary);
   letter-spacing: 0.04em;
   text-transform: uppercase;
   font-family: var(--yukti-font-data);
+}
+
+.tab:hover {
+  color: var(--yukti-color-ink-900);
 }
 
 .tab[aria-selected="true"] {
@@ -336,22 +439,18 @@ button.link {
   border: var(--yukti-border-width-hairline) solid
     var(--yukti-color-border-hairline-light);
   border-radius: var(--yukti-radius-sm);
-  padding: var(--yukti-space-3);
-  margin-bottom: var(--yukti-space-3);
-  background: var(--yukti-color-bone-100);
+  padding: var(--yukti-space-4);
+  margin-bottom: var(--yukti-space-4);
+  background: var(--surface-raised);
 }
 
 .panel > h3 {
-  font-size: 12px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  font-family: var(--yukti-font-data);
   color: var(--ink-muted);
-  margin-bottom: var(--yukti-space-2);
+  margin-bottom: var(--yukti-space-3);
 }
 
 .panel-note {
-  font-size: 13px;
+  font-size: var(--type-secondary);
   color: var(--ink-muted);
   max-width: 76ch;
 }
@@ -362,13 +461,16 @@ button.link {
   border: var(--yukti-border-width-hairline) solid var(--yukti-color-ink-900);
   border-left-width: 3px;
   border-radius: var(--yukti-radius-sm);
-  padding: var(--yukti-space-3);
-  margin-bottom: var(--yukti-space-3);
+  padding: var(--yukti-space-4);
+  margin-bottom: var(--yukti-space-4);
+  background: var(--surface-raised);
 }
 
 .verdict h2 {
-  font-size: 24px;
-  margin-bottom: var(--yukti-space-1);
+  font-size: var(--type-hero);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  margin-bottom: var(--yukti-space-2);
 }
 
 .verdict .guidance {
@@ -379,31 +481,28 @@ button.link {
 .verdict-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--yukti-space-4);
-  margin-top: var(--yukti-space-3);
-  padding-top: var(--yukti-space-2);
+  gap: var(--yukti-space-5);
+  margin-top: var(--yukti-space-4);
+  padding-top: var(--yukti-space-3);
   border-top: var(--yukti-border-width-hairline) solid
     var(--yukti-color-border-hairline-light);
 }
 
 .metric-label {
   display: block;
-  font-family: var(--yukti-font-data);
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
   color: var(--ink-faint);
+  margin-bottom: var(--space-hair);
 }
 
 .metric-value {
   font-family: var(--yukti-font-data);
   font-variant-numeric: tabular-nums;
-  font-size: 15px;
+  font-size: var(--type-body);
 }
 
 .reason-list {
   margin: 0;
-  padding-left: 1.2rem;
+  padding-left: var(--yukti-space-3);
   color: var(--ink-muted);
 }
 
@@ -424,6 +523,7 @@ button.link {
     var(--yukti-color-border-hairline-light);
   border-radius: var(--yukti-radius-sm);
   padding: var(--yukti-space-3);
+  background: var(--surface-raised);
 }
 
 .area-head {
@@ -438,7 +538,8 @@ button.link {
 }
 
 .area-head h4 {
-  font-size: 15px;
+  font-size: var(--type-section);
+  line-height: var(--leading-snug);
 }
 
 .finding {
@@ -449,20 +550,21 @@ button.link {
 
 .finding:last-child {
   border-bottom: 0;
+  padding-bottom: 0;
 }
 
 .stance {
   display: inline-block;
   font-family: var(--yukti-font-data);
-  font-size: 10px;
-  letter-spacing: 0.1em;
+  font-size: var(--type-micro);
+  letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
-  padding: 1px 6px;
+  padding: 0 var(--yukti-space-1);
   border: var(--yukti-border-width-hairline) solid
     var(--yukti-color-border-hairline-light);
   border-radius: var(--yukti-radius-sm);
   margin-right: var(--yukti-space-2);
-  vertical-align: 2px;
+  vertical-align: var(--space-hair);
 }
 
 .stance.is-conditional {
@@ -476,15 +578,12 @@ button.link {
 }
 
 .finding-topic {
-  font-family: var(--yukti-font-data);
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
   color: var(--ink-faint);
+  letter-spacing: 0.06em;
 }
 
 .cites {
-  font-size: 12px;
+  font-size: var(--type-data);
   color: var(--ink-faint);
   margin-top: var(--yukti-space-1);
 }
@@ -520,25 +619,19 @@ button.link {
 table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
+  font-size: var(--type-body);
 }
 
 th {
   text-align: left;
-  font-family: var(--yukti-font-data);
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
   color: var(--ink-faint);
-  font-weight: 500;
-  padding: var(--yukti-space-1) var(--yukti-space-2)
-    var(--yukti-space-1) 0;
+  padding: var(--yukti-space-1) var(--yukti-space-2) var(--yukti-space-1) 0;
   border-bottom: var(--yukti-border-width-hairline) solid
     var(--yukti-color-border-hairline-light);
 }
 
 td {
-  padding: var(--yukti-space-1) var(--yukti-space-2) var(--yukti-space-1) 0;
+  padding: var(--yukti-space-2) var(--yukti-space-2) var(--yukti-space-2) 0;
   border-bottom: var(--yukti-border-width-hairline) dotted
     var(--yukti-color-border-hairline-light);
   vertical-align: top;
@@ -555,28 +648,22 @@ td.numeric,
 }
 
 .area-block > h4 {
-  font-size: 13px;
+  font-size: var(--type-label);
   letter-spacing: 0.06em;
-  text-transform: uppercase;
-  font-family: var(--yukti-font-data);
   color: var(--ink-muted);
-  margin-bottom: var(--yukti-space-1);
+  margin-bottom: var(--yukti-space-2);
 }
 
 label {
   display: block;
-  font-size: 13px;
-  margin-bottom: var(--yukti-space-2);
+  font-size: var(--type-secondary);
+  margin-bottom: var(--yukti-space-3);
 }
 
 label > span.field-label {
   display: block;
-  font-family: var(--yukti-font-data);
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
   color: var(--ink-faint);
-  margin-bottom: 2px;
+  margin-bottom: var(--space-hair);
 }
 
 input,
@@ -584,8 +671,8 @@ select,
 textarea {
   width: 100%;
   font: inherit;
-  font-size: 14px;
-  padding: 0.35rem 0.5rem;
+  font-size: var(--type-secondary);
+  padding: var(--control-pad-y) var(--control-pad-x-compact);
   border: var(--yukti-border-width-hairline) solid
     var(--yukti-color-border-hairline-light);
   border-radius: var(--yukti-radius-sm);
@@ -595,12 +682,13 @@ textarea {
 
 input.compact,
 select.compact {
-  padding: 0.25rem 0.4rem;
-  font-size: 13px;
+  padding: var(--control-pad-y-compact) var(--control-pad-x-compact);
+  font-size: var(--type-secondary);
 }
 
 textarea {
   resize: vertical;
+  line-height: var(--leading-body);
 }
 
 .form-grid {
@@ -617,7 +705,7 @@ textarea {
   display: flex;
   align-items: center;
   gap: var(--yukti-space-2);
-  margin-top: var(--yukti-space-3);
+  margin-top: var(--yukti-space-4);
 }
 
 .row-actions {
@@ -632,7 +720,7 @@ textarea {
   background: var(--surface-sunken);
   border-radius: var(--yukti-radius-sm);
   margin-bottom: var(--yukti-space-3);
-  font-size: 14px;
+  font-size: var(--type-secondary);
 }
 
 .message.is-error {
@@ -656,7 +744,7 @@ textarea {
 
 .report-text {
   font-family: var(--yukti-font-data);
-  font-size: 12px;
+  font-size: var(--type-data);
   line-height: 1.45;
   white-space: pre;
   overflow-x: auto;
@@ -668,7 +756,7 @@ textarea {
 
 .digest {
   font-family: var(--yukti-font-data);
-  font-size: 12px;
+  font-size: var(--type-data);
   word-break: break-all;
   color: var(--ink-muted);
 }
@@ -677,7 +765,7 @@ textarea {
    suggesting it is invalid — it is still the record a past decision rests on. */
 .superseded-banner {
   font-family: var(--yukti-font-data);
-  font-size: 12px;
+  font-size: var(--type-data);
   line-height: 1.5;
   padding: var(--yukti-space-2);
   margin-bottom: var(--yukti-space-2);
@@ -688,24 +776,24 @@ textarea {
 
 .verified {
   font-family: var(--yukti-font-data);
-  font-size: 11px;
+  font-size: var(--type-label);
   letter-spacing: 0.04em;
 }
 
 .unverified {
   font-family: var(--yukti-font-data);
-  font-size: 11px;
+  font-size: var(--type-label);
   letter-spacing: 0.06em;
   font-weight: 600;
   background: var(--yukti-color-ink-900);
   color: var(--yukti-color-bone-100);
-  padding: 1px 6px;
+  padding: 0 var(--yukti-space-1);
   border-radius: var(--yukti-radius-sm);
 }
 
 ul.plain {
   margin: 0;
-  padding-left: 1.1rem;
+  padding-left: var(--yukti-space-3);
   color: var(--ink-muted);
 }
 
@@ -727,6 +815,10 @@ ul.plain li {
     border-bottom: var(--yukti-border-width-hairline) solid
       var(--yukti-color-border-hairline-dark);
     max-height: 220px;
+  }
+
+  .stage {
+    padding: var(--yukti-space-4) var(--yukti-space-3);
   }
 
   .position-row {
