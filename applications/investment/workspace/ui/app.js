@@ -617,12 +617,37 @@ function renderMaterial() {
   return wrap;
 }
 
+/* Give a control inside a table cell an accessible name.
+
+   A column heading does not name the inputs beneath it, so every control in
+   these three tables had a null accessible name and read as "edit text" with
+   nothing else. The visible column heading is reused verbatim; no wording is
+   invented and nothing about the value changes. */
+function named(control, ariaLabel) {
+  control.setAttribute("aria-label", ariaLabel);
+  return control;
+}
+
 function sourceRow(source) {
   const tr = el("tr", { class: "source-row" });
   tr.append(
-    el("td", {}, input("label", source.label, "SRC-AUDIT")),
-    el("td", {}, input("origin", source.origin, "Independent audit of FY2024")),
-    el("td", {}, select("kind", state.schedule.source_kinds, source.kind)),
+    el("td", {}, named(input("label", source.label, "SRC-AUDIT"), "Reference")),
+    el(
+      "td",
+      {},
+      named(
+        input("origin", source.origin, "Independent audit of FY2024"),
+        "Description",
+      ),
+    ),
+    el(
+      "td",
+      {},
+      named(
+        select("kind", state.schedule.source_kinds, source.kind),
+        "Standing",
+      ),
+    ),
   );
   const remove = el("button", { type: "button", class: "link" }, "Remove");
   remove.addEventListener("click", () => tr.remove());
@@ -637,8 +662,15 @@ function conflictRow(conflict) {
     label: entry.label,
   }));
   tr.append(
-    el("td", {}, select("metric", metricOptions, conflict.metric)),
-    el("td", {}, input("note", conflict.note, "Reference calls contradict the deck")),
+    el("td", {}, named(select("metric", metricOptions, conflict.metric), "Figure")),
+    el(
+      "td",
+      {},
+      named(
+        input("note", conflict.note, "Reference calls contradict the deck"),
+        "What conflicts",
+      ),
+    ),
   );
   const remove = el("button", { type: "button", class: "link" }, "Remove");
   remove.addEventListener("click", () => tr.remove());
@@ -654,26 +686,71 @@ function figureRow(entry, figure) {
     el("div", { class: "cites" }, `${entry.guidance} (${entry.unit})`),
   );
   tr.append(name);
-  tr.append(el("td", { class: "numeric" }, input("value", figure ? figure.value : "", "")));
+  // Named with the figure, not just the column, so a screen reader reaching
+  // row nine says "Annual recurring revenue, value" rather than "value".
   tr.append(
-    el("td", {}, select("status", state.schedule.figure_statuses,
-      figure ? figure.status : "reported")),
+    el(
+      "td",
+      { class: "numeric" },
+      named(
+        input("value", figure ? figure.value : "", ""),
+        `${entry.label} — value (${entry.unit})`,
+      ),
+    ),
+  );
+  tr.append(
+    el(
+      "td",
+      {},
+      named(
+        select(
+          "status",
+          state.schedule.figure_statuses,
+          figure ? figure.status : "reported",
+        ),
+        `${entry.label} — standing`,
+      ),
+    ),
   );
 
+  /* Citation controls.
+
+     Same options, same values, same checked state as before — `readMaterial`
+     still reads `.cite-box:checked` and the value is still the source label.
+     What changed is that they are usable:
+
+     * each option showed only its raw reference (`SRC-MARKET`), so citing a
+       source meant recalling from memory what that reference was. The recorded
+       description now sits beside it;
+     * each option was a bare `<label>`, which inherits `display:block` and a
+       16px bottom margin from the global form rule. Five sources cost ~80px of
+       margin per figure and the schedule ran to 3060px;
+     * they were rendered in `.cites`, the faint colour used for citation
+       footnotes, so interactive controls were drawn as the dimmest thing in
+       the row;
+     * the checkbox carried inline `width`/`margin` overrides to escape the
+       global `input { width: 100% }` rule. That rule now exempts checkboxes,
+       so no element styles itself. */
   const citeCell = el("td", { class: "cite-cell" });
   const selected = new Set(figure ? figure.source_labels : []);
   const labels = currentSourceLabels();
+  const origins = new Map(
+    state.detail.case.sources.map((source) => [source.label, source.origin]),
+  );
+
   if (!labels.length) {
     citeCell.append(el("span", { class: "cites" }, "Add a source first"));
   }
   labels.forEach((label) => {
-    const wrapper = el("label", { class: "cites" });
+    const option = el("label", { class: "cite-option" });
     const box = el("input", { type: "checkbox", class: "cite-box", value: label });
-    box.style.width = "auto";
-    box.style.marginRight = "4px";
     if (selected.has(label)) box.checked = true;
-    wrapper.append(box, label);
-    citeCell.append(wrapper);
+    option.append(
+      box,
+      el("span", { class: "cite-ref" }, label),
+      el("span", { class: "cite-origin" }, origins.get(label) || ""),
+    );
+    citeCell.append(option);
   });
   tr.append(citeCell);
   return tr;

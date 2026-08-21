@@ -1248,6 +1248,67 @@ select.compact {
   font-size: var(--type-secondary);
 }
 
+/* Checkboxes are not text fields and must escape the 100% width rule above.
+   Previously each one carried inline `width`/`margin` to do this itself, which
+   is a literal value outside the token system (§2.3) written at render time. */
+input[type="checkbox"],
+input[type="radio"] {
+  width: auto;
+  margin: 0;
+  padding: 0;
+  accent-color: var(--yukti-color-yellow-500);
+  flex: none;
+}
+
+/* ---------- figure citation controls ---------- */
+
+.cite-cell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-hair);
+  min-width: 220px;
+}
+
+/* Resets the global `label` rule. That rule gives every label
+   `display: block` and 24px of bottom margin, which is right for a stacked
+   form field and catastrophic for five checkboxes inside a table cell —
+   it was costing roughly 80px per figure across a fifteen-figure schedule. */
+.cite-option {
+  display: flex;
+  align-items: baseline;
+  gap: var(--yukti-space-2);
+  margin-bottom: 0;
+  padding: 1px 0;
+  font-size: var(--type-secondary);
+  color: var(--yukti-color-ink-900);
+  cursor: pointer;
+  transition: color var(--yukti-duration-quick) var(--yukti-ease-micro);
+}
+
+.cite-option:hover .cite-origin {
+  color: var(--ink-muted);
+}
+
+.cite-ref {
+  font-family: var(--yukti-font-data);
+  font-size: var(--type-label);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+/* The description the reference stands for. Truncated rather than wrapped:
+   a citation list is scanned, and a wrapping second line reintroduces exactly
+   the row height this change removes. The full text is on the source register
+   directly above. */
+.cite-origin {
+  font-size: var(--type-label);
+  color: var(--ink-faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
 textarea {
   resize: vertical;
   line-height: var(--leading-body);

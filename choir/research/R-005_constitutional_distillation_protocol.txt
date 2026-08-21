@@ -1,0 +1,348 @@
+# CHOIR Research RFC — Constitutional Distillation Protocol (CDP)
+
+**Status:** Research Proposal
+
+**Project:** CHOIR (Computational Heuristics for Ontological Institutional Reasoning)
+
+**Engine:** DAALE (Data Algorithmically Analytical Logical Engine)
+
+**Version:** R-005 (Draft)
+
+---
+
+## Abstract
+
+The Constitutional Distillation Protocol (CDP) is a proposed CHOIR primitive for converting explicit institutional governance into implicit specialist behavior.
+
+Instead of repeatedly injecting lengthy constitutional prompts into every inference, CDP teaches specialist kernels to behave as though those constitutional rules are permanently present.
+
+The result is a system where governance becomes part of model behavior rather than runtime prompt overhead.
+
+This proposal extends prompt distillation from task-specific rule compression into institutional reasoning preservation.
+
+---
+
+# Problem Statement
+
+Modern AI systems repeatedly consume large system prompts containing:
+
+* review policies
+* safety constraints
+* reasoning guidelines
+* formatting requirements
+* escalation rules
+* organizational standards
+
+These prompts are expensive to transmit, difficult to maintain, and easy to diverge across agents.
+
+More importantly—
+
+> Organizations lose reasoning consistency when governance exists only as text instead of learned behavior.
+
+CHOIR requires a mechanism that preserves institutional reasoning across every cognitive kernel without duplicating constitutional instructions every inference.
+
+---
+
+# Core Principle
+
+> Governance should be internalized, not repeatedly instructed.
+
+Prompt distillation demonstrates that a student model can learn behaviors produced by a teacher operating under a long system prompt. After training, the student reproduces those behaviors without requiring the original prompt at inference time. <Cite refs={["turn0search0","turn0search1"]}/>
+
+CHOIR generalizes this idea.
+
+Instead of distilling:
+
+> "Classify language."
+
+We distill:
+
+> "Reason like this institution."
+
+---
+
+# Constitutional Distillation Protocol
+
+## Stage 1 — Constitution Definition
+
+The institution defines its constitutional rules.
+
+Examples include:
+
+* evidence standards
+* acceptable uncertainty
+* escalation policies
+* precedent handling
+* disagreement protocols
+* formatting conventions
+
+These rules become the constitutional prompt.
+
+This prompt is **not** intended for long-term runtime use.
+
+Its purpose is to teach.
+
+---
+
+## Stage 2 — Teacher Deliberation
+
+A teacher model operates under the full constitution.
+
+Inputs include real organizational decisions:
+
+* investment memos
+* QA incidents
+* architecture reviews
+* customer escalations
+* committee discussions
+
+The teacher produces constitutionally compliant reasoning.
+
+Output includes:
+
+* conclusions
+* structured reasoning
+* citations
+* uncertainty
+* objections
+* resolutions
+
+The teacher becomes the institutional exemplar.
+
+---
+
+## Stage 3 — Distillation Dataset
+
+Runtime prompts are stripped away.
+
+The student receives only:
+
+Input:
+
+> Institutional case.
+
+Target:
+
+> Teacher-produced reasoning.
+
+The student never receives the constitutional prompt directly.
+
+Instead, it learns behaviors demonstrated by the teacher.
+
+This mirrors the prompt distillation workflow demonstrated in Tinker. <Cite refs={["turn0search0","turn0search1"]}/>
+
+---
+
+## Stage 4 — Specialist Kernel Formation
+
+Instead of one distilled model, CHOIR creates role-specific kernels.
+
+Example:
+
+| Kernel           | Distilled behavior     |
+| ---------------- | ---------------------- |
+| Historian        | precedent-first        |
+| Librarian        | evidence discipline    |
+| Contrarian       | assumption challenge   |
+| First Principles | decomposition          |
+| Expansionist     | alternative generation |
+
+Every kernel shares the same constitutional foundation while expressing different reasoning roles.
+
+---
+
+## Stage 5 — Runtime Execution
+
+At runtime:
+
+No constitutional prompt is injected.
+
+The scheduler only decides:
+
+* role
+* effort
+* rounds
+
+The constitutional behavior already exists inside the kernel.
+
+---
+
+# Architectural Model
+
+## Two-Layer System
+
+### Layer 1 — Constitutional Layer
+
+Responsibilities:
+
+* governance
+* precedent
+* institutional philosophy
+* reasoning standards
+* escalation policies
+
+This layer teaches.
+
+### Layer 2 — Runtime Layer
+
+Contains:
+
+* Historian
+* Contrarian
+* First Principles
+* Expansionist
+* Librarian
+
+These kernels execute decisions without repeatedly loading constitutional instructions.
+
+---
+
+# Why This Matters
+
+## 1. Reduced Prompt Overhead
+
+Long constitutional prompts disappear from runtime.
+
+Inference becomes cheaper.
+
+Latency decreases.
+
+Context remains cleaner.
+
+This directly aligns with the efficiency motivation behind prompt distillation. <Cite refs={["turn0search0","turn0search1"]}/>
+
+## 2. Consistent Institutional Behavior
+
+Every kernel inherits the same governance.
+
+Instead of:
+
+> Five differently prompted agents.
+
+CHOIR becomes:
+
+> Five constitutionally aligned specialists.
+
+## 3. Organizational DNA
+
+This introduces a new concept.
+
+### Organizational DNA
+
+The constitutional behavior of an institution becomes a trainable artifact.
+
+Examples:
+
+* investment philosophy
+* engineering culture
+* QA methodology
+* legal reasoning style
+
+Rather than preserving documents—
+
+CHOIR preserves demonstrated reasoning.
+
+---
+
+# Relationship to Deliberation Cohorts
+
+Constitutional Distillation complements—not replaces—the Deliberation Cohort.
+
+| Cohort Component | CDP Contribution |
+| ---------------- | ---------------- |
+| Role             | preserved        |
+| Effort           | preserved        |
+| Rounds           | preserved        |
+| Governance       | internalized     |
+
+Every cohort member begins with constitutional alignment before deliberation starts.
+
+---
+
+# Research Hypotheses
+
+## H1
+
+Distilled constitutional behavior reduces prompt tokens while preserving institutional consistency.
+
+## H2
+
+Role-specific constitutional distillation produces stronger specialization than a single universal distilled model.
+
+## H3
+
+Institutions transfer culture more effectively through demonstrated decisions than through static policy documents.
+
+---
+
+# Evaluation Metrics
+
+Traditional metrics:
+
+* accuracy
+* latency
+* token cost
+
+CHOIR-specific metrics:
+
+### Constitutional Fidelity
+
+How closely runtime behavior matches teacher behavior.
+
+### Precedent Compliance
+
+Whether reasoning correctly applies historical decisions.
+
+### Dissent Quality
+
+Whether objections improve institutional decisions.
+
+### Governance Consistency
+
+Whether different kernels apply the same constitutional principles.
+
+---
+
+# Limitations
+
+Prompt distillation inherits important constraints.
+
+### Demonstration Dependence
+
+A student can only learn behaviors the teacher actually demonstrates. <Cite ref=turn0search0/>
+
+Implication:
+
+Organizations cannot preserve reasoning they have never exhibited.
+
+### Coverage Risk
+
+Rare constitutional edge cases require representative examples.
+
+### Constitutional Drift
+
+Institutions evolve.
+
+Distilled kernels require periodic constitutional refresh cycles.
+
+---
+
+# Future Research
+
+Future work includes:
+
+* constitutional versioning
+* automatic constitution extraction from decision history
+* on-policy constitutional reinforcement
+* disagreement-aware constitutional updates
+* cross-organization constitutional transfer
+
+---
+
+# Canonical Axiom
+
+> Governance should not live in prompts.
+>
+> Governance should live in behavior.
+
+The Constitutional Distillation Protocol proposes that institutional reasoning becomes durable only when governance is transformed from explicit instructions into internalized cognitive behavior shared across every specialist kernel within CHOIR.
