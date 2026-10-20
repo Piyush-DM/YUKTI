@@ -60,6 +60,14 @@ async function boot() {
   }
   state.booting = false;
   render();
+
+  // Deep link from the chat surface: `record.html?case=<id>` opens that case
+  // rather than landing on the register, so "open the full record" arrives
+  // where the reader already was.
+  const wanted = new URLSearchParams(location.search).get("case");
+  if (wanted && state.cases.some((item) => item.case_id === wanted)) {
+    await selectCase(wanted);
+  }
 }
 
 async function api(method, path, body) {
@@ -120,6 +128,53 @@ async function act(fn) {
   render();
 }
 
+/* The first thing a reader can do on an empty register. Creates the worked
+   example already carrying its material, and stops there — requesting the
+   judgment and recording the decision are the reader's to perform. */
+async function loadWorkedExample() {
+  await act(async () => {
+    const detail = await api("POST", "/api/worked-example", {});
+    await refreshCases();
+    state.detail = detail;
+    state.selectedId = detail.case.case_id;
+    state.judgmentId = null;
+    state.execution = null;
+    state.tab = "material";
+    state.message = {
+      kind: "info",
+      text:
+        "Worked example loaded with its material on file. " +
+        "Open Judgment and request one.",
+    };
+  });
+}
+
+/* The lifecycle, named. A reader who has never seen this product should not
+   have to infer the order of operations from the tab bar. */
+function renderLifecycle() {
+  const list = el("ol", { class: "lifecycle" });
+  [
+    ["Open a case", "What the committee is being asked to approve."],
+    ["Assemble material", "Register sources, then record figures against them."],
+    ["Request a judgment", "The engine reads the material and nothing else."],
+    ["Record the decision", "What the committee chose, bound to that judgment."],
+  ].forEach(([name, detail]) => {
+    list.append(el("li", {}, el("strong", {}, name), ` ${detail}`));
+  });
+  return list;
+}
+
+function workedExampleButton(label) {
+  const button = el(
+    "button",
+    { class: "primary", type: "button" },
+    label || "Load the worked example",
+  );
+  button.disabled = state.busy;
+  button.addEventListener("click", loadWorkedExample);
+  return button;
+}
+
 /* ---------------------------------------------------------------- render */
 
 function render() {
@@ -166,6 +221,16 @@ function renderRegister() {
           "A case is one decision the committee has to make. Open one to " +
             "start assembling material against the diligence schedule.",
         ),
+        // On a fresh install this is the only thing anyone can usefully do
+        // first, so it is offered rather than left to be discovered on the
+        // material screen of a case they would have to create first.
+        el(
+          "p",
+          {},
+          "Or start from the worked example, which arrives with its material " +
+            "already on file.",
+        ),
+        workedExampleButton(),
       ),
     );
     return;
@@ -236,7 +301,12 @@ function renderStage() {
     judgment: renderJudgment,
     audit: renderAudit,
   };
-  inner.append((views[state.tab] || renderOverview)());
+  const view = (views[state.tab] || renderOverview)();
+  // Mark the active view's top-level panels as active for visual coherence
+  view.querySelectorAll('.panel').forEach((panel, index) => {
+    if (index === 0) panel.classList.add('is-active');
+  });
+  inner.append(view);
 }
 
 /* The shape of a case, drawn before its values arrive.
@@ -285,7 +355,24 @@ function renderEmptyState() {
         "the register, or open a new one to start assembling material against " +
         "the diligence schedule.",
     ),
+    el("h3", {}, "How a case reaches a decision"),
+    renderLifecycle(),
   );
+
+  // Nothing in the register means nothing to select, so the empty stage says
+  // the same thing the empty register does rather than leaving a reader to
+  // find the one action available to them.
+  if (!state.cases.length && !state.booting) {
+    box.append(
+      el(
+        "p",
+        {},
+        "Nothing is on file yet. The worked example walks all four steps " +
+          "with real material.",
+      ),
+      workedExampleButton(),
+    );
+  }
   return box;
 }
 
@@ -364,6 +451,9 @@ function renderCaseHead() {
 
 function renderTabs() {
   const nav = el("nav", { class: "tabs" });
+  // Indicator element that follows the active tab
+  const indicator = el("div", { class: "tabs-indicator" });
+  nav.append(indicator);
   const tabs = [
     ["overview", "Overview"],
     ["material", "Material"],
@@ -385,23 +475,40 @@ function renderTabs() {
     });
     nav.append(button);
   });
+  // Set the tabs indicator position after render
+  requestAnimationFrame(() => updateTabsIndicator(nav));
   return nav;
+}
+
+function updateTabsIndicator(nav) {
+  const activeTab = nav.querySelector('.tab[aria-selected="true"]');
+  const indicator = nav.querySelector('.tabs-indicator');
+  if (activeTab && indicator) {
+    indicator.style.left = activeTab.offsetLeft + 'px';
+    indicator.style.width = activeTab.offsetWidth + 'px';
+    indicator.style.transform = 'scaleX(1)';
+  }
 }
 
 /* -------------------------------------------------------------- overview */
 
 function renderOverview() {
-  const wrap = el("div", {});
+  const wrap = el("div", { class: "overview" });
   const record = state.detail.case;
   const total = state.schedule.schedule.length;
   const recorded = total - state.detail.outstanding.length;
 
-  const coverage = el("section", { class: "panel" });
-  coverage.append(el("h3", {}, "Diligence completeness"));
+  // Record spine — the central spine of the overview
+  const spine = el("section", { class: "panel record-spine" });
+  spine.append(el("h3", {}, "Record spine"));
+
+  // Completeness as a visual spine segment
+  const coverage = el("div", { class: "spine-segment" });
+  coverage.append(el("h4", {}, "Diligence completeness"));
   coverage.append(
-    el("p", { class: "numeric" }, `${recorded} of ${total} scheduled figures recorded`),
+    el("p", { class: "numeric spine-metric" }, `${recorded} of ${total} figures recorded`),
   );
-  const bar = el("div", { class: "coverage-bar" });
+  const bar = el("div", { class: "coverage-bar spine-bar" });
   bar.append(el("span", { style: `width: ${(recorded / total) * 100}%` }));
   coverage.append(bar);
   if (state.detail.outstanding.length) {
@@ -412,18 +519,20 @@ function renderOverview() {
   } else {
     coverage.append(el("p", { class: "panel-note" }, "The schedule is complete."));
   }
-  wrap.append(coverage);
+  spine.append(coverage);
 
-  const thesis = el("section", { class: "panel" });
-  thesis.append(el("h3", {}, "Thesis"));
+  // Thesis as a spine segment
+  const thesis = el("div", { class: "spine-segment" });
+  thesis.append(el("h4", {}, "Investment thesis"));
   thesis.append(el("p", {}, record.thesis || "No thesis recorded."));
-  wrap.append(thesis);
+  spine.append(thesis);
 
+  // Material register as a spine segment
   const snapshots = state.detail.case.snapshots || [];
   if (snapshots.length) {
-    const panel = el("section", { class: "panel" });
-    panel.append(el("h3", {}, `Material register (${snapshots.length})`));
-    panel.append(
+    const material = el("div", { class: "spine-segment" });
+    material.append(el("h4", {}, `Material register (${snapshots.length} snapshots)`));
+    material.append(
       el(
         "p",
         { class: "panel-note" },
@@ -432,17 +541,18 @@ function renderOverview() {
       ),
     );
     snapshots.forEach((snapshot) => {
-      const row = el("div", { class: "position-row" });
+      const row = el("div", { class: "position-row spine-row" });
       row.append(
         el("span", { class: "who" }, `${snapshot.snapshot_id} (v${snapshot.version})`),
         el("span", { class: "numeric" }, snapshot.recorded_on),
         el("span", { class: "digest" }, `${snapshot.material_digest.slice(0, 16)}…`),
       );
-      panel.append(row);
+      material.append(row);
     });
-    wrap.append(panel);
+    spine.append(material);
   }
 
+  wrap.append(spine);
   wrap.append(renderLedger());
   return wrap;
 }
@@ -843,7 +953,7 @@ function renderExecution(collapsed) {
       running
         ? "The engine is running. Stages are listed as they are reached in the " +
             "pipeline; nothing is reported until the run returns what it produced."
-        : "What this run produced, in the order it was produced.",
+        : "What this run produced, in the order it was produced. Each stage is an immutable artifact.",
     ),
   );
 
@@ -865,11 +975,15 @@ function renderExecution(collapsed) {
     const row = el("li", {
       class: `execution-stage${latest ? " is-latest" : ""}`,
       "data-state": done ? "complete" : "pending",
+      // Index for staggered artifact reveal animation
+      style: `--index: ${index};`,
     });
     row.append(
       el("span", { class: "execution-marker" }),
       el("span", { class: "execution-label" }, stage.label),
       el("span", { class: "execution-detail" }, done ? stage.detail || "" : ""),
+      // Artifact badge for completed stages
+      done ? el("span", { class: "execution-artifact-badge", "aria-label": "Artifact produced" }, "artifact") : null,
     );
     list.append(row);
   });
@@ -892,7 +1006,7 @@ const PENDING_STAGE_LABELS = [
 function renderJudgment() {
   const record = state.detail.case;
   const judgment = state.detail.judgment;
-  const wrap = el("div", {});
+  const wrap = el("div", { class: "judgment-view" });
 
   // Mid-run and mid-reveal, the execution panel is the whole view. The
   // institutional decision appears only once every stage has been read out.
@@ -926,53 +1040,74 @@ function renderJudgment() {
     return wrap;
   }
 
-  /* Board-packet order. The verdict is the headline; everything after it
-     exists to justify the verdict, in descending order of what a committee
-     needs to challenge first. Nothing is computed here that the record does
-     not already contain. */
+  /* Board-packet order: Recommendation → Why → Evidence.
+     The verdict is the headline; everything after it exists to justify
+     the verdict, in descending order of what a committee needs to challenge.
+     Nothing is computed here that the record does not already contain. */
 
+  // 1. RECOMMENDATION — The verdict itself
   wrap.append(renderVerdict(judgment));
 
+  // 2. WHY — The reasoning behind the recommendation
+  const whySections = [];
+
   if (judgment.conditions.length) {
-    const panel = el("section", { class: "panel" });
+    const panel = el("section", { class: "panel why-section" });
+    panel.dataset.whyType = "conditions";
     panel.append(el("h3", {}, `Conditions (${judgment.conditions.length})`));
     panel.append(
-      el("p", { class: "panel-note" },
+      el("p", { class: "panel-note why-note" },
         "Findings that support proceeding only if something is resolved first. " +
         "These are what a conditional approval would attach to."),
     );
     judgment.conditions.forEach((finding) => panel.append(findingBlock(finding)));
-    wrap.append(panel);
+    whySections.push(panel);
   }
 
   if (judgment.disagreements.length) {
-    const panel = el("section", { class: "panel" });
+    const panel = el("section", { class: "panel why-section" });
+    panel.dataset.whyType = "disagreements";
     panel.append(el("h3", {}, `Where the review areas disagree (${judgment.disagreements.length})`));
     panel.append(
-      el("p", { class: "panel-note" },
+      el("p", { class: "panel-note why-note" },
         "Review areas cannot see each other's work, so a disagreement is a real " +
         "difference in what the material supports — not two passes at the same " +
         "answer."),
     );
     judgment.disagreements.forEach((view) => panel.append(topicBlock(view, true)));
-    wrap.append(panel);
+    whySections.push(panel);
   }
 
-  const evidence = renderEvidenceReferences(judgment);
-  if (evidence) wrap.append(evidence);
-
   if (judgment.agreements.length) {
-    const panel = el("section", { class: "panel" });
+    const panel = el("section", { class: "panel why-section" });
+    panel.dataset.whyType = "agreements";
     panel.append(el("h3", {}, `Independent agreement (${judgment.agreements.length})`));
     panel.append(
-      el("p", { class: "panel-note" },
+      el("p", { class: "panel-note why-note" },
         "Two review areas reaching the same conclusion without visibility of " +
         "each other."),
     );
     judgment.agreements.forEach((view) => panel.append(topicBlock(view, false)));
-    wrap.append(panel);
+    whySections.push(panel);
   }
 
+  if (whySections.length) {
+    const whyWrapper = el("div", { class: "why-wrapper" });
+    whyWrapper.append(el("h3", { class: "why-heading" }, "Why"));
+    whySections.forEach((s) => whyWrapper.append(s));
+    wrap.append(whyWrapper);
+  }
+
+  // 3. EVIDENCE — The sources and review areas
+  const evidence = renderEvidenceReferences(judgment);
+  if (evidence) {
+    const evidenceWrapper = el("div", { class: "evidence-wrapper" });
+    evidenceWrapper.append(el("h3", { class: "evidence-heading" }, "Evidence"));
+    evidenceWrapper.append(evidence);
+    wrap.append(evidenceWrapper);
+  }
+
+  // Review areas — detailed breakdown
   const areas = el("section", { class: "panel" });
   areas.append(el("h3", {}, "Review areas"));
   const grid = el("div", { class: "area-grid" });

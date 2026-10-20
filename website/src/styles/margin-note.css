@@ -2,11 +2,9 @@
   Living Margin — Addendum v1.2/§16, the brief's own top-priority item.
   Per-scene metadata (SECTION/name/DRAWING/REV/SHEET/UPDATED) placed in the
   trailing grid column beside each scene's content. Wide viewports only
-  (≥1200px) — no spare grid column exists below that, and cluttering a
-  narrow layout would violate the "barely perceptible" rule it serves.
-  Always column 12 — a consistent margin position regardless of how wide any
-  given scene's own content span is (none of the current content utilities
-  reach column 12, so there's never an overlap).
+  (≥1200px) — no spare grid column exists below that.
+  Always column 12 — a consistent margin position regardless of how wide
+  any given scene's own content span is.
 */
 
 .yukti-margin-note {
@@ -20,23 +18,42 @@
     flex-direction: column;
     gap: var(--yukti-space-3);
     padding-top: var(--yukti-space-1);
+    position: sticky;
+    top: calc(var(--yukti-space-7) + var(--yukti-space-3));
+    max-height: calc(100vh - var(--yukti-space-7) * 2);
   }
 
   .yukti-margin-note__row {
     font-family: var(--yukti-font-data);
-    font-size: 10px;
+    font-size: 9px;
     line-height: 1.4;
     color: var(--yukti-color-bone-300);
-    opacity: 0.4;
+    opacity: 0.35;
     letter-spacing: 0.06em;
   }
 
   .yukti-margin-note__row b {
     display: block;
     color: var(--yukti-color-yellow-500);
-    opacity: 0.75;
+    opacity: 0.7;
     font-weight: 400;
     text-transform: uppercase;
     letter-spacing: 0.1em;
+  }
+
+  /* Reduced opacity when not the active scene */
+  .yukti-margin-note--inactive .yukti-margin-note__row {
+    opacity: 0.2;
+  }
+
+  .yukti-margin-note--inactive .yukti-margin-note__row b {
+    opacity: 0.4;
+  }
+}
+
+/* Print: hide margin notes */
+@media print {
+  .yukti-margin-note {
+    display: none !important;
   }
 }

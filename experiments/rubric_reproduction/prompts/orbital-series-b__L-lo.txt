@@ -1,0 +1,959 @@
+You are executing a fixed, deterministic analytical procedure. It is written out
+in full below, transcribed from a reference implementation. Your task is to apply
+it exactly as specified and report the result.
+
+Rules:
+
+- Use ONLY the information in the INPUT PACKET below. Do not use any outside
+  knowledge about the company, the sector, comparable transactions, or base
+  rates. If a rule needs a value the packet does not contain, follow the rule's
+  stated behaviour for a missing value.
+- Do not invent any identifier. Every id you cite must appear in the ID MAP or
+  the INPUT PACKET below.
+- Apply the numeric thresholds and the branch order exactly as written. Do not
+  substitute your own judgement for a threshold comparison.
+- Produce the confidence bands by the stated derivation rules only. Do not assign
+  a confidence value directly.
+- Return exactly one JSON object matching the REQUIRED OUTPUT schema, with no
+  prose, commentary, or markdown fences outside the object.
+
+==============================================================================
+RUBRIC (verbatim transcription of the frozen implementation)
+==============================================================================
+# The investment reasoning rubric — literal transcription of the frozen pipeline
+
+This document transcribes the behaviour of the frozen `choir_prototype` investment
+pipeline into rules a reader (human or model) can execute by hand. It is the
+rubric handed to the **L-lo control** in the `rubric_reproduction` experiment.
+
+**It is a transcription, not a summary.** Every threshold, branch order, string
+template, and default is copied from the source. Where the source does something
+odd (for example: it computes a `uncertainty` field it never reads), this
+document says so rather than tidying it.
+
+## Source of record
+
+Transcribed from, and audited against:
+
+| Behaviour | Source file | Symbols |
+|---|---|---|
+| Packet → IR translation | `choir_prototype/domains/investment/translator.py` | `translate`, `_build_relationships`, `_KIND_TO_QUALITY`, `_STATUS_TO_UNCERTAINTY` |
+| Evidence quality ordering | `choir_prototype/core/ir.py` | `EvidenceQuality`, `_EVIDENCE_RANK` |
+| The four kernels | `choir_prototype/domains/investment/kernels.py` | `FinancialPostureKernel`, `RiskExposureKernel`, `MarketPositionKernel`, `GovernanceKernel`, all threshold constants, `_collect`, `_number`, `all_kernels` |
+| Confidence derivation | `choir_prototype/core/contracts.py` | `derive_confidence`, `_weakest`, `_downgrade`, `_QUALITY_RANK_TO_BAND`, `_BAND_WEIGHT`, `_ORDERED_BANDS`, `MINIMUM_COVERAGE` |
+| Synthesis | `choir_prototype/core/synthesizer.py` | `synthesize`, `_topic_views`, `_is_agreement`, `_is_disagreement`, `_tally`, `_decide`, `_synthesis_confidence`, `_remaining_uncertainty`, `MINIMUM_USABLE_KERNELS`, `DOMINANCE_MARGIN` |
+| Citation / artifact validation (X4) | `choir_prototype/core/runtime.py` | `validate_artifact`, `predicate_coverage` |
+
+## How to audit this file
+
+1. `python -m unittest experiments.rubric_reproduction.tests.test_rubric_drift`
+   asserts every numeric constant, enum member, predicate list, topic label and
+   the emitted finding catalogue in Section H below equals the live source. If a
+   threshold in `kernels.py` changes, that test fails until this file is updated.
+2. The drift test **cannot** detect a change to an operator direction
+   (`>=` → `>`), a branch reordering, or an edit to a statement-string template.
+   Those are prose in Sections A–G and must be diffed against the source files by
+   a reviewer before the first model run. See Section I.
+
+---
+
+## Section A — Translation: packet → CHOIR IR
+
+No reasoning happens here. The translator maps shapes and preserves what the
+packet said, including errors.
+
+**Entities.** Exactly two, always:
+`ent-company` (kind `company`, label = packet `company_name`) and `ent-market`
+(kind `market`, label = `"<sector> market"`).
+
+**Evidence.** One evidence item per source, in packet order:
+`id` = the source `label` verbatim; `quality` = `_KIND_TO_QUALITY[kind]`, or
+`ASSERTED` if the `kind` is not one of the five keys:
+
+| source `kind` | evidence quality |
+|---|---|
+| `audit` | `AUDITED` |
+| `management` | `REPORTED` |
+| `interview` | `REPORTED` |
+| `third_party` | `ESTIMATED` |
+| `assertion` | `ASSERTED` |
+| anything else | `ASSERTED` (default) |
+
+**Claims.** One claim per `data_points` entry, in packet order:
+`id` = `clm-NNN` where `NNN` is the 1-based index zero-padded to 3 digits
+(`clm-001`, `clm-002`, …); `predicate` = the entry's `metric`; `value` = the
+entry's `value` (a string); `evidence_ids` = the entry's `source_labels`
+(verbatim, in order); `subject_id` = `ent-market` if the metric is one of
+`tam_usd`, `market_growth_pct`, `competitor_count`, otherwise `ent-company`.
+
+`uncertainty` = `_STATUS_TO_UNCERTAINTY[status]`, or `UNKNOWN` if `status` is not
+one of the five keys:
+
+| packet `status` | claim uncertainty |
+|---|---|
+| `confirmed` | `SETTLED` |
+| `reported` | `LIKELY` |
+| `estimated` | `LIKELY` |
+| `disputed` | `DISPUTED` |
+| `unknown` | `UNKNOWN` |
+| anything else | `UNKNOWN` (default) |
+
+**IMPORTANT — `uncertainty` is computed and then never read.** No kernel and no
+synthesis step consults a claim's `uncertainty`. A `status` of `disputed` on its
+own has **no effect** on any output. The only thing that creates a contradiction
+is a `noted_conflicts` entry (below).
+
+**Assumptions.** One per `stated_assumptions` entry, in order:
+`id` = `asm-NNN` (1-based, 3-digit), `statement` = the text, `basis` =
+`"stated in packet"`.
+
+**Relationships.**
+- One `SUPPORTS` relationship for every (claim, evidence_id) pair, i.e. for each
+  claim, one per id in its `evidence_ids`. `source_id` = the evidence id,
+  `target_id` = the claim id.
+- One `CONTRADICTS` relationship per `noted_conflicts` entry **whose `metric`
+  matches some claim's predicate**. `source_id` = `"packet-review"`,
+  `target_id` = that claim's id, `note` = the conflict's `note`. A
+  `noted_conflicts` entry whose metric matches no claim is silently dropped.
+
+A "contradicted claim" is any claim that is the `target_id` of a `CONTRADICTS`
+relationship.
+
+**Dangling evidence is preserved.** If a data point lists a `source_label` that
+no source defines, the claim still carries that id in `evidence_ids`. (Neither
+sample packet does this, but a faithful transcription must state it.)
+
+---
+
+## Section B — Evidence quality ordering
+
+`EvidenceQuality` ranks, strongest to weakest (`_EVIDENCE_RANK`):
+
+| quality | rank |
+|---|---|
+| `AUDITED` | 3 |
+| `REPORTED` | 2 |
+| `ESTIMATED` | 1 |
+| `ASSERTED` | 0 |
+
+"Weakest evidence item" in a set = the item with the lowest rank; ties are broken
+by ascending `id` (`_weakest` sorts by `(quality.rank, id)` and takes the first).
+
+---
+
+## Section C — The four kernels
+
+The kernels run in this fixed order (`all_kernels()`):
+**`financial_posture`, `risk_exposure`, `market_position`, `governance`.**
+
+Each kernel is given the whole IR and returns one artifact:
+`{kernel_name, findings[], evidence_references[], confidence, assumptions[],
+unresolved_questions[]}`.
+
+### C.0 — What every kernel does first (`_collect`)
+
+For its `PREDICATES` list (given per kernel below), the kernel builds:
+
+- **`found`**: for each predicate that appears as *some* claim's `predicate`, the
+  **first** such claim (packet order). Predicates with no matching claim are
+  simply absent from `found`.
+- **`evidence`**: the de-duplicated union of the evidence items backing the
+  claims in `found` — each claim's `evidence_ids` resolved to evidence items,
+  **skipping any id that is not a real evidence item**, then sorted by `id`.
+- **`contradictions`**: the count of claims in `found` whose id is a contradicted
+  claim (Section A).
+
+`found_inputs` passed to confidence derivation = `len(found)`.
+`expected_inputs` = the length of the kernel's `PREDICATES` list.
+
+`_number(claim)` = `float(claim.value)` if that parses, else `None`. (So
+`audit_status = "audited"` reads as `None` numerically; the governance kernel
+handles it as text.)
+
+A finding's `evidence_ids` are taken from the **raw `claim.evidence_ids`** of the
+claims it used (not the de-duplicated `evidence` set), except where a rule below
+says otherwise (the runway / burn / multi-signal findings union and sort them).
+
+---
+
+### C.1 — `financial_posture`
+
+`PREDICATES = ("arr_usd", "yoy_growth_pct", "gross_margin_pct",
+"net_burn_monthly_usd", "cash_usd")` — `expected_inputs = 5`.
+
+**Growth** — read `yoy_growth_pct` as a number `growth`.
+- absent → add unresolved question: `"Year-over-year growth was not stated in the packet."`
+- `growth >= 40.0` → stance `supports`, phrase `"Growth of {growth:.0f}% is strong"`
+- else `growth >= 15.0` → stance `neutral`, phrase `"Growth of {growth:.0f}% is moderate"`
+- else → stance `opposes`, phrase `"Growth of {growth:.0f}% is weak"`
+- finding: `id "fin-growth"`, `topic "growth"`,
+  `statement = "{phrase} against a 40% strong / 15% weak threshold."`,
+  `claim_ids = (that claim's id,)`, `evidence_ids = that claim's evidence_ids`.
+
+**Margin** — read `gross_margin_pct` as `margin`.
+- absent → unresolved: `"Gross margin was not stated in the packet."`
+- `margin >= 70.0` → `supports`, text `"Gross margin of {margin:.0f}% is healthy for the category"`
+- else `margin >= 50.0` → `conditional`, text `"Gross margin of {margin:.0f}% is serviceable but thin"`
+- else → `opposes`, text `"Gross margin of {margin:.0f}% is below the viable band"`
+- finding: `id "fin-margin"`, `topic "revenue_quality"`, `statement = "{text}."`,
+  `claim_ids = (claim id,)`, `evidence_ids = claim evidence_ids`.
+
+**Runway** — read `cash_usd` as `cash`, `net_burn_monthly_usd` as `burn`.
+- `cash` absent or `burn` absent → unresolved:
+  `"Runway could not be derived: cash or net burn was missing."`
+- else if `burn <= 0` → finding `id "fin-runway"`, `topic "capital_efficiency"`,
+  stance `supports`, `statement = "Company is not burning cash; runway is unbounded."`,
+  `claim_ids = (cash claim id, burn claim id)`, `evidence_ids = ()`.
+- else:
+  - add assumption: `"Runway is derived as cash / net monthly burn, holding burn flat."`
+  - `runway = cash / burn`
+  - `runway >= 18.0` → `supports`; else `runway >= 12.0` → `conditional`; else `opposes`
+  - finding `id "fin-runway"`, `topic "capital_efficiency"`,
+    `statement = "Derived runway is {runway:.1f} months against a 18-month comfort floor."`,
+    `claim_ids = (cash claim id, burn claim id)`,
+    `evidence_ids = sorted(set(cash claim evidence_ids) | set(burn claim evidence_ids))`.
+
+**Confidence:** `derive_confidence(evidence, expected_inputs=5,
+found_inputs=len(found), contradiction_count=contradictions)` (Section D).
+
+---
+
+### C.2 — `risk_exposure`
+
+`PREDICATES = ("top_customer_revenue_pct", "net_revenue_retention_pct",
+"logo_churn_pct", "net_burn_monthly_usd", "arr_usd")` — `expected_inputs = 5`.
+
+**Concentration** — read `top_customer_revenue_pct` as `concentration`.
+- absent → unresolved: `"Customer concentration was not disclosed."`
+- `concentration >= 40.0` → `opposes`, text `"Top customer is {concentration:.0f}% of revenue -- severe"`
+- else `>= 25.0` → `conditional`, text `"Top customer is {concentration:.0f}% of revenue -- elevated"`
+- else → `supports`, text `"Top customer is {concentration:.0f}% of revenue -- diversified"`
+- finding `id "risk-concentration"`, `topic "concentration_risk"`,
+  `statement = "{text} against a 40% severe / 25% elevated threshold."`,
+  `claim_ids = (claim id,)`, `evidence_ids = claim evidence_ids`.
+
+**Retention / churn** — read `net_revenue_retention_pct` as `retention`,
+`logo_churn_pct` as `churn`. Build a `signals` list and a `negative` flag.
+- both absent → unresolved: `"Neither retention nor churn was disclosed."`
+- otherwise:
+  - if `retention` present:
+    - `retention >= 110.0` → signal `"net revenue retention {retention:.0f}% is healthy"`
+    - else `retention >= 95.0` → signal `"net revenue retention {retention:.0f}% is flat"`, set `negative`
+    - else → signal `"net revenue retention {retention:.0f}% is eroding"`, set `negative`
+  - if `churn` present:
+    - `churn >= 15.0` → signal `"logo churn {churn:.0f}% is high"`, set `negative`
+    - else → signal `"logo churn {churn:.0f}% is contained"`
+  - finding `id "risk-retention"`, `topic "revenue_quality"`,
+    stance `opposes` if `negative` else `supports`,
+    `statement = "Revenue durability: {'; '.join(signals)}."`,
+    `claim_ids = (retention claim id if used, then churn claim id if used)`,
+    `evidence_ids = sorted(union of the used claims' evidence_ids)`.
+
+**Burn efficiency** — read `net_burn_monthly_usd` as `burn`, `arr_usd` as `arr`.
+- `burn` absent, or `arr` absent, or `arr <= 0` → unresolved:
+  `"Burn efficiency could not be assessed: burn or ARR was missing."`
+- else `ratio = (burn * 12) / arr`:
+  - `ratio < 0.5` → `supports`; else `ratio < 1.0` → `conditional`; else `opposes`
+  - finding `id "risk-burn"`, `topic "capital_efficiency"`,
+    `statement = "Annualised burn is {ratio:.2f}x ARR against a 0.50x efficient / 1.00x unsustainable threshold."`,
+    `claim_ids = (burn claim id, arr claim id)`,
+    `evidence_ids = sorted(set(burn claim evidence_ids) | set(arr claim evidence_ids))`.
+
+**Provisional flag.** After the findings above, for every claim in `found` (in
+ascending id order) whose id is a contradicted claim, add unresolved question:
+`"Claim {claim.id} ({claim.predicate}) is contradicted elsewhere in the packet;
+this finding is provisional."`
+
+**Confidence:** `derive_confidence(evidence, expected_inputs=5,
+found_inputs=len(found), contradiction_count=contradictions)`. `assumptions = ()`.
+
+---
+
+### C.3 — `market_position`
+
+`PREDICATES = ("tam_usd", "market_growth_pct", "competitor_count")` —
+`expected_inputs = 3`.
+
+**Opportunity** — read `tam_usd` as `tam`, `market_growth_pct` as `market_growth`.
+Build `signals` and a `positive` flag.
+- both absent → unresolved: `"No market sizing or market growth figure was supplied."`
+- otherwise:
+  - if `tam` present: `billions = tam / 1_000_000_000`
+    - `tam >= 5_000_000_000.0` → signal `"addressable market ${billions:.1f}B is large"`, set `positive`
+    - else → signal `"addressable market ${billions:.1f}B is modest"`
+  - if `market_growth` present:
+    - `market_growth >= 15.0` → signal `"market growing {market_growth:.0f}% a year"`, set `positive`
+    - else → signal `"market growing only {market_growth:.0f}% a year"`
+  - finding `id "mkt-opportunity"`, `topic "market_opportunity"`,
+    stance `supports` if `positive` else `neutral`,
+    `statement = "Market opportunity: {'; '.join(signals)}."`,
+    `claim_ids = (tam claim id if used, then market_growth claim id if used)`,
+    `evidence_ids = sorted(union of used claims' evidence_ids)`.
+
+**Competition** — read `competitor_count` as `competitors`.
+- absent → unresolved: `"Competitive density was not characterised."`
+- else `crowded = competitors >= 12`:
+  - finding `id "mkt-competition"`, `topic "competitive_position"`,
+    stance `conditional` if `crowded` else `supports`,
+    `statement = "{competitors:.0f} named competitors against a crowding threshold of 12."`,
+    `claim_ids = (claim id,)`, `evidence_ids = claim evidence_ids`.
+
+**Assumptions.** For each item in the de-duplicated `evidence` set whose quality
+is `estimated` (i.e. `quality.value == "estimated"`), add assumption:
+`"Market figures from {item.id} are estimates, not measurements."`
+
+**Confidence:** `derive_confidence(evidence, expected_inputs=3,
+found_inputs=len(found), contradiction_count=contradictions)`.
+
+---
+
+### C.4 — `governance`
+
+`PREDICATES = ("founder_voting_control_pct", "independent_board_seats",
+"audit_status", "reporting_cadence")` — `expected_inputs = 4`.
+
+**Control / oversight** — read `founder_voting_control_pct` as `control`,
+`independent_board_seats` as `seats`. Build `signals` and a `concerning` flag.
+- both absent → unresolved: `"Neither voting control nor board composition was given."`
+- otherwise:
+  - if `control` present:
+    - `control >= 50.0` → signal `"founders retain {control:.0f}% voting control"`, set `concerning`
+    - else → signal `"founder voting control is {control:.0f}%"`
+  - if `seats` present:
+    - `seats < 1` → signal `"no independent board seats"`, set `concerning`
+    - else → signal `"{seats:.0f} independent board seat(s)"`
+  - finding `id "gov-control"`, `topic "governance_quality"`,
+    stance `conditional` if `concerning` else `supports`,
+    `statement = "Control and oversight: {'; '.join(signals)}."`,
+    `claim_ids = (control claim id if used, then seats claim id if used)`,
+    `evidence_ids = sorted(union of used claims' evidence_ids)`.
+
+**Transparency** — the `audit_status` claim (text, not a number).
+- absent → unresolved: `"Audit status was not stated."`
+- else `audited = (claim value, lowercased) == "audited"`:
+  - finding `id "gov-transparency"`, `topic "financial_transparency"`,
+    stance `supports` if `audited` else `opposes`,
+    `statement = "Financial statements are {claim value}."`,
+    `claim_ids = (audit_status claim id,)`, `evidence_ids = that claim's evidence_ids`.
+
+**Reporting cadence** — if `reporting_cadence` is not in `found`, add unresolved
+question: `"Reporting cadence was not stated."` (No finding is ever produced from
+`reporting_cadence`.)
+
+**Confidence:** `derive_confidence(evidence, expected_inputs=4,
+found_inputs=len(found), contradiction_count=contradictions)`. `assumptions = ()`.
+
+---
+
+## Section D — Confidence derivation (`derive_confidence`)
+
+Inputs: `evidence` (the kernel's de-duplicated evidence set), `expected_inputs`,
+`found_inputs`, `contradiction_count`.
+
+Let `coverage_ratio = found_inputs / expected_inputs`
+(`0.0` if `expected_inputs == 0`).
+`coverage` string = `"{found_inputs}/{expected_inputs} expected inputs present"`.
+
+The `derivation` list always starts with:
+`"rule 0: inputs -- {n} evidence item(s), coverage {found_inputs}/{expected_inputs}
+({coverage_ratio:.0%}), {contradiction_count} contradiction(s)"`
+where `n = len(evidence)`.
+
+Then, in order:
+
+1. **No evidence.** If `evidence` is empty:
+   add `"rule 1: no evidence at all -> INSUFFICIENT (stop)"`; return band
+   `insufficient`, `limiting_factor = "no supporting evidence in packet"`,
+   `evidence_floor = "none"`.
+2. Otherwise add `"rule 1: evidence present -> continue"`.
+3. **Coverage floor.** If `coverage_ratio < 0.5`:
+   add `"rule 2: coverage {coverage_ratio:.0%} < 50% minimum -> INSUFFICIENT (stop)"`;
+   return band `insufficient`, `limiting_factor = "incomplete input coverage"`,
+   `evidence_floor = <weakest evidence item's quality value>`.
+4. Otherwise add
+   `"rule 2: coverage {coverage_ratio:.0%} >= 50% minimum -> continue"`.
+5. **Start band from the weakest evidence item** (Section B). Rank → band:
+   `3 → high`, `2 → moderate`, `1 → low`, `0 → low`.
+   `limiting_factor = "weakest evidence is {weakest.quality.value} ({weakest.id})"`.
+   Add `"rule 3: weakest evidence is {weakest.id} ({weakest.quality.value}) ->
+   start at {band}"`.
+6. **Contradiction downgrade.** If `contradiction_count > 0`:
+   move the band **down one step per contradiction**, not past `low`
+   (order `high → moderate → low`; `insufficient` is never reached this way).
+   `limiting_factor = "{contradiction_count} contradicted claim(s) in scope"`.
+   Add `"rule 4: {contradiction_count} contradiction(s) -> downgrade {before} to
+   {after} (floor: low)"`.
+   Else add `"rule 4: no contradictions -> no downgrade"`.
+7. **Partial-coverage cap.** If `coverage_ratio < 1.0` **and** the band is `high`:
+   set band `moderate`, `limiting_factor = "partial input coverage"`, add
+   `"rule 5: partial coverage caps high -> moderate"`. Else add
+   `"rule 5: no coverage cap applied"`.
+8. Add `"result: {band} (limited by: {limiting_factor})"`.
+
+`evidence_floor` in the non-early-return case = the weakest evidence item's
+`quality.value`. `contradictions` on the confidence object = `contradiction_count`.
+
+---
+
+## Section E — Synthesis (`synthesize`)
+
+Input: the four artifacts, in kernel dispatch order.
+
+### E.1 — Topic views
+
+Group every finding across all artifacts by its `topic`. Within a topic,
+positions are kept in **artifact (kernel dispatch) order**. Topics are then
+sorted alphabetically. A position records `{kernel_name, stance, statement,
+finding_id}`.
+
+- **Agreement** on a topic: it has **≥ 2 positions**, and the set of *non-neutral*
+  stances among them has size exactly 1 (every kernel that took a side took the
+  same side; `conditional` counts as a side here).
+- **Disagreement** on a topic: the stance set (including neutral) contains **both
+  `supports` and `opposes`**. (`conditional` vs `supports` is not a disagreement.)
+
+### E.2 — Usable kernels
+
+`usable_kernels` = the names of artifacts whose confidence band is **not**
+`insufficient`, in kernel dispatch order.
+
+### E.3 — Weighted tally (`_tally`)
+
+Band weight: `high = 3`, `moderate = 2`, `low = 1`, `insufficient = 0`.
+
+Walk the artifacts in order; for each, let `w` be its band weight; for each
+finding:
+- `supports` → `support_weight += w`
+- `opposes` → `oppose_weight += w`
+- `conditional` → `conditional_count += 1` (weight is not added)
+- `neutral` → nothing
+
+An `insufficient` kernel contributes weight 0, so its findings cannot move the
+tally.
+
+### E.4 — Decision rules (`_decide`), first match wins
+
+Let `margin = abs(support_weight - oppose_weight)`,
+`usable_count = len(usable_kernels)`, `total = 4`,
+`disagreement_count = number of disagreement topics`.
+
+Rules are evaluated in this order; the **first that fires** decides, and later
+rules are not evaluated:
+
+| Rule | Fires when | Outcome |
+|---|---|---|
+| **R1 insufficient-basis** | `usable_count < 2` | `insufficient basis` |
+| **R2 live-disagreement** | `disagreement_count > 0` **and** `margin < 3` | `contested` |
+| **R3 proceed-with-conditions** | `support_weight > oppose_weight` **and** `conditional_count > 0` | `proceed with conditions` |
+| **R4 proceed** | `support_weight > oppose_weight` | `proceed` |
+| **R5 decline** | `oppose_weight > support_weight` | `decline` |
+| **R6 balanced-fallback** | otherwise (`support_weight == oppose_weight`) | `contested` |
+
+Every rule that is evaluated is recorded as
+`{name, condition, observed, fired, outcome}` — including the ones that fall
+through — so the output's `rules_evaluated` lists R1 onward up to and including
+the rule that fired.
+
+`rationale` lines (not scored by the comparison, listed here for completeness):
+- If R1 fires:
+  `"Only {usable_count} of {total} kernels reached a usable confidence band; 2 are required."`
+  and
+  `"The packet has not been assessed. This is a statement about the evidence supplied, not about the opportunity."`
+- If R1 does not fire, two lines are always added next:
+  `"{usable_count} of {total} kernels reached a usable confidence band."`
+  and
+  `"Weighted support {support_weight} against opposition {oppose_weight}, with {conditional_count} conditional finding(s)."`
+- If R2 fires:
+  `"{disagreement_count} topic(s) carry directly opposing kernel findings and neither side leads by the 3-point margin required to treat the disagreement as settled."`
+  and `"Both positions are reported. The disagreement is live, not resolved."`
+- If there is a disagreement but R2 did not fire:
+  `"{disagreement_count} topic(s) carry opposing findings, but the leading side is ahead by {margin}, clearing the 3-point margin."`
+- If R3 fires: `"Support leads, but conditional findings remain outstanding; those become the conditions."`
+- If R4 fires: `"Support leads with no conditional findings outstanding."`
+- If R5 fires: `"Opposition leads on weighted findings."`
+- If R6 fires: `"Support and opposition are exactly balanced."`
+
+### E.5 — Institutional confidence (`_synthesis_confidence`)
+
+- If `usable_count < 2` → band `insufficient`,
+  `confidence_limiting_factor = "too few kernels reached a usable band"`.
+- Otherwise, among the usable artifacts:
+  - band = the **weakest** confidence band present (minimum, not mean; order
+    `high` > `moderate` > `low`).
+  - the "weakest contributing kernel" = the usable artifact with the lowest band
+    weight, ties broken by ascending `kernel_name`.
+  - `confidence_limiting_factor = "weakest contributing kernel is {name}
+    ({that kernel's confidence limiting_factor})"`.
+  - if `disagreement_count > 0`, prefix it:
+    `"{disagreement_count} unresolved topic disagreement(s); " + <the above>`.
+
+### E.6 — Remaining uncertainty (`_remaining_uncertainty`)
+
+For each artifact in dispatch order: for each unresolved question `q`, emit
+`"[{kernel_name}] {q}"`; for each assumption `a`, emit
+`"[{kernel_name}] Assumed: {a}"`. Then sort the whole list of strings ascending.
+
+---
+
+## Section F — Citation rule (X4, `validate_artifact`)
+
+Every id a finding cites in `claim_ids` or `evidence_ids`, and every id in an
+artifact's `evidence_references`, **must be an id that exists in the IR** — i.e.
+one of: the two entity ids (`ent-company`, `ent-market`), a claim id
+(`clm-NNN`), an evidence id (a source label), an assumption id (`asm-NNN`), or a
+relationship id (`rel-NNN`). A finding citing anything else is a hard failure.
+
+Additional validation the runtime enforces:
+- an artifact must have a non-empty `kernel_name`;
+- an artifact must have at least one finding **or** at least one unresolved
+  question (saying "I could not tell" is valid; saying nothing is not);
+- the confidence object must carry a non-empty `limiting_factor` (evidence that
+  it was derived, not authored).
+
+`evidence_references` for each kernel = the ids of its de-duplicated `evidence`
+set (Section C.0), in `id` order.
+
+---
+
+## Section G — What the output must contain
+
+One JSON object: `{"artifacts": [<four artifacts, in dispatch order>],
+"synthesis": {...}}`. Artifact and synthesis shapes are given in
+`prompts/OUTPUT_SCHEMA.json`. The scored fields are: the recommendation, the
+institutional confidence band, which decision rule fired, each kernel's band /
+limiting factor / coverage / contradiction count / derivation outcome, every
+finding's `(kernel, id, topic, stance)` and its cited ids, the weighted tally,
+the usable-kernel set, the agreement and disagreement topic sets, the
+per-kernel unresolved questions, and the remaining-uncertainty set.
+
+---
+
+## Section H — Machine-readable constants (checked against live source)
+
+`tests/test_rubric_drift.py` parses the JSON between the two sentinels below and
+asserts `constants` equals `ground_truth.live_constants()`, `finding_catalogue`
+equals the set of `(kernel, finding_id, topic)` triples the frozen pipeline emits
+across both sample packets, and `market_metrics` are the predicates the
+translator attaches to `ent-market`.
+
+<!-- BEGIN rubric-machine-block -->
+```json
+{
+  "constants": {
+    "translator": {
+      "TRANSLATOR_NAME": "investment.v0",
+      "IR_VERSION": "choir-ir/0.1",
+      "kind_to_quality": {
+        "audit": "AUDITED",
+        "management": "REPORTED",
+        "interview": "REPORTED",
+        "third_party": "ESTIMATED",
+        "assertion": "ASSERTED"
+      },
+      "kind_to_quality_default": "ASSERTED",
+      "status_to_uncertainty": {
+        "confirmed": "SETTLED",
+        "reported": "LIKELY",
+        "estimated": "LIKELY",
+        "disputed": "DISPUTED",
+        "unknown": "UNKNOWN"
+      },
+      "status_to_uncertainty_default": "UNKNOWN"
+    },
+    "evidence_quality_rank": {
+      "AUDITED": 3,
+      "REPORTED": 2,
+      "ESTIMATED": 1,
+      "ASSERTED": 0
+    },
+    "confidence": {
+      "MINIMUM_COVERAGE": 0.5,
+      "quality_rank_to_band": {
+        "3": "HIGH",
+        "2": "MODERATE",
+        "1": "LOW",
+        "0": "LOW"
+      },
+      "band_order_strong_to_weak": ["HIGH", "MODERATE", "LOW", "INSUFFICIENT"]
+    },
+    "band_weight": {
+      "HIGH": 3,
+      "MODERATE": 2,
+      "LOW": 1,
+      "INSUFFICIENT": 0
+    },
+    "synthesis": {
+      "MINIMUM_USABLE_KERNELS": 2,
+      "DOMINANCE_MARGIN": 3,
+      "recommendations": [
+        "proceed",
+        "proceed with conditions",
+        "decline",
+        "contested",
+        "insufficient basis"
+      ]
+    },
+    "kernels": {
+      "financial_posture": {
+        "predicates": [
+          "arr_usd",
+          "yoy_growth_pct",
+          "gross_margin_pct",
+          "net_burn_monthly_usd",
+          "cash_usd"
+        ],
+        "expected_inputs": 5
+      },
+      "risk_exposure": {
+        "predicates": [
+          "top_customer_revenue_pct",
+          "net_revenue_retention_pct",
+          "logo_churn_pct",
+          "net_burn_monthly_usd",
+          "arr_usd"
+        ],
+        "expected_inputs": 5
+      },
+      "market_position": {
+        "predicates": ["tam_usd", "market_growth_pct", "competitor_count"],
+        "expected_inputs": 3
+      },
+      "governance": {
+        "predicates": [
+          "founder_voting_control_pct",
+          "independent_board_seats",
+          "audit_status",
+          "reporting_cadence"
+        ],
+        "expected_inputs": 4
+      }
+    },
+    "thresholds": {
+      "STRONG_GROWTH_PCT": 40.0,
+      "WEAK_GROWTH_PCT": 15.0,
+      "HEALTHY_MARGIN_PCT": 70.0,
+      "WEAK_MARGIN_PCT": 50.0,
+      "COMFORTABLE_RUNWAY_MONTHS": 18.0,
+      "TIGHT_RUNWAY_MONTHS": 12.0,
+      "CONCENTRATION_ALERT_PCT": 25.0,
+      "CONCENTRATION_SEVERE_PCT": 40.0,
+      "HEALTHY_NRR_PCT": 110.0,
+      "WEAK_NRR_PCT": 95.0,
+      "HIGH_CHURN_PCT": 15.0,
+      "EFFICIENT_BURN_RATIO": 0.5,
+      "UNSUSTAINABLE_BURN_RATIO": 1.0,
+      "LARGE_TAM_USD": 5000000000.0,
+      "STRONG_MARKET_GROWTH_PCT": 15.0,
+      "CROWDED_COMPETITOR_COUNT": 12,
+      "FOUNDER_CONTROL_ALERT_PCT": 50.0,
+      "MINIMUM_INDEPENDENT_SEATS": 1
+    },
+    "topics": [
+      "growth",
+      "capital_efficiency",
+      "revenue_quality",
+      "market_opportunity",
+      "competitive_position",
+      "concentration_risk",
+      "governance_quality",
+      "financial_transparency"
+    ]
+  },
+  "kernel_dispatch_order": [
+    "financial_posture",
+    "risk_exposure",
+    "market_position",
+    "governance"
+  ],
+  "market_metrics": ["tam_usd", "market_growth_pct", "competitor_count"],
+  "finding_catalogue": [
+    {"kernel": "financial_posture", "finding_id": "fin-growth", "topic": "growth"},
+    {"kernel": "financial_posture", "finding_id": "fin-margin", "topic": "revenue_quality"},
+    {"kernel": "financial_posture", "finding_id": "fin-runway", "topic": "capital_efficiency"},
+    {"kernel": "risk_exposure", "finding_id": "risk-concentration", "topic": "concentration_risk"},
+    {"kernel": "risk_exposure", "finding_id": "risk-retention", "topic": "revenue_quality"},
+    {"kernel": "risk_exposure", "finding_id": "risk-burn", "topic": "capital_efficiency"},
+    {"kernel": "market_position", "finding_id": "mkt-opportunity", "topic": "market_opportunity"},
+    {"kernel": "market_position", "finding_id": "mkt-competition", "topic": "competitive_position"},
+    {"kernel": "governance", "finding_id": "gov-control", "topic": "governance_quality"},
+    {"kernel": "governance", "finding_id": "gov-transparency", "topic": "financial_transparency"}
+  ]
+}
+```
+<!-- END rubric-machine-block -->
+
+---
+
+## Section I — Limits of this transcription (read before the first model run)
+
+The drift test in Section H guards: numeric thresholds, the band-weight and
+quality-rank tables, `MINIMUM_COVERAGE`, `MINIMUM_USABLE_KERNELS`,
+`DOMINANCE_MARGIN`, the recommendation vocabulary, each kernel's predicate list
+and expected-input count, the topic vocabulary, the kernel dispatch order, the
+market-metric routing, and the emitted finding catalogue.
+
+The drift test **does not** guard, and a reviewer must diff Sections A–G against
+the source before relying on this file:
+
+- operator direction (`>=` vs `>`), which the prose in C–E states explicitly;
+- the **order** of branches within a kernel;
+- the exact wording of `statement` templates and of the unresolved-question and
+  assumption strings;
+- the exact `derivation` step strings in Section D;
+- the rationale strings in E.4 (these are not scored by `compare.py`).
+
+If any of those change in the source, this file is silently stale until a human
+notices.
+
+==============================================================================
+ID MAP (use these identifiers exactly; do not invent others)
+==============================================================================
+Entities:
+  ent-company   (every metric except the three market metrics below)
+  ent-market    (tam_usd, market_growth_pct, competitor_count)
+
+Evidence ids (one per source; cite these exactly):
+  SRC-AUDIT-FY24   Independent audit of FY2024 statements (audit)
+  SRC-DECK         Management investor deck, Q1 (management)
+  SRC-CAPTABLE     Certified capitalisation table (audit)
+  SRC-MARKET       Third-party market sizing report (third_party)
+  SRC-CUSTOMER     Reference calls with six customers (interview)
+
+Claim ids (one per data point, in packet order):
+  clm-001  arr_usd
+  clm-002  yoy_growth_pct
+  clm-003  gross_margin_pct
+  clm-004  net_burn_monthly_usd
+  clm-005  cash_usd
+  clm-006  top_customer_revenue_pct
+  clm-007  net_revenue_retention_pct
+  clm-008  logo_churn_pct
+  clm-009  tam_usd
+  clm-010  market_growth_pct
+  clm-011  competitor_count
+  clm-012  founder_voting_control_pct
+  clm-013  independent_board_seats
+  clm-014  audit_status
+  clm-015  reporting_cadence
+
+Assumption ids (one per stated assumption, in packet order):
+  asm-001
+  asm-002
+==============================================================================
+INPUT PACKET (this is all the information available)
+==============================================================================
+{
+  "document_version": "yukti-investment-document/0.1",
+  "id": "orbital-series-b",
+  "title": "Orbital Logistics -- Series B",
+  "company_name": "Orbital Logistics Inc.",
+  "sector": "supply chain software",
+  "stage": "Series B",
+  "sources": [
+    {
+      "label": "SRC-AUDIT-FY24",
+      "origin": "Independent audit of FY2024 statements",
+      "kind": "audit"
+    },
+    {
+      "label": "SRC-DECK",
+      "origin": "Management investor deck, Q1",
+      "kind": "management"
+    },
+    {
+      "label": "SRC-CAPTABLE",
+      "origin": "Certified capitalisation table",
+      "kind": "audit"
+    },
+    {
+      "label": "SRC-MARKET",
+      "origin": "Third-party market sizing report",
+      "kind": "third_party"
+    },
+    {
+      "label": "SRC-CUSTOMER",
+      "origin": "Reference calls with six customers",
+      "kind": "interview"
+    }
+  ],
+  "data_points": [
+    {
+      "metric": "arr_usd",
+      "value": "18000000",
+      "source_labels": [
+        "SRC-AUDIT-FY24"
+      ],
+      "status": "confirmed"
+    },
+    {
+      "metric": "yoy_growth_pct",
+      "value": "62",
+      "source_labels": [
+        "SRC-AUDIT-FY24",
+        "SRC-DECK"
+      ],
+      "status": "confirmed"
+    },
+    {
+      "metric": "gross_margin_pct",
+      "value": "74",
+      "source_labels": [
+        "SRC-AUDIT-FY24"
+      ],
+      "status": "confirmed"
+    },
+    {
+      "metric": "net_burn_monthly_usd",
+      "value": "1400000",
+      "source_labels": [
+        "SRC-AUDIT-FY24"
+      ],
+      "status": "confirmed"
+    },
+    {
+      "metric": "cash_usd",
+      "value": "21000000",
+      "source_labels": [
+        "SRC-AUDIT-FY24"
+      ],
+      "status": "confirmed"
+    },
+    {
+      "metric": "top_customer_revenue_pct",
+      "value": "38",
+      "source_labels": [
+        "SRC-DECK"
+      ],
+      "status": "reported"
+    },
+    {
+      "metric": "net_revenue_retention_pct",
+      "value": "104",
+      "source_labels": [
+        "SRC-DECK"
+      ],
+      "status": "disputed"
+    },
+    {
+      "metric": "logo_churn_pct",
+      "value": "11",
+      "source_labels": [
+        "SRC-DECK",
+        "SRC-CUSTOMER"
+      ],
+      "status": "reported"
+    },
+    {
+      "metric": "tam_usd",
+      "value": "8400000000",
+      "source_labels": [
+        "SRC-MARKET"
+      ],
+      "status": "estimated"
+    },
+    {
+      "metric": "market_growth_pct",
+      "value": "19",
+      "source_labels": [
+        "SRC-MARKET"
+      ],
+      "status": "estimated"
+    },
+    {
+      "metric": "competitor_count",
+      "value": "14",
+      "source_labels": [
+        "SRC-MARKET"
+      ],
+      "status": "estimated"
+    },
+    {
+      "metric": "founder_voting_control_pct",
+      "value": "56",
+      "source_labels": [
+        "SRC-CAPTABLE"
+      ],
+      "status": "confirmed"
+    },
+    {
+      "metric": "independent_board_seats",
+      "value": "1",
+      "source_labels": [
+        "SRC-CAPTABLE"
+      ],
+      "status": "confirmed"
+    },
+    {
+      "metric": "audit_status",
+      "value": "audited",
+      "source_labels": [
+        "SRC-AUDIT-FY24"
+      ],
+      "status": "confirmed"
+    },
+    {
+      "metric": "reporting_cadence",
+      "value": "monthly",
+      "source_labels": [
+        "SRC-DECK"
+      ],
+      "status": "reported"
+    }
+  ],
+  "stated_assumptions": [
+    "The FY2024 audit scope covers all operating subsidiaries.",
+    "Market sizing uses the vendor's own segment definition."
+  ],
+  "noted_conflicts": [
+    {
+      "metric": "net_revenue_retention_pct",
+      "note": "Customer reference calls describe contraction at two accounts, which is inconsistent with the retention figure in the deck."
+    }
+  ]
+}
+==============================================================================
+REQUIRED OUTPUT
+==============================================================================
+{
+  "artifacts": [
+    {
+      "kernel_name": "<financial_posture | risk_exposure | market_position | governance>",
+      "findings": [
+        {
+          "id": "<finding id from the rubric's finding catalogue>",
+          "topic": "<topic from the rubric's topic list>",
+          "stance": "<supports | opposes | conditional | neutral>",
+          "statement": "<the statement text the rule specifies>",
+          "claim_ids": ["clm-0NN", "..."],
+          "evidence_ids": ["SRC-...", "..."]
+        }
+      ],
+      "evidence_references": ["SRC-...", "..."],
+      "confidence": {
+        "band": "<high | moderate | low | insufficient>",
+        "limiting_factor": "<the limiting-factor string the rule specifies>",
+        "evidence_floor": "<audited | reported | estimated | asserted | none>",
+        "coverage": "<found>/<expected> expected inputs present",
+        "contradictions": <integer>,
+        "derivation": ["rule 0: ...", "rule 1: ...", "..."]
+      },
+      "assumptions": ["...", "..."],
+      "unresolved_questions": ["...", "..."]
+    }
+  ],
+  "synthesis": {
+    "recommendation": "<proceed | proceed with conditions | decline | contested | insufficient basis>",
+    "confidence": "<high | moderate | low | insufficient>",
+    "confidence_limiting_factor": "<string>",
+    "support_weight": <integer>,
+    "oppose_weight": <integer>,
+    "conditional_count": <integer>,
+    "usable_kernels": ["<kernel name>", "..."],
+    "agreements": [{"topic": "<topic>"}],
+    "disagreements": [{"topic": "<topic>"}],
+    "rules_evaluated": [{"name": "R1 insufficient-basis", "fired": false}, "..."],
+    "remaining_uncertainty": ["[kernel] ...", "..."],
+    "rationale": ["...", "..."]
+  }
+}
+

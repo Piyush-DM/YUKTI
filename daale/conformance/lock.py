@@ -33,7 +33,7 @@ executed. That is deliberate on two counts:
   normalised syntax tree rather than by bytes, so the mechanism is already
   idiomatic here.
 * It keeps the lock free of any dependency on the engine, which is what allows
-  it to be built while ``DECISION-005`` is open. Asserted by
+  it to be built without an answer to ``DECISION-005``. Asserted by
   ``test_conformance_never_imports_the_engine``.
 
 Determinism

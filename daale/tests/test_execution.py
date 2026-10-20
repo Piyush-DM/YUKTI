@@ -372,7 +372,7 @@ class TestDCore(unittest.TestCase):
 
 
 class TestDecisionBoundary(unittest.TestCase):
-    """The DECISION-005 boundary, asserted rather than only documented."""
+    """The evaluator boundary, asserted rather than only documented."""
 
     def test_no_execution_ever_emits_a_judgment(self) -> None:
         """v0 terminates; it does not adjudicate, and it says why."""

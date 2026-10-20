@@ -1,0 +1,857 @@
+{
+  "comparison_view": {
+    "agreements": [],
+    "confidence": "insufficient",
+    "confidence_limiting_factor": "too few kernels reached a usable band",
+    "disagreements": [],
+    "finding_citations": {
+      "financial_posture:fin-growth": {
+        "claim_ids": [
+          "clm-002"
+        ],
+        "evidence_ids": [
+          "SRC-FOUNDER"
+        ]
+      },
+      "market_position:mkt-opportunity": {
+        "claim_ids": [
+          "clm-003",
+          "clm-004"
+        ],
+        "evidence_ids": [
+          "SRC-SECTOR"
+        ]
+      }
+    },
+    "findings": [
+      [
+        "financial_posture",
+        "fin-growth",
+        "growth",
+        "supports"
+      ],
+      [
+        "market_position",
+        "mkt-opportunity",
+        "market_opportunity",
+        "neutral"
+      ]
+    ],
+    "fired_rule": "R1 insufficient-basis",
+    "kernel_bands": {
+      "financial_posture": "insufficient",
+      "governance": "insufficient",
+      "market_position": "low",
+      "risk_exposure": "insufficient"
+    },
+    "kernel_contradictions": {
+      "financial_posture": 0,
+      "governance": 0,
+      "market_position": 0,
+      "risk_exposure": 0
+    },
+    "kernel_coverage": {
+      "financial_posture": "2/5 expected inputs present",
+      "governance": "0/4 expected inputs present",
+      "market_position": "2/3 expected inputs present",
+      "risk_exposure": "1/5 expected inputs present"
+    },
+    "kernel_derivation_outcome": {
+      "financial_posture": "insufficient",
+      "governance": "insufficient",
+      "market_position": "low",
+      "risk_exposure": "insufficient"
+    },
+    "kernel_derivation_steps": {
+      "financial_posture": [
+        "rule 0",
+        "rule 1",
+        "rule 2"
+      ],
+      "governance": [
+        "rule 0",
+        "rule 1"
+      ],
+      "market_position": [
+        "rule 0",
+        "rule 1",
+        "rule 2",
+        "rule 3",
+        "rule 4",
+        "rule 5"
+      ],
+      "risk_exposure": [
+        "rule 0",
+        "rule 1",
+        "rule 2"
+      ]
+    },
+    "kernel_limiting_factors": {
+      "financial_posture": "incomplete input coverage",
+      "governance": "no supporting evidence in packet",
+      "market_position": "weakest evidence is estimated (SRC-SECTOR)",
+      "risk_exposure": "incomplete input coverage"
+    },
+    "kernel_unresolved": {
+      "financial_posture": [
+        "Gross margin was not stated in the packet.",
+        "Runway could not be derived: cash or net burn was missing."
+      ],
+      "governance": [
+        "Audit status was not stated.",
+        "Neither voting control nor board composition was given.",
+        "Reporting cadence was not stated."
+      ],
+      "market_position": [
+        "Competitive density was not characterised."
+      ],
+      "risk_exposure": [
+        "Burn efficiency could not be assessed: burn or ARR was missing.",
+        "Customer concentration was not disclosed.",
+        "Neither retention nor churn was disclosed."
+      ]
+    },
+    "recommendation": "insufficient basis",
+    "remaining_uncertainty": [
+      "Assumed: Market figures from SRC-SECTOR are estimates, not measurements.",
+      "Audit status was not stated.",
+      "Burn efficiency could not be assessed: burn or ARR was missing.",
+      "Competitive density was not characterised.",
+      "Customer concentration was not disclosed.",
+      "Gross margin was not stated in the packet.",
+      "Neither retention nor churn was disclosed.",
+      "Neither voting control nor board composition was given.",
+      "Reporting cadence was not stated.",
+      "Runway could not be derived: cash or net burn was missing."
+    ],
+    "tally": {
+      "conditional": 0,
+      "oppose": 0,
+      "support": 0
+    },
+    "usable_kernels": [
+      "market_position"
+    ]
+  },
+  "document": {
+    "company_name": "Northwind Instruments Ltd.",
+    "data_points": [
+      {
+        "metric": "arr_usd",
+        "source_labels": [
+          "SRC-FOUNDER"
+        ],
+        "status": "reported",
+        "value": "400000"
+      },
+      {
+        "metric": "yoy_growth_pct",
+        "source_labels": [
+          "SRC-FOUNDER"
+        ],
+        "status": "reported",
+        "value": "120"
+      },
+      {
+        "metric": "tam_usd",
+        "source_labels": [
+          "SRC-SECTOR"
+        ],
+        "status": "estimated",
+        "value": "1200000000"
+      },
+      {
+        "metric": "market_growth_pct",
+        "source_labels": [
+          "SRC-SECTOR"
+        ],
+        "status": "estimated",
+        "value": "7"
+      }
+    ],
+    "document_version": "yukti-investment-document/0.1",
+    "id": "northwind-seed",
+    "noted_conflicts": [],
+    "sector": "laboratory hardware",
+    "sources": [
+      {
+        "kind": "assertion",
+        "label": "SRC-FOUNDER",
+        "origin": "Founder email summary"
+      },
+      {
+        "kind": "third_party",
+        "label": "SRC-SECTOR",
+        "origin": "Trade association sector note"
+      }
+    ],
+    "stage": "Seed",
+    "stated_assumptions": [
+      "Founder figures are unaudited and self-reported."
+    ],
+    "title": "Northwind Instruments -- Seed"
+  },
+  "experiment": "rubric_reproduction",
+  "generated_by": "experiments/rubric_reproduction/ground_truth.py",
+  "ir_known_ids": [
+    "SRC-FOUNDER",
+    "SRC-SECTOR",
+    "asm-001",
+    "clm-001",
+    "clm-002",
+    "clm-003",
+    "clm-004",
+    "ent-company",
+    "ent-market",
+    "rel-001",
+    "rel-002",
+    "rel-003",
+    "rel-004"
+  ],
+  "note": "Derived by running choir_prototype's own pipeline. No expected value is hand-written here.",
+  "packet_id": "northwind-seed",
+  "record": {
+    "artifacts": [
+      {
+        "assumptions": [],
+        "confidence": {
+          "band": "insufficient",
+          "contradictions": 0,
+          "coverage": "2/5 expected inputs present",
+          "derivation": [
+            "rule 0: inputs -- 1 evidence item(s), coverage 2/5 (40%), 0 contradiction(s)",
+            "rule 1: evidence present -> continue",
+            "rule 2: coverage 40% < 50% minimum -> INSUFFICIENT (stop)"
+          ],
+          "evidence_floor": "asserted",
+          "limiting_factor": "incomplete input coverage"
+        },
+        "evidence_references": [
+          "SRC-FOUNDER"
+        ],
+        "findings": [
+          {
+            "claim_ids": [
+              "clm-002"
+            ],
+            "evidence_ids": [
+              "SRC-FOUNDER"
+            ],
+            "id": "fin-growth",
+            "stance": "supports",
+            "statement": "Growth of 120% is strong against a 40% strong / 15% weak threshold.",
+            "topic": "growth"
+          }
+        ],
+        "kernel_name": "financial_posture",
+        "unresolved_questions": [
+          "Gross margin was not stated in the packet.",
+          "Runway could not be derived: cash or net burn was missing."
+        ]
+      },
+      {
+        "assumptions": [],
+        "confidence": {
+          "band": "insufficient",
+          "contradictions": 0,
+          "coverage": "1/5 expected inputs present",
+          "derivation": [
+            "rule 0: inputs -- 1 evidence item(s), coverage 1/5 (20%), 0 contradiction(s)",
+            "rule 1: evidence present -> continue",
+            "rule 2: coverage 20% < 50% minimum -> INSUFFICIENT (stop)"
+          ],
+          "evidence_floor": "asserted",
+          "limiting_factor": "incomplete input coverage"
+        },
+        "evidence_references": [
+          "SRC-FOUNDER"
+        ],
+        "findings": [],
+        "kernel_name": "risk_exposure",
+        "unresolved_questions": [
+          "Customer concentration was not disclosed.",
+          "Neither retention nor churn was disclosed.",
+          "Burn efficiency could not be assessed: burn or ARR was missing."
+        ]
+      },
+      {
+        "assumptions": [
+          "Market figures from SRC-SECTOR are estimates, not measurements."
+        ],
+        "confidence": {
+          "band": "low",
+          "contradictions": 0,
+          "coverage": "2/3 expected inputs present",
+          "derivation": [
+            "rule 0: inputs -- 1 evidence item(s), coverage 2/3 (67%), 0 contradiction(s)",
+            "rule 1: evidence present -> continue",
+            "rule 2: coverage 67% >= 50% minimum -> continue",
+            "rule 3: weakest evidence is SRC-SECTOR (estimated) -> start at low",
+            "rule 4: no contradictions -> no downgrade",
+            "rule 5: no coverage cap applied",
+            "result: low (limited by: weakest evidence is estimated (SRC-SECTOR))"
+          ],
+          "evidence_floor": "estimated",
+          "limiting_factor": "weakest evidence is estimated (SRC-SECTOR)"
+        },
+        "evidence_references": [
+          "SRC-SECTOR"
+        ],
+        "findings": [
+          {
+            "claim_ids": [
+              "clm-003",
+              "clm-004"
+            ],
+            "evidence_ids": [
+              "SRC-SECTOR"
+            ],
+            "id": "mkt-opportunity",
+            "stance": "neutral",
+            "statement": "Market opportunity: addressable market $1.2B is modest; market growing only 7% a year.",
+            "topic": "market_opportunity"
+          }
+        ],
+        "kernel_name": "market_position",
+        "unresolved_questions": [
+          "Competitive density was not characterised."
+        ]
+      },
+      {
+        "assumptions": [],
+        "confidence": {
+          "band": "insufficient",
+          "contradictions": 0,
+          "coverage": "0/4 expected inputs present",
+          "derivation": [
+            "rule 0: inputs -- 0 evidence item(s), coverage 0/4 (0%), 0 contradiction(s)",
+            "rule 1: no evidence at all -> INSUFFICIENT (stop)"
+          ],
+          "evidence_floor": "none",
+          "limiting_factor": "no supporting evidence in packet"
+        },
+        "evidence_references": [],
+        "findings": [],
+        "kernel_name": "governance",
+        "unresolved_questions": [
+          "Neither voting control nor board composition was given.",
+          "Audit status was not stated.",
+          "Reporting cadence was not stated."
+        ]
+      }
+    ],
+    "ir": {
+      "assumptions": [
+        {
+          "basis": "stated in packet",
+          "id": "asm-001",
+          "statement": "Founder figures are unaudited and self-reported."
+        }
+      ],
+      "claims": [
+        {
+          "evidence_ids": [
+            "SRC-FOUNDER"
+          ],
+          "id": "clm-001",
+          "predicate": "arr_usd",
+          "subject_id": "ent-company",
+          "uncertainty": "likely",
+          "value": "400000"
+        },
+        {
+          "evidence_ids": [
+            "SRC-FOUNDER"
+          ],
+          "id": "clm-002",
+          "predicate": "yoy_growth_pct",
+          "subject_id": "ent-company",
+          "uncertainty": "likely",
+          "value": "120"
+        },
+        {
+          "evidence_ids": [
+            "SRC-SECTOR"
+          ],
+          "id": "clm-003",
+          "predicate": "tam_usd",
+          "subject_id": "ent-market",
+          "uncertainty": "likely",
+          "value": "1200000000"
+        },
+        {
+          "evidence_ids": [
+            "SRC-SECTOR"
+          ],
+          "id": "clm-004",
+          "predicate": "market_growth_pct",
+          "subject_id": "ent-market",
+          "uncertainty": "likely",
+          "value": "7"
+        }
+      ],
+      "entities": [
+        {
+          "attributes": {
+            "sector": "laboratory hardware",
+            "stage": "Seed"
+          },
+          "id": "ent-company",
+          "kind": "company",
+          "label": "Northwind Instruments Ltd."
+        },
+        {
+          "attributes": {
+            "sector": "laboratory hardware"
+          },
+          "id": "ent-market",
+          "kind": "market",
+          "label": "laboratory hardware market"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "SRC-FOUNDER",
+          "quality": "asserted",
+          "source": "Founder email summary",
+          "statement": "Founder email summary (assertion)"
+        },
+        {
+          "id": "SRC-SECTOR",
+          "quality": "estimated",
+          "source": "Trade association sector note",
+          "statement": "Trade association sector note (third_party)"
+        }
+      ],
+      "metadata": {
+        "domain": "investment",
+        "ir_version": "choir-ir/0.1",
+        "packet_id": "northwind-seed",
+        "packet_title": "Northwind Instruments -- Seed",
+        "translator": "investment.v0"
+      },
+      "relationships": [
+        {
+          "id": "rel-001",
+          "kind": "supports",
+          "note": "",
+          "source_id": "SRC-FOUNDER",
+          "target_id": "clm-001"
+        },
+        {
+          "id": "rel-002",
+          "kind": "supports",
+          "note": "",
+          "source_id": "SRC-FOUNDER",
+          "target_id": "clm-002"
+        },
+        {
+          "id": "rel-003",
+          "kind": "supports",
+          "note": "",
+          "source_id": "SRC-SECTOR",
+          "target_id": "clm-003"
+        },
+        {
+          "id": "rel-004",
+          "kind": "supports",
+          "note": "",
+          "source_id": "SRC-SECTOR",
+          "target_id": "clm-004"
+        }
+      ]
+    },
+    "synthesis": {
+      "agreements": [],
+      "conditional_count": 0,
+      "confidence": "insufficient",
+      "confidence_limiting_factor": "too few kernels reached a usable band",
+      "disagreements": [],
+      "oppose_weight": 0,
+      "rationale": [
+        "Only 1 of 4 kernels reached a usable confidence band; 2 are required.",
+        "The packet has not been assessed. This is a statement about the evidence supplied, not about the opportunity."
+      ],
+      "recommendation": "insufficient basis",
+      "remaining_uncertainty": [
+        "[financial_posture] Gross margin was not stated in the packet.",
+        "[financial_posture] Runway could not be derived: cash or net burn was missing.",
+        "[governance] Audit status was not stated.",
+        "[governance] Neither voting control nor board composition was given.",
+        "[governance] Reporting cadence was not stated.",
+        "[market_position] Assumed: Market figures from SRC-SECTOR are estimates, not measurements.",
+        "[market_position] Competitive density was not characterised.",
+        "[risk_exposure] Burn efficiency could not be assessed: burn or ARR was missing.",
+        "[risk_exposure] Customer concentration was not disclosed.",
+        "[risk_exposure] Neither retention nor churn was disclosed."
+      ],
+      "rules_evaluated": [
+        {
+          "condition": "usable kernels < 2",
+          "fired": true,
+          "name": "R1 insufficient-basis",
+          "observed": "1 usable of 4",
+          "outcome": "INSUFFICIENT_BASIS"
+        }
+      ],
+      "support_weight": 0,
+      "tally_detail": [
+        {
+          "finding_id": "fin-growth",
+          "kernel_band": "insufficient",
+          "kernel_name": "financial_posture",
+          "running_conditional": 0,
+          "running_oppose": 0,
+          "running_support": 0,
+          "stance": "supports",
+          "weight": 0
+        },
+        {
+          "finding_id": "mkt-opportunity",
+          "kernel_band": "low",
+          "kernel_name": "market_position",
+          "running_conditional": 0,
+          "running_oppose": 0,
+          "running_support": 0,
+          "stance": "neutral",
+          "weight": 0
+        }
+      ],
+      "topic_views": [
+        {
+          "positions": [
+            {
+              "finding_id": "fin-growth",
+              "kernel_name": "financial_posture",
+              "stance": "supports",
+              "statement": "Growth of 120% is strong against a 40% strong / 15% weak threshold."
+            }
+          ],
+          "topic": "growth"
+        },
+        {
+          "positions": [
+            {
+              "finding_id": "mkt-opportunity",
+              "kernel_name": "market_position",
+              "stance": "neutral",
+              "statement": "Market opportunity: addressable market $1.2B is modest; market growing only 7% a year."
+            }
+          ],
+          "topic": "market_opportunity"
+        }
+      ],
+      "usable_kernels": [
+        "market_position"
+      ]
+    },
+    "trace": [
+      {
+        "action": "packet-loaded",
+        "component": "pipeline",
+        "detail": "packet northwind-seed: Northwind Instruments -- Seed",
+        "inputs": [],
+        "notes": [
+          "2 source document(s)",
+          "4 data point(s)",
+          "1 stated assumption(s)",
+          "0 flagged conflict(s)"
+        ],
+        "outputs": [
+          "packet:northwind-seed"
+        ],
+        "stage": "1. packet intake",
+        "step": 1
+      },
+      {
+        "action": "translate-start",
+        "component": "translator",
+        "detail": "mapping 4 data points to IR",
+        "inputs": [
+          "packet:northwind-seed"
+        ],
+        "notes": [
+          "translator performs no reasoning; it maps shapes only"
+        ],
+        "outputs": [],
+        "stage": "2. translation",
+        "step": 2
+      },
+      {
+        "action": "translate-complete",
+        "component": "translator",
+        "detail": "2 entities, 4 claims, 2 evidence, 4 relationships",
+        "inputs": [],
+        "notes": [
+          "0 claim(s) marked contradicted",
+          "1 assumption(s) carried through"
+        ],
+        "outputs": [
+          "ir:northwind-seed"
+        ],
+        "stage": "2. translation",
+        "step": 3
+      },
+      {
+        "action": "ir-sealed",
+        "component": "pipeline",
+        "detail": "kernels receive the IR and nothing else",
+        "inputs": [
+          "ir:northwind-seed"
+        ],
+        "notes": [
+          "kernels cannot see the packet",
+          "kernels cannot see each other's artifacts",
+          "kernels cannot see the synthesizer"
+        ],
+        "outputs": [],
+        "stage": "3. handoff",
+        "step": 4
+      },
+      {
+        "action": "dispatch-start",
+        "component": "runtime",
+        "detail": "4 kernels queued over IR northwind-seed",
+        "inputs": [
+          "ir:northwind-seed"
+        ],
+        "notes": [
+          "financial_posture",
+          "risk_exposure",
+          "market_position",
+          "governance"
+        ],
+        "outputs": [],
+        "stage": "4. kernel execution",
+        "step": 5
+      },
+      {
+        "action": "kernel-start",
+        "component": "financial_posture",
+        "detail": "reading 2 of 5 predicates",
+        "inputs": [
+          "arr_usd",
+          "yoy_growth_pct"
+        ],
+        "notes": [
+          "missing from packet: gross_margin_pct, net_burn_monthly_usd, cash_usd"
+        ],
+        "outputs": [],
+        "stage": "4. kernel execution",
+        "step": 6
+      },
+      {
+        "action": "kernel-returned",
+        "component": "financial_posture",
+        "detail": "1 finding(s), confidence insufficient, 2 unresolved",
+        "inputs": [],
+        "notes": [
+          "cites 2 IR object(s)",
+          "confidence limited by: incomplete input coverage"
+        ],
+        "outputs": [
+          "fin-growth"
+        ],
+        "stage": "4. kernel execution",
+        "step": 7
+      },
+      {
+        "action": "artifact-validated",
+        "component": "runtime",
+        "detail": "financial_posture artifact accepted",
+        "inputs": [
+          "SRC-FOUNDER",
+          "clm-002"
+        ],
+        "notes": [
+          "every cited id exists in the IR",
+          "kernel produced findings or unresolved questions",
+          "confidence carries a limiting factor (so it was derived)"
+        ],
+        "outputs": [],
+        "stage": "4. kernel execution",
+        "step": 8
+      },
+      {
+        "action": "kernel-start",
+        "component": "risk_exposure",
+        "detail": "reading 1 of 5 predicates",
+        "inputs": [
+          "arr_usd"
+        ],
+        "notes": [
+          "missing from packet: top_customer_revenue_pct, net_revenue_retention_pct, logo_churn_pct, net_burn_monthly_usd"
+        ],
+        "outputs": [],
+        "stage": "4. kernel execution",
+        "step": 9
+      },
+      {
+        "action": "kernel-returned",
+        "component": "risk_exposure",
+        "detail": "0 finding(s), confidence insufficient, 3 unresolved",
+        "inputs": [],
+        "notes": [
+          "cites 0 IR object(s)",
+          "confidence limited by: incomplete input coverage"
+        ],
+        "outputs": [],
+        "stage": "4. kernel execution",
+        "step": 10
+      },
+      {
+        "action": "artifact-validated",
+        "component": "runtime",
+        "detail": "risk_exposure artifact accepted",
+        "inputs": [],
+        "notes": [
+          "every cited id exists in the IR",
+          "kernel produced findings or unresolved questions",
+          "confidence carries a limiting factor (so it was derived)"
+        ],
+        "outputs": [],
+        "stage": "4. kernel execution",
+        "step": 11
+      },
+      {
+        "action": "kernel-start",
+        "component": "market_position",
+        "detail": "reading 2 of 3 predicates",
+        "inputs": [
+          "tam_usd",
+          "market_growth_pct"
+        ],
+        "notes": [
+          "missing from packet: competitor_count"
+        ],
+        "outputs": [],
+        "stage": "4. kernel execution",
+        "step": 12
+      },
+      {
+        "action": "kernel-returned",
+        "component": "market_position",
+        "detail": "1 finding(s), confidence low, 1 unresolved",
+        "inputs": [],
+        "notes": [
+          "cites 3 IR object(s)",
+          "confidence limited by: weakest evidence is estimated (SRC-SECTOR)"
+        ],
+        "outputs": [
+          "mkt-opportunity"
+        ],
+        "stage": "4. kernel execution",
+        "step": 13
+      },
+      {
+        "action": "artifact-validated",
+        "component": "runtime",
+        "detail": "market_position artifact accepted",
+        "inputs": [
+          "SRC-SECTOR",
+          "clm-003",
+          "clm-004"
+        ],
+        "notes": [
+          "every cited id exists in the IR",
+          "kernel produced findings or unresolved questions",
+          "confidence carries a limiting factor (so it was derived)"
+        ],
+        "outputs": [],
+        "stage": "4. kernel execution",
+        "step": 14
+      },
+      {
+        "action": "kernel-start",
+        "component": "governance",
+        "detail": "reading 0 of 4 predicates",
+        "inputs": [],
+        "notes": [
+          "missing from packet: founder_voting_control_pct, independent_board_seats, audit_status, reporting_cadence"
+        ],
+        "outputs": [],
+        "stage": "4. kernel execution",
+        "step": 15
+      },
+      {
+        "action": "kernel-returned",
+        "component": "governance",
+        "detail": "0 finding(s), confidence insufficient, 3 unresolved",
+        "inputs": [],
+        "notes": [
+          "cites 0 IR object(s)",
+          "confidence limited by: no supporting evidence in packet"
+        ],
+        "outputs": [],
+        "stage": "4. kernel execution",
+        "step": 16
+      },
+      {
+        "action": "artifact-validated",
+        "component": "runtime",
+        "detail": "governance artifact accepted",
+        "inputs": [],
+        "notes": [
+          "every cited id exists in the IR",
+          "kernel produced findings or unresolved questions",
+          "confidence carries a limiting factor (so it was derived)"
+        ],
+        "outputs": [],
+        "stage": "4. kernel execution",
+        "step": 17
+      },
+      {
+        "action": "dispatch-complete",
+        "component": "runtime",
+        "detail": "4 artifacts collected",
+        "inputs": [],
+        "notes": [],
+        "outputs": [
+          "financial_posture",
+          "risk_exposure",
+          "market_position",
+          "governance"
+        ],
+        "stage": "4. kernel execution",
+        "step": 18
+      },
+      {
+        "action": "synthesis-start",
+        "component": "synthesizer",
+        "detail": "4 artifacts received",
+        "inputs": [
+          "financial_posture",
+          "risk_exposure",
+          "market_position",
+          "governance"
+        ],
+        "notes": [
+          "synthesizer sees artifacts only, never the IR or the packet"
+        ],
+        "outputs": [],
+        "stage": "5. synthesis",
+        "step": 19
+      },
+      {
+        "action": "synthesis-complete",
+        "component": "synthesizer",
+        "detail": "insufficient basis at insufficient confidence",
+        "inputs": [],
+        "notes": [
+          "0 agreement(s), 0 disagreement(s)",
+          "decided by rule R1 insufficient-basis",
+          "confidence limited by: too few kernels reached a usable band"
+        ],
+        "outputs": [
+          "INSUFFICIENT_BASIS"
+        ],
+        "stage": "5. synthesis",
+        "step": 20
+      }
+    ]
+  },
+  "record_digest": "fc4e69083af1977251f224fe4019694389a80fe11d60a1a1263fcc785022ab6f",
+  "report_digest": "f2b333e41337a7c1e63d4df631b4106d283c45f9a8ed0c239e1a5b1060f1bdee",
+  "report_text": "==============================================================================\nCHOIR PROTOTYPE V0 -- INSTITUTIONAL REASONING REPORT\n==============================================================================\nPacket      : northwind-seed\nTitle       : Northwind Instruments -- Seed\nDomain      : investment\nTranslator  : investment.v0\nIR version  : choir-ir/0.1\n\n==============================================================================\n1. TRANSLATION INTO THE INTERMEDIATE REPRESENTATION\n==============================================================================\n2 entities, 4 claims, 2 evidence items, 1 assumptions, 4 relationships.\n\nEntities:\n  ent-company    company    Northwind Instruments Ltd.\n  ent-market     market     laboratory hardware market\n\nClaims:\n  clm-001    arr_usd                      = 400000       [likely]\n             backed by: SRC-FOUNDER\n  clm-002    yoy_growth_pct               = 120          [likely]\n             backed by: SRC-FOUNDER\n  clm-003    tam_usd                      = 1200000000   [likely]\n             backed by: SRC-SECTOR\n  clm-004    market_growth_pct            = 7            [likely]\n             backed by: SRC-SECTOR\n\nAssumptions carried from the packet:\n  asm-001: Founder figures are unaudited and self-reported.\n\n==============================================================================\n2. RECOMMENDATION\n==============================================================================\nINSUFFICIENT BASIS\n\nRationale:\n  1. Only 1 of 4 kernels reached a usable confidence band; 2 are required.\n  2. The packet has not been assessed. This is a statement about the evidence supplied, not about the opportunity.\n\n==============================================================================\n3. CONFIDENCE\n==============================================================================\nBand            : insufficient\nLimited by      : too few kernels reached a usable band\nContributing    : market_position\nWeighted tally  : support 0, opposition 0, conditional 0\n\nConfidence is derived from evidence quality, input coverage and contradiction count. No kernel may assign it.\n\n==============================================================================\n4. KERNEL FINDINGS\n==============================================================================\nKernels ran independently and could not observe one another.\n\n------------------------------------------------------------------------------\nKERNEL: financial_posture\n  confidence : insufficient\n  limited by : incomplete input coverage\n  coverage   : 2/5 expected inputs present\n  weakest ev.: asserted\n  findings:\n    [supports   ] (growth) Growth of 120% is strong against a 40% strong / 15% weak threshold.\n                  cites: clm-002, SRC-FOUNDER\n  unresolved:\n    - Gross margin was not stated in the packet.\n    - Runway could not be derived: cash or net burn was missing.\n\n------------------------------------------------------------------------------\nKERNEL: risk_exposure\n  confidence : insufficient\n  limited by : incomplete input coverage\n  coverage   : 1/5 expected inputs present\n  weakest ev.: asserted\n  findings: (none)\n  unresolved:\n    - Customer concentration was not disclosed.\n    - Neither retention nor churn was disclosed.\n    - Burn efficiency could not be assessed: burn or ARR was missing.\n\n------------------------------------------------------------------------------\nKERNEL: market_position\n  confidence : low\n  limited by : weakest evidence is estimated (SRC-SECTOR)\n  coverage   : 2/3 expected inputs present\n  weakest ev.: estimated\n  findings:\n    [neutral    ] (market_opportunity) Market opportunity: addressable market $1.2B is modest; market growing only 7% a year.\n                  cites: clm-003, clm-004, SRC-SECTOR\n  assumptions:\n    - Market figures from SRC-SECTOR are estimates, not measurements.\n  unresolved:\n    - Competitive density was not characterised.\n\n------------------------------------------------------------------------------\nKERNEL: governance\n  confidence : insufficient\n  limited by : no supporting evidence in packet\n  coverage   : 0/4 expected inputs present\n  weakest ev.: none\n  findings: (none)\n  unresolved:\n    - Neither voting control nor board composition was given.\n    - Audit status was not stated.\n    - Reporting cadence was not stated.\n\n==============================================================================\n5. AGREEMENTS\n==============================================================================\nTopics where two or more independent kernels reached the same stance.\n(no topic drew agreement from two kernels)\n\n==============================================================================\n6. DISAGREEMENTS\n==============================================================================\nTopics where kernels reached directly opposing stances.\n(no direct disagreements)\n\n==============================================================================\n7. REMAINING UNCERTAINTY\n==============================================================================\n  - [financial_posture] Gross margin was not stated in the packet.\n  - [financial_posture] Runway could not be derived: cash or net burn was missing.\n  - [governance] Audit status was not stated.\n  - [governance] Neither voting control nor board composition was given.\n  - [governance] Reporting cadence was not stated.\n  - [market_position] Assumed: Market figures from SRC-SECTOR are estimates, not measurements.\n  - [market_position] Competitive density was not characterised.\n  - [risk_exposure] Burn efficiency could not be assessed: burn or ARR was missing.\n  - [risk_exposure] Customer concentration was not disclosed.\n  - [risk_exposure] Neither retention nor churn was disclosed.\n\n==============================================================================\n8. SUPPORTING EVIDENCE\n==============================================================================\n  SRC-FOUNDER        [asserted ] Founder email summary\n                     status: used\n  SRC-SECTOR         [estimated] Trade association sector note\n                     status: used\n\n==============================================================================\n9. EXECUTION TRACE\n==============================================================================\nSummary view. For inputs, outputs and per-step notes, run with --inspect trace.\n\n  -- stage 1. packet intake --\n    1. pipeline           packet-loaded        packet northwind-seed: Northwind Instruments -- Seed\n  -- stage 2. translation --\n    2. translator         translate-start      mapping 4 data points to IR\n    3. translator         translate-complete   2 entities, 4 claims, 2 evidence, 4 relationships\n  -- stage 3. handoff --\n    4. pipeline           ir-sealed            kernels receive the IR and nothing else\n  -- stage 4. kernel execution --\n    5. runtime            dispatch-start       4 kernels queued over IR northwind-seed\n    6. financial_posture  kernel-start         reading 2 of 5 predicates\n    7. financial_posture  kernel-returned      1 finding(s), confidence insufficient, 2 unresolved\n    8. runtime            artifact-validated   financial_posture artifact accepted\n    9. risk_exposure      kernel-start         reading 1 of 5 predicates\n   10. risk_exposure      kernel-returned      0 finding(s), confidence insufficient, 3 unresolved\n   11. runtime            artifact-validated   risk_exposure artifact accepted\n   12. market_position    kernel-start         reading 2 of 3 predicates\n   13. market_position    kernel-returned      1 finding(s), confidence low, 1 unresolved\n   14. runtime            artifact-validated   market_position artifact accepted\n   15. governance         kernel-start         reading 0 of 4 predicates\n   16. governance         kernel-returned      0 finding(s), confidence insufficient, 3 unresolved\n   17. runtime            artifact-validated   governance artifact accepted\n   18. runtime            dispatch-complete    4 artifacts collected\n  -- stage 5. synthesis --\n   19. synthesizer        synthesis-start      4 artifacts received\n   20. synthesizer        synthesis-complete   insufficient basis at insufficient confidence",
+  "source_fingerprint": "f73955abd4088d98c0b25f982d1eb464b470bc5836561133bf4fb9c6f08cd699"
+}

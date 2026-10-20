@@ -523,6 +523,37 @@ button.link {
   margin-bottom: 0;
 }
 
+.empty-state h3 {
+  margin-top: var(--yukti-space-3);
+  margin-bottom: var(--yukti-space-2);
+  font-family: var(--yukti-font-data);
+  font-size: var(--type-label);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+/* The four steps, numbered, because the order is the product. */
+.lifecycle {
+  margin: 0 0 var(--yukti-space-3);
+  padding-left: var(--yukti-space-3);
+  color: var(--ink-muted);
+}
+
+.lifecycle li {
+  margin-bottom: var(--yukti-space-1);
+  line-height: var(--leading-normal);
+}
+
+.lifecycle strong {
+  color: var(--yukti-color-ink-900);
+}
+
+.register-empty button {
+  margin-top: var(--yukti-space-1);
+  width: 100%;
+}
+
 /* ---------- skeletons ---------- */
 
 /* Placeholders, in register.
@@ -684,6 +715,22 @@ button.link {
   border-bottom: var(--yukti-border-width-hairline) solid
     var(--yukti-color-border-hairline-light);
   margin-bottom: var(--yukti-space-4);
+  position: relative;
+}
+
+/* Active tab indicator — a yellow line that connects tab to panel */
+.tabs-indicator {
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  height: 2px;
+  background: var(--yukti-color-yellow-500);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--yukti-duration-quick) var(--yukti-ease-micro),
+    left var(--yukti-duration-quick) var(--yukti-ease-micro),
+    width var(--yukti-duration-quick) var(--yukti-ease-micro);
+  z-index: 1;
 }
 
 .tab {
@@ -702,6 +749,8 @@ button.link {
   transition:
     color var(--yukti-duration-quick) var(--yukti-ease-micro),
     border-bottom-color var(--yukti-duration-quick) var(--yukti-ease-micro);
+  position: relative;
+  z-index: 2;
 }
 
 .tab:hover {
@@ -716,11 +765,10 @@ button.link {
 .tab[aria-selected="true"],
 .tab[aria-selected="true"]:hover {
   color: var(--yukti-color-ink-900);
-  border-bottom-color: var(--yukti-color-ink-900);
+  border-bottom-color: var(--yukti-color-yellow-500);
 }
 
-/* ---------- panels ---------- */
-
+/* Panel coherence — panels share visual language with active tab */
 .panel {
   border: var(--yukti-border-width-hairline) solid
     var(--yukti-color-border-hairline-light);
@@ -728,6 +776,26 @@ button.link {
   padding: var(--yukti-space-4);
   margin-bottom: var(--yukti-space-4);
   background: var(--surface-raised);
+  /* Subtle top accent that echoes the active tab */
+  position: relative;
+}
+
+.panel::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--yukti-color-border-hairline-light);
+  border-radius: var(--yukti-radius-sm) var(--yukti-radius-sm) 0 0;
+  transition: background-color var(--yukti-duration-quick) var(--yukti-ease-micro);
+}
+
+/* When a panel is "active" (matches the selected tab), its top accent turns yellow */
+/* This is set via JS when tabs switch */
+.panel.is-active::before {
+  background: var(--yukti-color-yellow-500);
 }
 
 .panel > h3 {
@@ -980,6 +1048,61 @@ button.link {
 
   .execution-stage.is-latest {
     animation: none;
+  }
+}
+
+/* Execution artifact badge — marks completed stages as immutable artifacts */
+.execution-artifact-badge {
+  font-family: var(--yukti-font-data);
+  font-size: var(--type-micro);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--yukti-color-yellow-500);
+  background: transparent;
+  border: var(--yukti-border-width-hairline) solid var(--yukti-color-yellow-500);
+  border-radius: var(--yukti-radius-focus);
+  padding: var(--space-hair) var(--yukti-space-1);
+  opacity: 0.7;
+  white-space: nowrap;
+  margin-left: var(--yukti-space-2);
+  transition: opacity var(--yukti-duration-quick) var(--yukti-ease-micro);
+}
+
+.execution-stage[data-state="complete"] .execution-artifact-badge:hover {
+  opacity: 1;
+  background: var(--yukti-color-yellow-500);
+  color: var(--yukti-color-ink-900);
+}
+
+/* Staggered reveal for artifact trail — each artifact appears with slight delay */
+.execution-stage[data-state="complete"] {
+  animation: artifact-reveal var(--yukti-duration-quick) var(--yukti-ease-standard) both;
+}
+
+/* The is-latest gets the arrival animation, others get a subtle fade-in */
+.execution-stage[data-state="complete"]:not(.is-latest) {
+  animation: artifact-reveal var(--yukti-duration-quick) var(--yukti-ease-standard) both;
+  animation-delay: calc(var(--index, 0) * 80ms);
+}
+
+@keyframes artifact-reveal {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Motion System §8 — removed, not shortened */
+@media (prefers-reduced-motion: reduce) {
+  .execution-stage[data-state="complete"],
+  .execution-stage.is-latest {
+    animation: none;
+    opacity: 1;
+    transform: none;
   }
 }
 
@@ -1428,6 +1551,182 @@ ul.plain li {
   display: none;
 }
 
+/* Skip link for keyboard accessibility */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: var(--yukti-space-4);
+  z-index: var(--yukti-z-modal);
+  padding: var(--yukti-space-2) var(--yukti-space-3);
+  background: var(--yukti-color-yellow-500);
+  color: var(--yukti-color-ink-900);
+  font-family: var(--yukti-font-data);
+  font-size: var(--type-label);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: var(--yukti-radius-sm);
+  transition: top var(--yukti-duration-quick) var(--yukti-ease-micro);
+}
+
+.skip-link:focus {
+  top: var(--yukti-space-4);
+}
+
+/* ---------- record spine (Overview) ---------- */
+
+.record-spine {
+  border-left: 2px solid var(--yukti-color-border-hairline-light);
+  padding-left: var(--yukti-space-4);
+  margin-left: calc(var(--yukti-space-2) * -1);
+}
+
+.record-spine > h3 {
+  margin-left: var(--yukti-space-2);
+  margin-bottom: var(--yukti-space-4);
+  padding-left: var(--yukti-space-2);
+  border-left: 2px solid var(--yukti-color-yellow-500);
+}
+
+.spine-segment {
+  position: relative;
+  padding-bottom: var(--yukti-space-4);
+  margin-bottom: var(--yukti-space-4);
+}
+
+.spine-segment:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: calc(var(--yukti-space-2) * -1);
+  bottom: 0;
+  width: 2px;
+  height: var(--yukti-space-4);
+  background: var(--yukti-color-border-hairline-light);
+}
+
+.spine-segment > h4 {
+  font-size: var(--type-label);
+  letter-spacing: 0.06em;
+  color: var(--ink-muted);
+  margin-bottom: var(--yukti-space-2);
+  padding-left: var(--yukti-space-2);
+}
+
+.spine-metric {
+  font-family: var(--yukti-font-data);
+  font-size: var(--type-body);
+  font-variant-numeric: tabular-nums;
+  color: var(--yukti-color-ink-900);
+  margin-bottom: var(--yukti-space-2);
+}
+
+.spine-bar {
+  height: 4px;
+  background: var(--surface-sunken);
+  border-radius: var(--yukti-radius-sm);
+  overflow: hidden;
+  margin: var(--yukti-space-1) 0 var(--yukti-space-2);
+}
+
+.spine-bar > span {
+  display: block;
+  height: 100%;
+  background: var(--yukti-color-yellow-500);
+  transition: width var(--yukti-duration-standard) var(--yukti-ease-standard);
+}
+
+.spine-row {
+  grid-template-columns: 1fr 120px 1fr;
+  gap: var(--yukti-space-2);
+  padding: var(--yukti-space-2) 0;
+  border-bottom: var(--yukti-border-width-hairline) dotted var(--yukti-color-border-hairline-light);
+}
+
+@media (max-width: 900px) {
+  .spine-row {
+    grid-template-columns: 1fr;
+    gap: var(--yukti-space-1);
+  }
+}
+
+/* ---------- Judgment view: Recommendation → Why → Evidence ---------- */
+
+.judgment-view {
+  display: flex;
+  flex-direction: column;
+  gap: var(--yukti-space-4);
+}
+
+/* Why wrapper — the reasoning layer */
+.why-wrapper {
+  border-left: 2px solid var(--yukti-color-yellow-500);
+  padding-left: var(--yukti-space-4);
+  margin-left: calc(var(--yukti-space-2) * -1);
+}
+
+.why-heading {
+  font-family: var(--yukti-font-data);
+  font-size: var(--type-label);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--yukti-color-yellow-500);
+  margin: 0 0 var(--yukti-space-3);
+  padding-left: var(--yukti-space-2);
+}
+
+.why-section {
+  position: relative;
+  padding-bottom: var(--yukti-space-4);
+  margin-bottom: var(--yukti-space-3);
+}
+
+.why-section:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: calc(var(--yukti-space-2) * -1);
+  bottom: 0;
+  width: 2px;
+  height: var(--yukti-space-4);
+  background: var(--yukti-color-border-hairline-light);
+}
+
+.why-note {
+  font-size: var(--type-secondary);
+  color: var(--ink-muted);
+  max-width: 76ch;
+  border-left: 2px solid var(--yukti-color-yellow-500);
+  padding-left: var(--yukti-space-3);
+  margin-left: calc(var(--yukti-space-2) * -1);
+}
+
+/* Evidence wrapper — the evidence layer */
+.evidence-wrapper {
+  border-left: 2px solid var(--yukti-color-border-hairline-light);
+  padding-left: var(--yukti-space-4);
+  margin-left: calc(var(--yukti-space-2) * -1);
+}
+
+.evidence-heading {
+  font-family: var(--yukti-font-data);
+  font-size: var(--type-label);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin: 0 0 var(--yukti-space-3);
+  padding-left: var(--yukti-space-2);
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+  .why-wrapper,
+  .evidence-wrapper {
+    margin-left: 0;
+    padding-left: var(--yukti-space-3);
+    border-left-width: 1px;
+  }
+}
+
+/* Enhanced responsive breakpoints */
 @media (max-width: 900px) {
   .shell {
     grid-template-columns: 1fr;
@@ -1446,5 +1745,221 @@ ul.plain li {
 
   .position-row {
     grid-template-columns: 1fr;
+  }
+
+  .record-spine {
+    margin-left: 0;
+    padding-left: var(--yukti-space-3);
+    border-left-width: 1px;
+  }
+
+  .why-wrapper,
+  .evidence-wrapper {
+    margin-left: 0;
+    padding-left: var(--yukti-space-3);
+    border-left-width: 1px;
+  }
+
+  .verdict-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .area-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tab {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 600px) {
+  .stage {
+    padding: var(--yukti-space-3) var(--yukti-space-2);
+  }
+
+  .panel {
+    padding: var(--yukti-space-3);
+  }
+
+  .verdict {
+    padding: var(--yukti-space-3);
+  }
+
+  .verdict-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--yukti-space-1);
+  }
+
+  .verdict h2 {
+    font-size: var(--type-title);
+  }
+
+  .case-facts {
+    gap: var(--yukti-space-2);
+  }
+
+  .coverage-bar {
+    height: 4px;
+  }
+
+  .execution-stage {
+    grid-template-columns: var(--yukti-space-2) 1fr;
+    grid-template-areas:
+      "marker label"
+      "marker detail";
+  }
+
+  .execution-detail {
+    grid-area: detail;
+    text-align: left;
+    margin-top: var(--space-hair);
+  }
+
+  .execution-artifact-badge {
+    grid-area: detail;
+    justify-self: start;
+    margin-top: var(--space-hair);
+    margin-left: 0;
+  }
+}
+
+/* ---------- Empty states ---------- */
+
+.empty-state {
+  max-width: 48ch;
+  margin: var(--yukti-space-6) auto 0;
+  padding-left: var(--yukti-space-3);
+  border-left: 2px solid var(--yukti-color-border-hairline-light);
+  text-align: left;
+  color: var(--ink-muted);
+}
+
+.empty-state h2 {
+  font-size: var(--type-title);
+  line-height: var(--leading-snug);
+  color: var(--yukti-color-ink-900);
+  margin-bottom: var(--yukti-space-2);
+}
+
+.empty-state p:last-child {
+  margin-bottom: 0;
+}
+
+/* Skeleton loading states */
+.skeleton-case {
+  display: flex;
+  flex-direction: column;
+  gap: var(--yukti-space-4);
+  padding: var(--yukti-space-4);
+  background: var(--surface-raised);
+  border: var(--yukti-border-width-hairline) solid var(--yukti-color-border-hairline-light);
+  border-radius: var(--yukti-radius-sm);
+}
+
+.skeleton-line {
+  display: block;
+  height: var(--yukti-space-2);
+  border-radius: var(--yukti-radius-sm);
+  background: var(--surface-sunken);
+  animation: skeleton-breath 1.8s var(--yukti-ease-standard) infinite;
+}
+
+@keyframes skeleton-breath {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+.skeleton-head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--yukti-space-2);
+  padding-bottom: var(--yukti-space-3);
+  margin-bottom: var(--yukti-space-4);
+  border-bottom: var(--yukti-border-width-hairline) solid var(--yukti-color-border-hairline-light);
+}
+
+.skeleton-line.is-title {
+  height: var(--type-title);
+  width: 38%;
+}
+
+.skeleton-line.is-sub {
+  width: 26%;
+}
+
+.skeleton-line.is-facts {
+  width: 54%;
+  height: var(--yukti-space-2);
+}
+
+.skeleton-tabs {
+  display: flex;
+  gap: var(--yukti-space-3);
+  padding-bottom: var(--yukti-space-2);
+  margin-bottom: var(--yukti-space-4);
+  border-bottom: var(--yukti-border-width-hairline) solid var(--yukti-color-border-hairline-light);
+}
+
+.skeleton-line.is-tab {
+  width: 72px;
+}
+
+.skeleton-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--yukti-space-3);
+  border: var(--yukti-border-width-hairline) solid var(--yukti-color-border-hairline-light);
+  border-radius: var(--yukti-radius-sm);
+  background: var(--surface-raised);
+  padding: var(--yukti-space-4);
+}
+
+.skeleton-line.is-label {
+  width: 128px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-line {
+    animation: none;
+  }
+}
+
+/* Error state enhancements */
+.message.is-error {
+  border-left-color: var(--yukti-color-ink-900);
+  font-weight: 500;
+  background: var(--surface-sunken);
+}
+
+/* Focus visible improvements for accessibility */
+*:focus-visible {
+  outline: var(--yukti-focus-ring-width) solid var(--yukti-color-yellow-500);
+  outline-offset: var(--yukti-focus-ring-offset);
+  border-radius: var(--yukti-radius-focus);
+}
+
+/* Ensure focus is visible on interactive elements in panels */
+.panel button:focus-visible,
+.panel a:focus-visible,
+.panel input:focus-visible,
+.panel select:focus-visible,
+.panel textarea:focus-visible {
+  outline-offset: calc(var(--yukti-focus-ring-offset) * -1);
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --yukti-color-border-hairline-light: rgba(20, 20, 15, 0.3);
+    --yukti-color-border-hairline-dark: rgba(242, 239, 230, 0.3);
   }
 }

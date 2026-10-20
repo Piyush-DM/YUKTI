@@ -1,0 +1,117 @@
+{
+  "policy_id": "VENDOR-POST-TECH-DD",
+  "policy_version": "0.1",
+  "decision_stage": "post_technical_due_diligence_approval",
+  "decision_states": [
+    "ADVANCE",
+    "HOLD",
+    "REJECT",
+    "ESCALATE"
+  ],
+  "human_authority_required": true,
+  "requirements": [
+    {
+      "requirement_id": "R1",
+      "description": "A completed security questionnaire is supplied.",
+      "mandatory": true,
+      "critical": true
+    },
+    {
+      "requirement_id": "R2",
+      "description": "A SOC 2 report or formally accepted equivalent assurance is supplied.",
+      "mandatory": true,
+      "critical": true
+    },
+    {
+      "requirement_id": "R3",
+      "description": "Technical architecture documentation is supplied.",
+      "mandatory": true,
+      "critical": false
+    },
+    {
+      "requirement_id": "R4",
+      "description": "A current penetration-test report is supplied.",
+      "mandatory": true,
+      "critical": false
+    }
+  ],
+  "rules": [
+    {
+      "rule_id": "P100-HIGH-CHALLENGE",
+      "priority": 100,
+      "description": "Escalate when an analyst finding has a high-severity adversarial challenge.",
+      "condition": {
+        "metric": "high_adversarial_challenges",
+        "operator": "gte",
+        "value": 1
+      },
+      "outcome": "ESCALATE"
+    },
+    {
+      "rule_id": "P090-HIGH-CONTRADICTION",
+      "priority": 90,
+      "description": "Escalate when supplied evidence contains a high-severity unresolved contradiction.",
+      "condition": {
+        "metric": "high_unresolved_contradictions",
+        "operator": "gte",
+        "value": 1
+      },
+      "outcome": "ESCALATE"
+    },
+    {
+      "rule_id": "P080-CRITICAL-FAILURE",
+      "priority": 80,
+      "description": "Reject when supplied evidence establishes failure of a critical requirement.",
+      "condition": {
+        "metric": "failed_critical_requirements",
+        "operator": "gte",
+        "value": 1
+      },
+      "outcome": "REJECT"
+    },
+    {
+      "rule_id": "P070-MANDATORY-FAILURE",
+      "priority": 70,
+      "description": "Hold when a mandatory requirement is not satisfied and no higher-priority critical-failure rule applies.",
+      "condition": {
+        "metric": "failed_mandatory_requirements",
+        "operator": "gte",
+        "value": 1
+      },
+      "outcome": "HOLD"
+    },
+    {
+      "rule_id": "P060-MANDATORY-UNKNOWN",
+      "priority": 60,
+      "description": "Hold when evidence cannot establish a mandatory requirement.",
+      "condition": {
+        "metric": "unknown_mandatory_requirements",
+        "operator": "gte",
+        "value": 1
+      },
+      "outcome": "HOLD"
+    },
+    {
+      "rule_id": "P050-ALL-MANDATORY-SATISFIED",
+      "priority": 50,
+      "description": "Advance when every mandatory requirement is satisfied and no higher-priority rule applies.",
+      "condition": {
+        "metric": "all_mandatory_requirements_satisfied",
+        "operator": "eq",
+        "value": true
+      },
+      "outcome": "ADVANCE"
+    },
+    {
+      "rule_id": "P000-CONSERVATIVE-FALLBACK",
+      "priority": 0,
+      "description": "Escalate any valid state not covered by a more specific policy rule.",
+      "condition": {
+        "metric": "always",
+        "operator": "eq",
+        "value": true
+      },
+      "outcome": "ESCALATE"
+    }
+  ]
+}

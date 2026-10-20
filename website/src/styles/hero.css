@@ -10,29 +10,190 @@
   display: flex;
   flex-direction: column;
   gap: var(--yukti-space-6);
+  max-width: 72ch;
+}
+
+/* Headline block */
+.yukti-hero-headline-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--yukti-space-4);
+}
+
+.yukti-hero-headline-block .yukti-type-mega {
+  /* Word-stacked via .yukti-heading-mega in content-loader */
+}
+
+/* Dividers framing the canvas */
+.yukti-hero-canvas-frame {
+  display: flex;
+  flex-direction: column;
+  gap: var(--yukti-space-5);
+  padding-block: var(--yukti-space-7);
+  position: relative;
+}
+
+.yukti-hero-canvas-frame::before,
+.yukti-hero-canvas-frame::after {
+  content: '';
+  display: block;
+  width: 60px;
+  height: var(--yukti-border-width-hairline);
+  background: var(--yukti-color-yellow-500);
+}
+
+.yukti-hero-canvas-frame::before {
+  margin-bottom: var(--yukti-space-5);
+}
+
+.yukti-hero-canvas-frame::after {
+  margin-top: var(--yukti-space-5);
 }
 
 .yukti-hero-canvas-wrap {
   display: flex;
   justify-content: center;
-  padding-block: var(--yukti-space-6);
+  position: relative;
 }
 
 .yukti-hero-canvas-wrap .yukti-reasoning-canvas {
   width: 100%;
-  max-width: 520px;
+  max-width: 580px;
 }
 
-/* Supporting copy demoted to an "annotation" register beneath the canvas,
-   rather than large body text directly under the headline. */
+/* Supporting copy demoted to an "annotation" register beneath the canvas */
 .yukti-hero-annotation {
   max-width: 48ch;
+  padding-top: var(--yukti-space-2);
 }
 
 .yukti-hero-annotation__text {
-  font-size: var(--yukti-type-data-size);
   font-family: var(--yukti-font-data);
+  font-size: var(--yukti-type-data-size);
   color: var(--yukti-color-bone-300);
   opacity: 0.75;
   line-height: 1.7;
+  margin-bottom: var(--yukti-space-4);
+}
+
+.yukti-hero-annotation .yukti-quiet-link {
+  margin-top: 0;
+}
+
+/* Reasoning Canvas — reserved space for future graph */
+.yukti-reasoning-canvas {
+  position: relative;
+  background: var(--yukti-color-graphite-850);
+  border: var(--yukti-border-width-hairline) solid var(--yukti-color-border-hairline-dark);
+  border-radius: var(--yukti-radius-sm);
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+}
+
+.yukti-reasoning-canvas__surface {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+/* Canvas labels */
+.yukti-reasoning-canvas__label,
+.yukti-reasoning-canvas__rev,
+.yukti-reasoning-canvas__status {
+  position: absolute;
+  font-family: var(--yukti-font-data);
+  font-size: var(--yukti-type-caption-size);
+  letter-spacing: var(--yukti-type-caption-tracking);
+  text-transform: uppercase;
+  color: var(--yukti-color-yellow-500);
+  opacity: 0.7;
+}
+
+.yukti-reasoning-canvas__label {
+  top: var(--yukti-space-3);
+  left: var(--yukti-space-3);
+}
+
+.yukti-reasoning-canvas__rev {
+  top: var(--yukti-space-3);
+  right: var(--yukti-space-3);
+}
+
+.yukti-reasoning-canvas__status {
+  bottom: var(--yukti-space-3);
+  left: var(--yukti-space-3);
+}
+
+/* Drafting brackets — L-shaped viewfinder corners */
+.yukti-bracket {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.yukti-bracket::before,
+.yukti-bracket::after {
+  content: '';
+  position: absolute;
+  background: var(--yukti-color-yellow-500);
+}
+
+.yukti-bracket::before {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--yukti-border-width-hairline);
+}
+
+.yukti-bracket::after {
+  top: 0;
+  left: 0;
+  width: var(--yukti-border-width-hairline);
+  height: 100%;
+}
+
+.yukti-bracket--tl { top: var(--yukti-space-3); left: var(--yukti-space-3); }
+.yukti-bracket--tr { top: var(--yukti-space-3); right: var(--yukti-space-3); transform: scaleX(-1); }
+.yukti-bracket--bl { bottom: var(--yukti-space-3); left: var(--yukti-space-3); transform: scaleY(-1); }
+.yukti-bracket--br { bottom: var(--yukti-space-3); right: var(--yukti-space-3); transform: scale(-1, -1); }
+
+/* Canvas hint */
+.yukti-reasoning-canvas__hint {
+  position: absolute;
+  bottom: var(--yukti-space-3);
+  right: var(--yukti-space-3);
+  font-family: var(--yukti-font-data);
+  font-size: var(--yukti-type-caption-size);
+  letter-spacing: var(--yukti-type-caption-tracking);
+  text-transform: uppercase;
+  color: var(--yukti-color-bone-300);
+  opacity: 0.4;
+}
+
+/* Coordinate readout */
+.yukti-reasoning-canvas__readout {
+  position: absolute;
+  bottom: var(--yukti-space-3);
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--yukti-font-data);
+  font-size: var(--yukti-type-data-size);
+  font-variant-numeric: var(--yukti-type-data-numeric);
+  color: var(--yukti-color-yellow-500);
+  opacity: 0.6;
+  white-space: nowrap;
+}
+
+/* Responsive */
+@media (max-width: 760px) {
+  .yukti-hero-canvas-frame {
+    padding-block: var(--yukti-space-5);
+  }
+
+  .yukti-hero-canvas-wrap .yukti-reasoning-canvas {
+    max-width: 100%;
+    aspect-ratio: 16 / 10;
+  }
 }

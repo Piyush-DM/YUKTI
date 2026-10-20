@@ -9,8 +9,10 @@ Where this stops, and why it stops there
 ----------------------------------------
 
 The plan gives the D-Core nine responsibilities. Eight of them are implemented
-below. The ninth -- emitting a judgment -- is not, and cannot be, while
-``DECISION-005`` is open.
+below. The ninth -- emitting a judgment -- is not, and cannot be, while the
+evaluator question stands unanswered. ``DECISION-005`` was invalidated as a
+governing decision on 2026-08-22 without selecting an answer, and no
+replacement has been recorded.
 
 A judgment requires evaluated results, and evaluation requires deciding *who
 evaluates*: whether DAALE calls the frozen prototype's kernels, or evaluates
@@ -99,7 +101,8 @@ class ExecutionSummary:
 # Stated once, so every summary gives the same reason in the same words.
 _NO_EVALUATOR = (
     "no evaluator: whether DAALE calls the frozen kernels or evaluates for "
-    "itself is options B and A of DECISION-005, which is open"
+    "itself is options B and A of DECISION-005, which no longer governs and "
+    "has no recorded replacement"
 )
 
 

@@ -1,0 +1,19 @@
+{
+  "case_id": "DD-001",
+  "kernel_id": "ADVERSARY",
+  "findings": [
+    {
+      "finding_id": "ADV-001",
+      "finding_type": "CHALLENGE",
+      "target_type": "CLAIM",
+      "target_id": "C2",
+      "evidence_ids": ["E2", "E3"],
+      "content": "The phrase acceptable risk profile combines business concentration risk and technical assurance risk without an application-defined tolerance for customer concentration.",
+      "status": "AMBIGUOUS",
+      "severity": "MEDIUM",
+      "confidence": 0.75
+    }
+  ],
+  "summary": "The critical security failures are directly grounded in E3. The broader acceptability claim remains partly ambiguous because the policy does not define a customer-concentration threshold.",
+  "uncertainties": []
+}

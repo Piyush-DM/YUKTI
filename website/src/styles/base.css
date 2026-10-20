@@ -13,6 +13,16 @@
 
 html {
   color-scheme: dark;
+  scroll-behavior: smooth;
+  /* scroll-snap for philosophy statements */
+  scroll-snap-type: y proximity;
+  -webkit-text-size-adjust: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 body {
@@ -24,12 +34,126 @@ body {
   font-weight: var(--yukti-type-body-weight);
   line-height: var(--yukti-type-body-line-height);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
+/* Skip link for keyboard accessibility */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: var(--yukti-space-4);
+  z-index: var(--yukti-z-entry-cover);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--yukti-space-2);
+  padding: var(--yukti-space-2) var(--yukti-space-3);
+  background: var(--yukti-color-yellow-500);
+  color: var(--yukti-color-ink-900);
+  font-family: var(--yukti-font-data);
+  font-size: var(--yukti-type-label-size);
+  font-weight: var(--yukti-type-label-weight);
+  letter-spacing: var(--yukti-type-label-tracking);
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: var(--yukti-radius-sm);
+  transition: top var(--yukti-duration-quick) var(--yukti-ease-micro);
+}
+
+.skip-link:focus {
+  top: var(--yukti-space-4);
+  outline: none;
+}
+
+/* Focus visible — the primary accessibility affordance */
 :focus-visible {
   outline: var(--yukti-focus-ring-width) solid var(--yukti-color-yellow-focus);
   outline-offset: var(--yukti-focus-ring-offset);
   border-radius: var(--yukti-radius-focus);
+}
+
+/* Ensure focus is not lost on interactive elements */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible,
+summary:focus-visible {
+  outline: var(--yukti-focus-ring-width) solid var(--yukti-color-yellow-focus);
+  outline-offset: var(--yukti-focus-ring-offset);
+  border-radius: var(--yukti-radius-focus);
+}
+
+/* Selection styling */
+::selection {
+  background: var(--yukti-color-yellow-500);
+  color: var(--yukti-color-ink-900);
+}
+
+::-moz-selection {
+  background: var(--yukti-color-yellow-500);
+  color: var(--yukti-color-ink-900);
+}
+
+/* Reduced motion — respect user preference structurally, not just faster */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Entry sequence specific - keep one token for fade */
+  :root {
+    --yukti-duration-instant: 0ms;
+    --yukti-duration-quick: 0ms;
+    --yukti-duration-standard: 0ms;
+    --yukti-duration-deliberate: 0ms;
+    --yukti-duration-reveal: 0ms;
+    --yukti-duration-cinematic: 0ms;
+    --yukti-distance-xs: 0px;
+    --yukti-distance-sm: 0px;
+    --yukti-distance-md: 0px;
+    --yukti-distance-lg: 0px;
+    --yukti-tilt-max: 0deg;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --yukti-color-border-hairline-dark: rgba(242, 239, 230, 0.25);
+    --yukti-color-border-hairline-light: rgba(20, 20, 15, 0.25);
+    --yukti-color-bone-300: #e8e4d8;
+    --yukti-color-yellow-500: #ffd000;
+  }
+}
+
+/* Print styles */
+@media print {
+  .skip-link,
+  .yukti-nav,
+  .yukti-entry-cover,
+  .yukti-blueprint,
+  .yukti-registration,
+  .yukti-ruler,
+  [data-reveal] {
+    display: none !important;
+  }
+
+  body {
+    background: white;
+    color: black;
+  }
+
+  .yukti-scene {
+    page-break-inside: avoid;
+    border-bottom: none;
+  }
 }
 
 img,
@@ -37,4 +161,73 @@ svg,
 canvas {
   display: block;
   max-width: 100%;
+  height: auto;
+}
+
+/* Typography normalization */
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  font-weight: inherit;
+  line-height: inherit;
+}
+
+p {
+  margin: 0;
+}
+
+ul, ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Form element basics */
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+/* Link baseline */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Table baseline */
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+/* Details/summary baseline */
+details > summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+details > summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Utility: visually hidden but accessible */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }

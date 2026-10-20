@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YUKTI — Judgment Report</title>
+  <meta name="description" content="A CHOIR institutional reasoning judgment: recommendation, kernel findings, evidence, and execution trace." />
+  <link rel="stylesheet" href="/src/styles/tokens.design.css" />
+  <link rel="stylesheet" href="/src/styles/tokens.motion.css" />
+  <link rel="stylesheet" href="/src/styles/base.css" />
+  <link rel="stylesheet" href="/src/styles/blueprint.css" />
+  <link rel="stylesheet" href="/src/styles/drafting.css" />
+  <link rel="stylesheet" href="/src/styles/layout.css" />
+  <link rel="stylesheet" href="/src/styles/margin-note.css" />
+  <link rel="stylesheet" href="/src/styles/motion.css" />
+  <link rel="stylesheet" href="/src/styles/nav.css" />
+  <link rel="stylesheet" href="/src/styles/footer.css" />
+  <link rel="stylesheet" href="/src/styles/evidence.css" />
+  <link rel="stylesheet" href="/src/styles/judgment.css" />
+</head>
+<body class="yukti-material-graphite">
+
+  <div class="yukti-blueprint" aria-hidden="true"></div>
+  <div class="yukti-registration" aria-hidden="true">
+    <span class="yukti-registration__mark yukti-registration__mark--tl"></span>
+    <span class="yukti-registration__mark yukti-registration__mark--tr"></span>
+    <span class="yukti-registration__mark yukti-registration__mark--bl"></span>
+    <span class="yukti-registration__mark yukti-registration__mark--br"></span>
+  </div>
+  <div class="yukti-ruler" aria-hidden="true"></div>
+
+  <header class="yukti-nav">
+    <a href="/" class="yukti-nav__wordmark">YUKTI</a>
+    <nav aria-label="Primary">
+      <ul id="nav-links" class="yukti-nav__links"></ul>
+    </nav>
+    <button
+      type="button"
+      class="yukti-nav__menu-trigger"
+      aria-label="Menu"
+      aria-expanded="false"
+      aria-controls="nav-links"
+      data-nav-trigger
+    >
+      Menu
+    </button>
+  </header>
+
+  <main>
+    <article id="judgment-root" class="yukti-judgment" aria-busy="true">
+      <div class="yukti-shell">
+        <p class="yukti-type-data yukti-judgment__loading">Loading judgment…</p>
+      </div>
+    </article>
+  </main>
+
+  <footer class="yukti-footer">
+    <hr class="yukti-rule--tick" />
+    <div class="yukti-shell yukti-footer__inner">
+      <span class="yukti-footer__word">YUKTI</span>
+      <span class="yukti-footer__tagline">Institutional Reasoning Infrastructure</span>
+      <div class="yukti-footer__meta">
+        <span><b>Revision</b><span>0.2</span></span>
+        <span><b>Prepared</b><span>2026</span></span>
+      </div>
+    </div>
+    <hr class="yukti-rule--tick" />
+  </footer>
+
+  <script type="module" src="/src/scripts/judgment.js"></script>
+  <script type="module" src="/src/scripts/nav-toggle.js"></script>
+  <script type="module" src="/src/scripts/motion.js"></script>
+</body>
+</html>

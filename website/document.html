@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YUKTI — Document</title>
+  <meta name="description" content="A YUKTI research document, published as written." />
+  <link rel="stylesheet" href="/src/styles/tokens.design.css" />
+  <link rel="stylesheet" href="/src/styles/tokens.motion.css" />
+  <link rel="stylesheet" href="/src/styles/base.css" />
+  <link rel="stylesheet" href="/src/styles/blueprint.css" />
+  <link rel="stylesheet" href="/src/styles/drafting.css" />
+  <link rel="stylesheet" href="/src/styles/layout.css" />
+  <link rel="stylesheet" href="/src/styles/margin-note.css" />
+  <link rel="stylesheet" href="/src/styles/motion.css" />
+  <link rel="stylesheet" href="/src/styles/nav.css" />
+  <link rel="stylesheet" href="/src/styles/footer.css" />
+  <link rel="stylesheet" href="/src/styles/archive.css" />
+  <link rel="stylesheet" href="/src/styles/document.css" />
+</head>
+<body class="yukti-material-graphite">
+
+  <!-- Skip link for keyboard accessibility -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <div class="yukti-blueprint" aria-hidden="true"></div>
+  <div class="yukti-registration" aria-hidden="true">
+    <span class="yukti-registration__mark yukti-registration__mark--tl"></span>
+    <span class="yukti-registration__mark yukti-registration__mark--tr"></span>
+    <span class="yukti-registration__mark yukti-registration__mark--bl"></span>
+    <span class="yukti-registration__mark yukti-registration__mark--br"></span>
+  </div>
+  <div class="yukti-ruler" aria-hidden="true"></div>
+
+  <header class="yukti-nav">
+    <a href="/" class="yukti-nav__wordmark">YUKTI</a>
+    <nav aria-label="Primary">
+      <ul id="nav-links" class="yukti-nav__links"></ul>
+    </nav>
+    <button
+      type="button"
+      class="yukti-nav__menu-trigger"
+      aria-label="Menu"
+      aria-expanded="false"
+      aria-controls="nav-links"
+      data-nav-trigger
+    >
+      Menu
+    </button>
+  </header>
+
+  <main id="main-content">
+    <!-- The whole report renders into here. A technical report is one
+         continuous sheet, so there are no scene bands inside it. -->
+    <article id="document-root" class="yukti-doc" aria-busy="true">
+      <div class="yukti-shell">
+        <p class="yukti-type-data yukti-doc__loading">Loading document…</p>
+      </div>
+    </article>
+  </main>
+
+  <footer class="yukti-footer">
+    <hr class="yukti-rule--tick" />
+    <div class="yukti-shell yukti-footer__inner">
+      <span class="yukti-footer__word">YUKTI</span>
+      <span class="yukti-footer__tagline">Institutional Reasoning Infrastructure</span>
+      <div class="yukti-footer__meta">
+        <span><b>Revision</b><span>0.2</span></span>
+        <span><b>Prepared</b><span>2026</span></span>
+      </div>
+    </div>
+    <hr class="yukti-rule--tick" />
+  </footer>
+
+  <script type="module" src="/src/scripts/document.js"></script>
+  <script type="module" src="/src/scripts/nav-toggle.js"></script>
+  <script type="module" src="/src/scripts/motion.js"></script>
+</body>
+</html>

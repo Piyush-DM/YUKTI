@@ -10,7 +10,7 @@ do, and the five items carried out of it unresolved.
 
 v0 is a **canonical control plane**: it validates, names, orders, versions,
 commits, traces and terminates. It does not reason, and the reason it does not
-is `DECISION-005`, described below.
+is that the evaluator question is unanswered — described below.
 
 Areas outside `conformance/` and `execution/` remain scaffold. They preserve
 architectural names so future work can add behavior only after the
@@ -33,7 +33,7 @@ corresponding CHOIR specifications or approved architecture documents exist.
 - `runtime/`: Reserved for approved runtime coordination behavior.
 - `tests/`: Standard-library tests that protect scaffold stability.
 
-## The DECISION-005 boundary
+## The evaluator boundary
 
 DAALE v0 stops at one specific point, and it is worth stating plainly because
 everything else in `execution/` is complete without it.
@@ -42,7 +42,12 @@ The D-Core validates, orders, versions, commits, traces and terminates. It does
 not evaluate. Evaluating requires deciding *who evaluates* — whether DAALE
 calls the frozen prototype's kernels or evaluates for itself — and those are
 options **B** and **A** of `DECISION-005` verbatim. There is no neutral third
-answer, because "who evaluates" is exactly what that ADR asks.
+answer, because "who evaluates" is exactly what that ADR asked.
+
+`DECISION-005` was **invalidated on 2026-08-22** and no longer governs. That
+ruling selected neither option and recorded no replacement architecture, so the
+question is still unanswered and the boundary below still stands — it is now
+held by the ruling rather than by an open ADR.
 
 There is therefore **no evaluator and no placeholder for one**. A stub raising
 `NotImplementedError` would still assert that the evaluator belongs inside
@@ -53,7 +58,8 @@ time.
 Every `ExecutionSummary` reports `emits_judgment=False` and carries the reason,
 so a completed execution cannot be mistaken for an adjudicated one.
 
-**A ruling on `DECISION-005` is the next act, not Phase 3.**
+**The next act is the architectural artifact that supersedes `DECISION-005`,
+not Phase 3.**
 
 ## Who may commit
 
@@ -77,7 +83,7 @@ introduce new runtime dependencies or frameworks without explicit approval.
 built under direct architectural instruction to implement the DAALE v0
 execution plan, which the rules permit as an alternative to a specification. It
 carries no dependency on `DECISION-005`: the commitments it locks are CHOIR's
-and are identical under every option that ADR leaves open, and the package
+and are identical under every option that ADR set out, and the package
 imports nothing from `choir_prototype` or `applications`. Nothing else in
 `daale/` has been unblocked by it.
 

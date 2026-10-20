@@ -19,19 +19,29 @@ and pretending otherwise here would be worse than saying so.
 
 from __future__ import annotations
 
+import argparse
 import json
+import threading
+import webbrowser
 from dataclasses import asdict
 from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
 
-from applications.investment.workspace import analysis, diligence
+from applications.investment.workspace import (
+    analysis,
+    assistant,
+    diligence,
+    explain,
+    intake,
+)
 from applications.investment.workspace.cases import (
     Case,
     CaseStore,
     Figure,
     FlaggedConflict,
+    IntakeRecord,
     LedgerEntry,
     Source,
 )
@@ -93,6 +103,8 @@ class WorkspaceHandler(SimpleHTTPRequestHandler):
             body = self._read_json()
             if segments == ["api", "cases"]:
                 payload = self._open_case(body)
+            elif segments == ["api", "worked-example"]:
+                payload = self._open_worked_example()
             elif len(segments) == 4 and segments[:2] == ["api", "cases"]:
                 payload = self._case_action(segments[2], segments[3], body)
             else:
@@ -156,7 +168,146 @@ class WorkspaceHandler(SimpleHTTPRequestHandler):
         if action == "decision":
             self._record_decision(case_id, body)
             return self._case_detail(case_id)
+        if action == "read":
+            return self._read_prose(case_id, body)
+        if action == "accept":
+            self._accept_intake(case_id, body)
+            return self._case_detail(case_id)
+        if action == "ask":
+            return self._ask(case_id, body)
         raise LookupError(action)
+
+    def _read_prose(self, case_id: str, body: dict[str, Any]) -> dict[str, Any]:
+        """Read pasted prose and return proposals. Changes nothing.
+
+        A read, expressed as a POST because the text travels in the body. The
+        case is untouched: these are suggestions until someone accepts them.
+        """
+        case = self.store.load(case_id)
+        text = _text(body, "text")
+        reading = intake.read(text, case.sources)
+        read_by = "reader"
+
+        # The model reads messier prose than the keyword reader does. It is
+        # tried second and only replaces the figures, never the governance: its
+        # proposals are the same Proposal objects, still unconfirmed, still
+        # carrying a span that had to be found verbatim in the text.
+        if assistant.enabled():
+            attributable = case.sources + tuple(
+                Source(label=item.label, origin=item.origin, kind=item.kind)
+                for item in reading.sources
+            )
+            try:
+                proposed = assistant.propose(text, attributable)
+            except assistant.AssistantUnavailable as exc:
+                read_by = f"reader (the model was unavailable: {exc})"
+            else:
+                if proposed:
+                    reading = intake.Reading(sources=reading.sources, figures=proposed)
+                    read_by = "model"
+
+        return {
+            "text": text,
+            "read_by": read_by,
+            "sources": [asdict(source) for source in reading.sources],
+            "proposals": [
+                asdict(proposal) | {"needs_attention": proposal.needs_attention}
+                for proposal in reading.figures
+            ],
+            "unmatched": [
+                asdict(item)
+                for item in diligence.outstanding(
+                    frozenset(proposal.metric for proposal in reading.figures)
+                )
+            ],
+        }
+
+    def _accept_intake(self, case_id: str, body: dict[str, Any]) -> None:
+        """Fold the readings a person confirmed into the case material.
+
+        Sources the reader confirmed are registered first, because a figure may
+        not cite a source that is not in the register -- the one rule the
+        product enforces purely for the audit trail.
+        """
+        confirmed_sources = tuple(
+            Source(
+                label=_text(entry, "label"),
+                origin=_text(entry, "origin"),
+                kind=_text(entry, "kind"),
+            )
+            for entry in _entries(body, "sources")
+        )
+        if confirmed_sources:
+            case = self.store.load(case_id)
+            have = {source.label for source in case.sources}
+            self.store.record_material(
+                case_id,
+                sources=case.sources
+                + tuple(item for item in confirmed_sources if item.label not in have),
+                figures=case.figures,
+                assumptions=case.assumptions,
+                flagged_conflicts=case.flagged_conflicts,
+            )
+
+        accepted = tuple(
+            IntakeRecord(
+                record_id="",
+                metric=_text(entry, "metric"),
+                value=_text(entry, "value"),
+                status=_text(entry, "status"),
+                source_label=_text(entry, "source_label"),
+                quote=_text(entry, "quote"),
+                basis=_text(entry, "basis"),
+                recorded_on=_text(entry, "recorded_on"),
+                edited=bool(entry.get("edited", False)),
+            )
+            for entry in _entries(body, "accepted")
+        )
+        if not accepted and not confirmed_sources:
+            raise ValueError("Nothing was accepted.")
+        if accepted:
+            self.store.accept_intake(case_id, accepted)
+
+    def _ask(self, case_id: str, body: dict[str, Any]) -> dict[str, Any]:
+        """Answer a question about this case from its record."""
+        case = self.store.load(case_id)
+        judgment = analysis.read_judgment(self.store, case) if case.judgments else None
+        question = _text(body, "question")
+
+        # Compute first, phrase second. The deterministic answer is the answer;
+        # the model only changes its wording, and is checked afterwards for
+        # figures the record does not contain.
+        reply = explain.answer(question, case, judgment)
+        text = reply.text
+        phrased_by = "record"
+        note = ""
+
+        extract = json.dumps(asdict(judgment) if judgment else {}, indent=1)[:12000]
+
+        if assistant.enabled():
+            try:
+                if reply.understood:
+                    # A recognised question already has an answer. The model
+                    # only puts the record's answer into better words.
+                    phrased = assistant.phrase(question, case, reply.text, extract)
+                else:
+                    # Anything else: an ordinary conversation, grounded in the
+                    # record rather than refused for not matching a phrasing.
+                    phrased = assistant.converse(question, case, extract)
+                text = phrased.text
+                phrased_by = "model" if phrased.model_used else "record"
+                note = phrased.note
+            except assistant.AssistantUnavailable as exc:
+                note = f"the model was unavailable: {exc}"
+
+        return {
+            "answer": text,
+            "record_sources": list(reply.sources),
+            "understood": reply.understood,
+            "phrased_by": phrased_by,
+            "note": note,
+            "suggestions": list(explain.suggestions(case, judgment)),
+        }
 
     # -- actions -----------------------------------------------------------
 
@@ -169,6 +320,16 @@ class WorkspaceHandler(SimpleHTTPRequestHandler):
             thesis=_text(body, "thesis"),
             owner=_text(body, "owner"),
         )
+        return self._case_detail(case.case_id)
+
+    def _open_worked_example(self) -> dict[str, Any]:
+        """Open a case already carrying the worked example's material.
+
+        The one action the register offers when it is empty. It leaves the case
+        at *Material assembled*, so the reader still performs the two steps that
+        matter: requesting the judgment and recording the decision.
+        """
+        case = analysis.open_worked_example(self.store)
         return self._case_detail(case.case_id)
 
     def _record_material(self, case_id: str, body: dict[str, Any]) -> None:
@@ -245,6 +406,7 @@ class WorkspaceHandler(SimpleHTTPRequestHandler):
                 for entry in diligence.outstanding(case.recorded_metrics())
             ],
             "judgment": None,
+            "suggestions": [],
             "ledger_verification": [
                 asdict(check)
                 | {
@@ -255,10 +417,11 @@ class WorkspaceHandler(SimpleHTTPRequestHandler):
                 for check in analysis.verify_ledger(self.store, case_id)
             ],
         }
+        judgment = None
         if case.judgments:
-            payload["judgment"] = asdict(
-                analysis.read_judgment(self.store, case, judgment_id)
-            )
+            judgment = analysis.read_judgment(self.store, case, judgment_id)
+            payload["judgment"] = asdict(judgment)
+        payload["suggestions"] = list(explain.suggestions(case, judgment))
         return payload
 
     # -- transport ---------------------------------------------------------
@@ -305,6 +468,7 @@ def _schedule_payload() -> dict[str, Any]:
         "schedule": [asdict(entry) for entry in diligence.SCHEDULE],
         "source_kinds": [asdict(entry) for entry in diligence.SOURCE_KINDS],
         "figure_statuses": [asdict(entry) for entry in diligence.FIGURE_STATUSES],
+        "assistant": assistant.status(),
     }
 
 
@@ -326,16 +490,81 @@ def _text(source: dict[str, Any], key: str) -> str:
     return value
 
 
-def main() -> int:
-    """Run the workspace server."""
+# ASCII only. A Windows console runs a legacy codepage by default and renders an
+# em dash as a replacement character, which is a poor first impression from the
+# one screen that tells a new reader what to do.
+BANNER = """\
+  YUKTI - Investment Committee Workspace
+
+  Open:        {url}
+  Case store:  {store}
+
+  What to do, in order:
+    1. Open a case, or load the worked example from the empty register.
+    2. Material  - register the sources, then record figures against them.
+    3. Judgment  - request one. The engine reads only the material.
+    4. Decision  - record what the committee chose. Audit keeps the receipt.
+
+  Stop with Ctrl-C. Local development only: no accounts, no access control.
+"""
+
+
+def main(argv: list[str] | None = None) -> int:
+    """Run the workspace server.
+
+    Opens a browser by default. Someone handed this application should not have
+    to read a port off a console to use it, and the port is the only thing the
+    console said that they needed.
+    """
+    parser = argparse.ArgumentParser(
+        prog="yukti",
+        description="Run the YUKTI investment committee workspace.",
+    )
+    parser.add_argument("--host", default=HOST, help=f"default: {HOST}")
+    parser.add_argument("--port", type=int, default=PORT, help=f"default: {PORT}")
+    parser.add_argument(
+        "--no-browser", action="store_true", help="do not open a browser"
+    )
+    parser.add_argument(
+        "--check-assist",
+        action="store_true",
+        help="check the optional language model wiring and exit",
+    )
+    args = parser.parse_args(argv)
+
+    if args.check_assist:
+        print(assistant.check())
+        return 0
+
     STORE.root.mkdir(parents=True, exist_ok=True)
-    server = ThreadingHTTPServer((HOST, PORT), WorkspaceHandler)
-    print(f"YUKTI workspace running at http://{HOST}:{PORT}/")
-    print(f"Case store: {STORE.root}")
+    try:
+        server = ThreadingHTTPServer((args.host, args.port), WorkspaceHandler)
+    except OSError as exc:
+        print(f"Could not start on {args.host}:{args.port} — {exc}")
+        print("Something else may be using the port. Try: --port 8771")
+        return 1
+
+    url = f"http://{args.host}:{args.port}/"
+    print(BANNER.format(url=url, store=STORE.root))
+
+    if not args.no_browser:
+        # Slightly delayed so the first request cannot race the serve loop, and
+        # swallowed on failure: a machine with no browser should still get a
+        # working server, not a traceback under the instructions.
+        def open_browser() -> None:
+            try:
+                webbrowser.open(url)
+            except Exception:
+                pass
+
+        threading.Timer(0.5, open_browser).start()
+
     try:
         server.serve_forever()
     except KeyboardInterrupt:
         print("\nStopped.")
+    finally:
+        server.server_close()
     return 0
 
 

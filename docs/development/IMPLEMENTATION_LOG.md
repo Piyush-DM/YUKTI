@@ -826,3 +826,107 @@ Unchanged by this cycle and restated in `DAALE_v0_CLOSURE.md` §7:
 3. Seven further commitments remain unexercised, classified.
 4. No review workflow behind escalation.
 5. The v0 plan itself is recorded nowhere in this repository.
+
+---
+
+## 2026-08-22 — DECISION-005 invalidated
+
+**Instruction.** Apply the ruling that `DECISION-005` is INVALIDATED as of
+2026-08-22 and no longer governs. Preserve the original ADR and its historical
+status exactly. Add current-governance notation so a reader can distinguish the
+two layers. Update only the canonical references that need to acknowledge the
+change. Do not select evaluator A or B, modify `contract.py` or
+`choir_prototype/`, start Phase 3, resolve the IR/contract mismatch, or invent
+a replacement decision.
+
+### The correction that shaped this cycle
+
+An earlier reading treated "invalidated" as implying the ADR should be edited,
+retired or deleted. The architect corrected it: **invalidation is a governance
+layer, not a verdict on the record.** An ADR can be simultaneously
+
+```
+Historical status at closure: Open / Not accepted
+Current governance status:    INVALIDATED
+```
+
+and collapsing those two destroys the record of what was actually true at
+closure. This is the same shape `DECISION-004` already set for judgments —
+history is append-only, superseded records stay fully readable, nothing is
+overwritten. ADRs now get the treatment judgments already had.
+
+### Completed
+
+- **The ADR.** A current-governance block above the preserved historical
+  status, and an appended `## Governance record` table. The status line, the
+  options, the constraint section and `## Approval Status` are untouched.
+  Not marked `Approved`. Not marked `Rejected`. Not deleted.
+- **20 live references updated** across `dcore.py`, `conformance/`,
+  `daale/README.md`, `README.md`, `IMPLEMENTATION_QUEUE.md`,
+  `TRACEABILITY_MATRIX.md` and three test docstrings.
+- **Two closed records appended to, never edited:** `DAALE_v0_CLOSURE.md` §10
+  and this entry.
+- `_NO_EVALUATOR` now reads "which no longer governs and has no recorded
+  replacement" instead of "which is open". It is a runtime value carried on
+  every `ExecutionSummary`, so leaving it would have had the engine telling
+  consumers it cannot judge for a reason that no longer holds.
+
+**Validation gate:** recorded below.
+
+### How the scope was decided
+
+The hard part was not the edits, it was separating **a now-false present-tense
+claim** from **historical record that must not be rewritten**. That distinction
+was put to twelve agents: four mapped the reference surface, then two opposing
+skeptics per slice — one arguing every proposed edit rewrites history, one
+arguing every preserved line is now false.
+
+82 references, 26 challenged. The line that settled it:
+
+> A document that declares itself closed and dated is historical record. A live
+> artifact with no closure stamp must be true today.
+
+So `DAALE_v0_CLOSURE.md` ("Status: CLOSED — 2026-08-14") and this log are
+appended to; module docstrings, READMEs, the queue and the traceability row are
+corrected, because a developer opening `dcore.py` reads its docstring as a
+description of current behaviour, not as a dated artefact.
+
+The challenge pass earned its cost: it found **four live falsehoods in
+`daale/README.md`** that the mapping pass missed entirely, including "A ruling
+on `DECISION-005` is the next act, not Phase 3" and "the reason it does not
+[reason] is `DECISION-005`" — the fourth sentence of the file, where a reader
+forms their picture of current state.
+
+### Assumptions
+
+**H1 — The conformance lock keeps reading the ADR's *historical* status.**
+`_read_decisions` takes the first line containing `Status:`, and the governance
+block deliberately writes `status:` in lower case so it cannot be picked up.
+That is a property of casing: easy to break by accident and silent when broken,
+so `test_the_lock_reads_historical_status_not_the_governance_block` pins it.
+Correct for the lock's purpose — it resolves *evidence*, and an invalidated
+decision must never resolve, which `test_an_invalidated_decision_still_does_
+not_resolve` now asserts directly.
+
+**H2 — Test docstrings were corrected; no test name, assertion or behaviour
+changed.** The two assertions pinning `"Open. Not accepted."` still pass
+unchanged, which is the evidence that the historical record survived.
+
+**H3 — `DECISION-006`'s line about why that cycle could proceed was left
+alone.** It is an approved ADR describing a past cycle, and it was true when
+written.
+
+### Not done, by instruction
+
+Evaluator A/B not selected. `contract.py` untouched. `choir_prototype/`
+untouched. Phase 3 not started. The IR/contract vocabulary mismatch
+(`temp_dump/implementation/blocked/2026-08-22_ir_contract_vocabulary_mismatch.md`)
+is untouched and still open. No replacement decision invented.
+
+### Carried forward
+
+1. **The evaluator question is still unanswered.** Invalidation removed the
+   record of the question, not the question. The next act is the architectural
+   artifact that supersedes the ADR.
+2. **The IR/contract vocabulary mismatch** — real CHOIR IR fails the v0
+   contract gate on seven violations. Pinned by `TestRealIrShape`, unresolved.

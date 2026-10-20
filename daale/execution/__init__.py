@@ -34,6 +34,7 @@ from daale.execution.contract import (
     ContractViolation,
     validate_package,
 )
+from daale.execution.dependencies import DependencyIndex, build_index
 from daale.execution.dcore import (
     ContractRejected,
     DCore,
@@ -69,6 +70,7 @@ __all__ = [
     "ContractResult",
     "ContractViolation",
     "DCore",
+    "DependencyIndex",
     "ExecutionEvent",
     "ExecutionIdentity",
     "ExecutionLease",
@@ -81,6 +83,7 @@ __all__ = [
     "StaleWrite",
     "UnauthorizedWrite",
     "apply_outcome",
+    "build_index",
     "compute_execution_id",
     "compute_input_digest",
     "identify",

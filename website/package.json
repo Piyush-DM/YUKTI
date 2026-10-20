@@ -5,8 +5,9 @@
   "description": "YUKTI public website — static HTML/CSS/vanilla JS. Vite is a dev-server/bundler only; no framework runtime ships (D1).",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "build:research": "node tools/build-research.mjs",
+    "dev": "npm run build:research && vite",
+    "build": "npm run build:research && vite build",
     "preview": "vite preview"
   },
   "devDependencies": {

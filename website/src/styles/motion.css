@@ -6,8 +6,8 @@
 */
 
 [data-reveal] {
-  opacity: var(--yukti-opacity-hidden);
-  transform: translateY(var(--yukti-distance-md));
+  opacity: var(--yukti-opacity-hidden, 0);
+  transform: translateY(var(--yukti-distance-md, 30px));
   transition:
     opacity var(--yukti-duration-reveal) var(--yukti-ease-standard),
     transform var(--yukti-duration-reveal) var(--yukti-ease-standard);
@@ -15,8 +15,22 @@
 }
 
 [data-reveal].is-revealed {
-  opacity: var(--yukti-opacity-full);
+  opacity: var(--yukti-opacity-full, 1);
   transform: none;
+}
+
+/* Stagger support via CSS variable */
+[data-reveal][style*="--stagger"] {
+  transition-delay: calc(var(--yukti-reveal-delay, 0ms) + var(--stagger));
+}
+
+/* Reveal group — children reveal in sequence */
+[data-reveal-group] > [data-reveal] {
+  opacity: var(--yukti-opacity-hidden, 0);
+  transform: translateY(var(--yukti-distance-md, 30px));
+  transition:
+    opacity var(--yukti-duration-reveal) var(--yukti-ease-standard),
+    transform var(--yukti-duration-reveal) var(--yukti-ease-standard);
 }
 
 /* Belt-and-suspenders: tokens.motion.css already zeroes durations/distances
@@ -24,8 +38,9 @@
    is slow to attach the .is-revealed class (Motion Rule 8 — structural, not
    just shortened). */
 @media (prefers-reduced-motion: reduce) {
-  [data-reveal] {
-    opacity: var(--yukti-opacity-full);
+  [data-reveal],
+  [data-reveal-group] > [data-reveal] {
+    opacity: var(--yukti-opacity-full, 1);
     transform: none;
     transition: none;
   }

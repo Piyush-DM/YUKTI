@@ -6,6 +6,18 @@
       "runtimeExecutable": ".venv/Scripts/python.exe",
       "runtimeArgs": ["-m", "applications.investment.workspace"],
       "port": 8770
+    },
+    {
+      "name": "website",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "website", "run", "dev", "--", "--port", "5173", "--strictPort"],
+      "port": 5173
+    },
+    {
+      "name": "yukti-downloads-app",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "C:/Users/PIYUSH/Downloads/YUKTI", "run", "dev", "--", "--port", "5180", "--strictPort"],
+      "port": 5180
     }
   ]
 }

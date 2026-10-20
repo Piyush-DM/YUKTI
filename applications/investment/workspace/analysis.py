@@ -40,7 +40,14 @@ from applications.investment.vertical_slice.run import (
     execute_slice,
 )
 from applications.investment.workspace import diligence
-from applications.investment.workspace.cases import Case, CaseStore, JudgmentRecord
+from applications.investment.workspace.cases import (
+    Case,
+    CaseStore,
+    Figure,
+    FlaggedConflict,
+    JudgmentRecord,
+    Source,
+)
 
 # Stances the engine reports, in institutional wording.
 _STANCE_LABELS = {
@@ -367,6 +374,58 @@ def reference_material() -> dict[str, Any]:
         "assumptions": document["stated_assumptions"],
         "flagged_conflicts": document["noted_conflicts"],
     }
+
+
+# The committee facts for the worked example. Institutional metadata only --
+# none of it reaches the engine, which reads the material and nothing else.
+WORKED_EXAMPLE_FACTS = {
+    "company": "Orbital Logistics",
+    "sector": "Supply chain software",
+    "stage": "Series B",
+    "requested_decision": "Approve a $12M Series B allocation",
+    "thesis": "Reference case.",
+    "owner": "Reference case",
+}
+
+
+def open_worked_example(store: CaseStore) -> Case:
+    """Open a case already carrying the worked example's material.
+
+    The register is empty on a fresh install, and the first thing a new reader
+    needs is a case that is ready to analyse -- not fifteen figures to type
+    before anything happens. This composes the same two calls the intake and
+    material screens already make (``open_case`` then ``record_material``) with
+    the material ``reference_material`` already returns.
+
+    It deliberately stops at *Material assembled*. Requesting the judgment and
+    recording the decision are the two steps that make the lifecycle worth
+    walking, and doing them here would hand back a finished case rather than a
+    startable one.
+    """
+    material = reference_material()
+    case = store.open_case(**WORKED_EXAMPLE_FACTS)
+    store.record_material(
+        case.case_id,
+        sources=tuple(
+            Source(label=item["label"], origin=item["origin"], kind=item["kind"])
+            for item in material["sources"]
+        ),
+        figures=tuple(
+            Figure(
+                metric=item["metric"],
+                value=item["value"],
+                status=item["status"],
+                source_labels=tuple(item["source_labels"]),
+            )
+            for item in material["figures"]
+        ),
+        assumptions=tuple(material["assumptions"]),
+        flagged_conflicts=tuple(
+            FlaggedConflict(metric=item["metric"], note=item["note"])
+            for item in material["flagged_conflicts"]
+        ),
+    )
+    return store.load(case.case_id)
 
 
 def _resolve(case: Case, judgment_id: str | None) -> JudgmentRecord:

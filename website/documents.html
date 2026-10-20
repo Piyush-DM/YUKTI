@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YUKTI — Research Archive</title>
+  <meta
+    name="description"
+    content="The YUKTI research archive: numbered research documents, architecture decisions, and open proposals, published as written."
+  />
+  <link rel="stylesheet" href="/src/styles/tokens.design.css" />
+  <link rel="stylesheet" href="/src/styles/tokens.motion.css" />
+  <link rel="stylesheet" href="/src/styles/base.css" />
+  <link rel="stylesheet" href="/src/styles/blueprint.css" />
+  <link rel="stylesheet" href="/src/styles/drafting.css" />
+  <link rel="stylesheet" href="/src/styles/layout.css" />
+  <link rel="stylesheet" href="/src/styles/mega-heading.css" />
+  <link rel="stylesheet" href="/src/styles/margin-note.css" />
+  <link rel="stylesheet" href="/src/styles/motion.css" />
+  <link rel="stylesheet" href="/src/styles/nav.css" />
+  <link rel="stylesheet" href="/src/styles/footer.css" />
+  <link rel="stylesheet" href="/src/styles/archive.css" />
+</head>
+<body class="yukti-material-graphite">
+
+  <!-- Skip link for keyboard accessibility -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- Same App Shell as the homepage: ambient linework, fixed registration
+       marks, left-edge ruler. The archive is a further sheet in the same
+       drawing set, not a separate site. -->
+  <div class="yukti-blueprint" aria-hidden="true"></div>
+  <div class="yukti-registration" aria-hidden="true">
+    <span class="yukti-registration__mark yukti-registration__mark--tl"></span>
+    <span class="yukti-registration__mark yukti-registration__mark--tr"></span>
+    <span class="yukti-registration__mark yukti-registration__mark--bl"></span>
+    <span class="yukti-registration__mark yukti-registration__mark--br"></span>
+  </div>
+  <div class="yukti-ruler" aria-hidden="true"></div>
+
+  <header class="yukti-nav">
+    <a href="/" class="yukti-nav__wordmark">YUKTI</a>
+    <nav aria-label="Primary">
+      <ul id="nav-links" class="yukti-nav__links"></ul>
+    </nav>
+    <button
+      type="button"
+      class="yukti-nav__menu-trigger"
+      aria-label="Menu"
+      aria-expanded="false"
+      aria-controls="nav-links"
+      data-nav-trigger
+    >
+      Menu
+    </button>
+  </header>
+
+  <main id="main-content">
+    <!-- ============================================================
+         ARCHIVE HEADER — title block of the drawing set
+         ============================================================ -->
+    <section class="yukti-scene yukti-scene--archive-head">
+      <div class="yukti-shell">
+        <div class="yukti-grid">
+          <div class="yukti-col-9">
+            <p class="yukti-scene__index yukti-type-data" data-reveal>ARCHIVE</p>
+            <h1 id="archive-heading" data-reveal-group></h1>
+            <div class="yukti-archive__preamble" data-reveal-group>
+              <p class="yukti-type-body" data-reveal>
+                Every numbered document YUKTI has produced, published as written. Nothing here
+                has been rewritten for a public audience: each page is derived from the research
+                document or architecture decision it names, and cites that source by path.
+              </p>
+              <p class="yukti-type-body" data-reveal>
+                Most of this work is <strong>not accepted</strong>. Status is stated on every
+                entry, and reserved document numbers with no drafted content are listed at the
+                foot of this page rather than quietly omitted.
+              </p>
+            </div>
+
+            <hr class="yukti-rule--tick" data-reveal />
+
+            <!-- Status legend — a drawing key, not a filter UI affordance -->
+            <dl class="yukti-archive__legend" data-reveal-group>
+              <div data-reveal><dt>Published</dt><dd>An approved ruling that governs.</dd></div>
+              <div data-reveal><dt>Active</dt><dd>A complete research document. Drafted, not accepted.</dd></div>
+              <div data-reveal><dt>Open</dt><dd>A proposal or open question. Not a finding.</dd></div>
+              <div data-reveal><dt>Superseded</dt><dd>A ruling that no longer governs.</dd></div>
+            </dl>
+          </div>
+          <aside class="yukti-margin-note" data-margin-note aria-hidden="true"></aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         REGISTER — one row per document, grouped by series
+         ============================================================ -->
+    <section class="yukti-scene">
+      <div class="yukti-shell">
+        <div id="archive-register" class="yukti-archive"></div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         RESERVED — allocated numbers with no drafted document
+         ============================================================ -->
+    <section class="yukti-scene">
+      <div class="yukti-shell">
+        <div class="yukti-grid">
+          <div class="yukti-col-9">
+            <p class="yukti-scene__index yukti-type-data" data-reveal>RESERVED</p>
+            <h2 class="yukti-type-heading" data-reveal>Numbers allocated, not yet drafted</h2>
+            <p class="yukti-type-body yukti-archive__reserved-note" data-reveal>
+              These identifiers are taken. Each is a 0-byte placeholder in the repository, held
+              against research that has not been written into it. They are listed so the numbering
+              reads as complete, and so no future document silently claims one of them.
+            </p>
+            <div id="archive-reserved" class="yukti-archive__reserved" data-reveal-group></div>
+          </div>
+          <aside class="yukti-margin-note" aria-hidden="true"></aside>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="yukti-footer">
+    <hr class="yukti-rule--tick" />
+    <div class="yukti-shell yukti-footer__inner">
+      <span class="yukti-footer__word">YUKTI</span>
+      <span class="yukti-footer__tagline">Institutional Reasoning Infrastructure</span>
+      <div class="yukti-footer__meta">
+        <span><b>Revision</b><span>0.2</span></span>
+        <span><b>Prepared</b><span>2026</span></span>
+      </div>
+    </div>
+    <hr class="yukti-rule--tick" />
+  </footer>
+
+  <script type="module" src="/src/scripts/archive.js"></script>
+  <script type="module" src="/src/scripts/nav-toggle.js"></script>
+  <script type="module" src="/src/scripts/motion.js"></script>
+</body>
+</html>

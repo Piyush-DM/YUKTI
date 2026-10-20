@@ -1,10 +1,7 @@
 /*
-  Evidence Scene — pipeline diagram (Addendum v1.2/§16). Replaces the v1.1
-  connected-tick-line trace with a labeled pipeline: Claim, then Evidence →
-  Finding → Result connected by arrow glyphs, then an Annotation caption in a
-  bone/paper-textured box. Content unchanged (real mock-copy fields only —
-  see architecture §16 for why "Assumption" from the brief's own mockup was
-  deliberately not added).
+  Evidence Scene — Pipeline diagram (Addendum v1.2/§16).
+  Labeled pipeline: Claim → Evidence → Finding → Result connected by arrows,
+  then an Annotation caption in a bone/paper-textured box.
 */
 
 .yukti-pipeline {
@@ -30,6 +27,7 @@
   font-size: var(--yukti-type-body-size);
   color: var(--yukti-color-bone-100);
   margin: 0;
+  line-height: var(--yukti-type-body-line-height);
 }
 
 .yukti-pipeline__stages {
@@ -41,33 +39,87 @@
 
 .yukti-pipeline__arrow {
   font-family: var(--yukti-font-data);
+  font-size: var(--yukti-type-data-size);
   color: var(--yukti-color-border-hairline-dark);
   padding-left: 2px;
+  line-height: 1;
 }
 
+/* Result stage — muted label */
 .yukti-pipeline__stage.is-result .yukti-pipeline__label {
   color: var(--yukti-color-bone-300);
 }
 
 /* Annotation caption — the "museum paper" material treatment */
 .yukti-pipeline__annotation {
-  padding: var(--yukti-space-4);
+  position: relative;
+  padding: var(--yukti-space-5);
   border-radius: var(--yukti-radius-sm);
+  background: var(--yukti-color-bone-100);
+  overflow: hidden;
+}
+
+.yukti-pipeline__annotation::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: var(--yukti-texture-grain-fine);
+  opacity: 0.06;
+  mix-blend-mode: multiply;
 }
 
 .yukti-pipeline__annotation .yukti-pipeline__label {
   color: var(--yukti-color-yellow-600);
 }
 
-/* Bug fix: .yukti-pipeline__value's base rule sets bone-100 text (correct for
-   the dark graphite pipeline above) — inside this bone/paper-background box
-   that's bone-on-bone, invisible. Override to ink for readability. */
 .yukti-pipeline__annotation .yukti-pipeline__value {
   color: var(--yukti-color-ink-900);
+  position: relative;
+  z-index: 1;
 }
 
-.yukti-pipeline__annotation .yukti-pipeline__value,
 .yukti-pipeline__annotation .yukti-pipeline__label {
   position: relative;
-  z-index: 1; /* sit above the paper-grain ::before overlay (drafting.css) */
+  z-index: 1;
+}
+
+/* Pipeline stage with connecting line */
+.yukti-pipeline__stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--yukti-space-1);
+  padding-left: var(--yukti-space-3);
+}
+
+.yukti-pipeline__stage:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: calc(-1 * var(--yukti-space-2));
+  width: 1px;
+  background: var(--yukti-color-border-hairline-dark);
+}
+
+.yukti-pipeline__stage:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: -3px;
+  top: calc(100% + var(--yukti-space-1));
+  width: 7px;
+  height: 1px;
+  background: var(--yukti-color-yellow-500);
+}
+
+.yukti-pipeline__stage.is-result {
+  /* Result has no continuation line */
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .yukti-pipeline__annotation {
+    padding: var(--yukti-space-4);
+  }
 }

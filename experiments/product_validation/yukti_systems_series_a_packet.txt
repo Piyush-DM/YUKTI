@@ -1,0 +1,190 @@
+YUKTI — Series A Investment Packet
+Fictional / Synthetic Diligence Material
+Prepared for Internal Investment Review
+Company: YUKTI Systems Pvt. Ltd.
+Round: Series A
+Date: September 2026
+Stage: Series A
+Capital Requested: INR 42 crore
+Post-money valuation: INR 280 crore
+Proposed investor ownership: 15%
+Founder Memo
+YUKTI is building an institutional reasoning platform for enterprise AI. We help investment teams and other high-consequence organizations turn unstructured information into structured, auditable judgments.
+The company says it has grown very quickly since launching its first commercial product in late 2025.
+Management currently reports approximately INR 18.4 crore ARR, although another internal spreadsheet refers to INR 21.7 crore ARR as of August 2026. The finance team says the difference is mainly due to annualized contracted revenue being included in the second number.
+Revenue for FY2025 was approximately INR 2.1 crore. FY2026 revenue is expected to be around INR 11–13 crore depending on whether several contracts currently described as "committed" close before year end.
+Management expects FY2027 revenue of INR 48 crore and believes the business can reach INR 100 crore ARR within 18 months.
+The company currently has 37 enterprise customers, 19 of which are paying customers. Several customers are described as "design partners" but are included in the customer count in investor materials.
+Average annual contract value is approximately INR 72 lakh. However, the sales dashboard shows median annual contract value of INR 31 lakh and several large contracts above INR 1 crore.
+Gross margin is reported as 81%. Another finance document reports gross margin of 68% after including model inference costs and cloud infrastructure. Management believes margins will return above 80% once inference is optimized.
+Net revenue retention is approximately 143%, although the company has only been selling commercially for around 11 months.
+Customer concentration remains low according to management, with the largest customer representing approximately 19% of ARR.
+Product
+The core YUKTI engine uses multiple reasoning kernels to independently examine evidence before producing a synthesized institutional judgment.
+Management claims the architecture is deterministic once the evidence packet has been frozen.
+The product currently supports:
+
+* evidence extraction
+* human confirmation of extracted material
+* structured reasoning
+* judgment generation
+* disagreement identification
+* decision recording
+* audit trails
+* reproducibility checks
+* report generation
+
+The company says the current system has processed more than 8,400 investment packets.
+An engineering note from August refers to approximately 1,200 packets processed in production.
+The company explains that the 8,400 number includes simulations, repeated runs and internal test packets.
+Management states that no customer has reported an incorrect investment recommendation caused by the reasoning engine.
+There have nevertheless been 14 cases where analysts overrode or materially disagreed with a YUKTI recommendation.
+Management says these were "normal human review events" rather than product failures.
+Customers
+Selected customers listed in the Series A presentation:
+
+1. Meridian Capital Partners
+2. Northstar Ventures
+3. Helio Systems
+4. Apex Growth Fund
+5. Kestrel Insurance
+6. Vertex Properties
+7. Orbital Ventures
+8. Blackstone Capital Advisors
+9. GlobalEdge Holdings
+10. Acme Financial
+
+The customer success document says the company currently has:
+
+* 19 paying customers
+* 8 active pilots
+* 11 customers in procurement
+* 23 historical design partners
+
+It is unclear whether some categories overlap.
+One sales document says 6 customers have deployed YUKTI into production.
+Another says 14 customers are currently in production.
+Customer Example — Meridian Robotics
+Management highlights Meridian Robotics as a flagship customer.
+The case study states that YUKTI analyzed a Series B investment opportunity involving Meridian and reduced analyst preparation time by approximately 72%.
+The original analyst report reportedly required approximately 31 hours.
+YUKTI completed the corresponding analysis in 43 minutes.
+The case study says the investment committee ultimately approved the investment.
+The YUKTI report itself contained a disagreement regarding revenue quality and recommended proceeding with conditions.
+The committee memo says the investment was approved because "the risks identified by YUKTI were understood and manageable."
+No independent record was found showing whether the committee challenged YUKTI's underlying evidence before reaching the decision.
+Financial Summary
+FY2025
+Revenue: INR 2.1 crore
+Gross profit: INR 1.7 crore
+Operating expenses: INR 7.8 crore
+EBITDA: -INR 6.1 crore
+FY2026
+Revenue: INR 12.4 crore
+ARR: INR 18.4 crore
+Gross margin: 81%
+Cash burn: INR 1.4 crore/month
+FY2027 Forecast
+Revenue: INR 48 crore
+ARR: INR 61 crore
+Gross margin: 86%
+EBITDA: INR 4.8 crore
+Management expects to become EBITDA positive during Q2 FY2027.
+Cash Position
+Cash and equivalents as of August 31, 2026:
+INR 9.7 crore
+Monthly operating burn:
+INR 1.4 crore
+Management says the Series A gives the company approximately 30 months of runway.
+The finance model, however, assumes a monthly burn of INR 2.1 crore following planned hiring.
+Fundraising History
+Pre-seed: INR 4 crore
+Seed: INR 12 crore
+Current Series A: INR 42 crore
+Previous investors reportedly invested at:
+Pre-seed valuation: INR 18 crore post-money
+Seed valuation: INR 72 crore post-money
+Current Series A valuation:
+INR 280 crore post-money
+Management claims this represents approximately 4x growth in company value since the previous round.
+Cap Table
+Founder A: 46%
+Founder B: 24%
+Employee option pool: 12%
+Seed investors: 11%
+Pre-seed investors: 5%
+Advisors: 4%
+The founders are described elsewhere as owning 68% combined.
+The company expects to create an additional 10% option pool immediately following the Series A.
+Management says existing shareholders will not experience material dilution.
+Hiring Plan
+The company currently employs 43 people.
+Planned post-Series A headcount:
+Engineering: 34
+AI/ML: 21
+Sales: 18
+Customer success: 12
+Operations: 8
+Management expects total headcount to reach approximately 93 employees within 12 months.
+Annualized personnel cost is expected to increase from INR 5.2 crore to INR 17 crore.
+Market
+Management estimates the enterprise AI governance and reasoning market at approximately USD 18 billion today.
+The addressable investment intelligence segment is estimated at USD 4.6 billion.
+Management believes YUKTI can capture 5% of the global investment intelligence market within five years.
+The investor presentation describes the competitive landscape as fragmented.
+Named competitors include:
+
+* generic enterprise AI copilots
+* investment research platforms
+* internal analyst teams
+* workflow automation companies
+
+Management claims YUKTI has no direct competitor with deterministic institutional reasoning.
+Security
+The company states that all customer data is encrypted at rest and in transit.
+SOC 2 Type II certification is described as "in progress."
+The security roadmap says certification is expected by December 2026.
+An earlier engineering document says the production application currently runs primarily as a local-development architecture and does not yet have multi-tenant access controls.
+Management describes the current system as "enterprise-ready."
+AI / Model Dependency
+The reasoning engine is described as model-independent.
+The current assistant layer uses an external model gateway for model-assisted prose interpretation.
+The company says the system can operate without external model assistance, but management considers the assisted path necessary for large-scale commercial deployment.
+Current model infrastructure costs are estimated at INR 18 lakh per month.
+An engineering spreadsheet estimates this could increase to INR 42 lakh per month at 10x current usage.
+Legal / Regulatory
+The company says it has no material litigation.
+A compliance note states that two enterprise customers have requested contractual restrictions around automated investment recommendations.
+The legal team is evaluating whether YUKTI should be classified as a decision-support system rather than an automated investment adviser in certain jurisdictions.
+No final regulatory determination has been obtained.
+Series A Use of Funds
+INR 16 crore — engineering
+INR 8 crore — AI infrastructure
+INR 7 crore — sales and marketing
+INR 5 crore — international expansion
+INR 3 crore — compliance/security
+INR 3 crore — working capital
+Management expects this capital to support approximately 30 months of runway.
+Management's Investment Thesis
+YUKTI believes institutional decision-making is entering a transition similar to the transition from spreadsheets to software.
+The company expects AI reasoning systems to become part of every major investment committee's workflow.
+Management believes YUKTI can become the infrastructure layer for this transition.
+The company is seeking INR 42 crore at a INR 238 crore pre-money valuation.
+Management expects the next financing to occur at a valuation above INR 500 crore.
+Selected Claims Requiring Verification
+
+* 19 paying enterprise customers
+* 37 total enterprise customers
+* 8,400 investment packets processed
+* 1,200 production packets processed
+* 143% net revenue retention
+* 81% gross margin
+* 72% analyst time reduction
+* 86% projected FY2027 gross margin
+* 30 months of Series A runway
+* SOC 2 Type II completion by December 2026
+* USD 18B total addressable market
+* 5% five-year market share target
+* No direct deterministic reasoning competitor
+* No material litigation
+* Enterprise-ready production architecture

@@ -1,0 +1,1703 @@
+{
+  "comparison_view": {
+    "agreements": [
+      "capital_efficiency"
+    ],
+    "confidence": "low",
+    "confidence_limiting_factor": "1 unresolved topic disagreement(s); weakest contributing kernel is market_position (weakest evidence is estimated (SRC-MARKET))",
+    "disagreements": [
+      "revenue_quality"
+    ],
+    "finding_citations": {
+      "financial_posture:fin-growth": {
+        "claim_ids": [
+          "clm-002"
+        ],
+        "evidence_ids": [
+          "SRC-AUDIT-FY24",
+          "SRC-DECK"
+        ]
+      },
+      "financial_posture:fin-margin": {
+        "claim_ids": [
+          "clm-003"
+        ],
+        "evidence_ids": [
+          "SRC-AUDIT-FY24"
+        ]
+      },
+      "financial_posture:fin-runway": {
+        "claim_ids": [
+          "clm-004",
+          "clm-005"
+        ],
+        "evidence_ids": [
+          "SRC-AUDIT-FY24"
+        ]
+      },
+      "governance:gov-control": {
+        "claim_ids": [
+          "clm-012",
+          "clm-013"
+        ],
+        "evidence_ids": [
+          "SRC-CAPTABLE"
+        ]
+      },
+      "governance:gov-transparency": {
+        "claim_ids": [
+          "clm-014"
+        ],
+        "evidence_ids": [
+          "SRC-AUDIT-FY24"
+        ]
+      },
+      "market_position:mkt-competition": {
+        "claim_ids": [
+          "clm-011"
+        ],
+        "evidence_ids": [
+          "SRC-MARKET"
+        ]
+      },
+      "market_position:mkt-opportunity": {
+        "claim_ids": [
+          "clm-009",
+          "clm-010"
+        ],
+        "evidence_ids": [
+          "SRC-MARKET"
+        ]
+      },
+      "risk_exposure:risk-burn": {
+        "claim_ids": [
+          "clm-001",
+          "clm-004"
+        ],
+        "evidence_ids": [
+          "SRC-AUDIT-FY24"
+        ]
+      },
+      "risk_exposure:risk-concentration": {
+        "claim_ids": [
+          "clm-006"
+        ],
+        "evidence_ids": [
+          "SRC-DECK"
+        ]
+      },
+      "risk_exposure:risk-retention": {
+        "claim_ids": [
+          "clm-007",
+          "clm-008"
+        ],
+        "evidence_ids": [
+          "SRC-CUSTOMER",
+          "SRC-DECK"
+        ]
+      }
+    },
+    "findings": [
+      [
+        "financial_posture",
+        "fin-growth",
+        "growth",
+        "supports"
+      ],
+      [
+        "financial_posture",
+        "fin-margin",
+        "revenue_quality",
+        "supports"
+      ],
+      [
+        "financial_posture",
+        "fin-runway",
+        "capital_efficiency",
+        "conditional"
+      ],
+      [
+        "governance",
+        "gov-control",
+        "governance_quality",
+        "conditional"
+      ],
+      [
+        "governance",
+        "gov-transparency",
+        "financial_transparency",
+        "supports"
+      ],
+      [
+        "market_position",
+        "mkt-competition",
+        "competitive_position",
+        "conditional"
+      ],
+      [
+        "market_position",
+        "mkt-opportunity",
+        "market_opportunity",
+        "supports"
+      ],
+      [
+        "risk_exposure",
+        "risk-burn",
+        "capital_efficiency",
+        "conditional"
+      ],
+      [
+        "risk_exposure",
+        "risk-concentration",
+        "concentration_risk",
+        "conditional"
+      ],
+      [
+        "risk_exposure",
+        "risk-retention",
+        "revenue_quality",
+        "opposes"
+      ]
+    ],
+    "fired_rule": "R3 proceed-with-conditions",
+    "kernel_bands": {
+      "financial_posture": "moderate",
+      "governance": "moderate",
+      "market_position": "low",
+      "risk_exposure": "low"
+    },
+    "kernel_contradictions": {
+      "financial_posture": 0,
+      "governance": 0,
+      "market_position": 0,
+      "risk_exposure": 1
+    },
+    "kernel_coverage": {
+      "financial_posture": "5/5 expected inputs present",
+      "governance": "4/4 expected inputs present",
+      "market_position": "3/3 expected inputs present",
+      "risk_exposure": "5/5 expected inputs present"
+    },
+    "kernel_derivation_outcome": {
+      "financial_posture": "moderate",
+      "governance": "moderate",
+      "market_position": "low",
+      "risk_exposure": "low"
+    },
+    "kernel_derivation_steps": {
+      "financial_posture": [
+        "rule 0",
+        "rule 1",
+        "rule 2",
+        "rule 3",
+        "rule 4",
+        "rule 5"
+      ],
+      "governance": [
+        "rule 0",
+        "rule 1",
+        "rule 2",
+        "rule 3",
+        "rule 4",
+        "rule 5"
+      ],
+      "market_position": [
+        "rule 0",
+        "rule 1",
+        "rule 2",
+        "rule 3",
+        "rule 4",
+        "rule 5"
+      ],
+      "risk_exposure": [
+        "rule 0",
+        "rule 1",
+        "rule 2",
+        "rule 3",
+        "rule 4",
+        "rule 5"
+      ]
+    },
+    "kernel_limiting_factors": {
+      "financial_posture": "weakest evidence is reported (SRC-DECK)",
+      "governance": "weakest evidence is reported (SRC-DECK)",
+      "market_position": "weakest evidence is estimated (SRC-MARKET)",
+      "risk_exposure": "1 contradicted claim(s) in scope"
+    },
+    "kernel_unresolved": {
+      "financial_posture": [],
+      "governance": [],
+      "market_position": [],
+      "risk_exposure": [
+        "Claim clm-007 (net_revenue_retention_pct) is contradicted elsewhere in the packet; this finding is provisional."
+      ]
+    },
+    "recommendation": "proceed with conditions",
+    "remaining_uncertainty": [
+      "Assumed: Market figures from SRC-MARKET are estimates, not measurements.",
+      "Assumed: Runway is derived as cash / net monthly burn, holding burn flat.",
+      "Claim clm-007 (net_revenue_retention_pct) is contradicted elsewhere in the packet; this finding is provisional."
+    ],
+    "tally": {
+      "conditional": 5,
+      "oppose": 1,
+      "support": 7
+    },
+    "usable_kernels": [
+      "financial_posture",
+      "governance",
+      "market_position",
+      "risk_exposure"
+    ]
+  },
+  "document": {
+    "company_name": "Orbital Logistics Inc.",
+    "data_points": [
+      {
+        "metric": "arr_usd",
+        "source_labels": [
+          "SRC-AUDIT-FY24"
+        ],
+        "status": "confirmed",
+        "value": "18000000"
+      },
+      {
+        "metric": "yoy_growth_pct",
+        "source_labels": [
+          "SRC-AUDIT-FY24",
+          "SRC-DECK"
+        ],
+        "status": "confirmed",
+        "value": "62"
+      },
+      {
+        "metric": "gross_margin_pct",
+        "source_labels": [
+          "SRC-AUDIT-FY24"
+        ],
+        "status": "confirmed",
+        "value": "74"
+      },
+      {
+        "metric": "net_burn_monthly_usd",
+        "source_labels": [
+          "SRC-AUDIT-FY24"
+        ],
+        "status": "confirmed",
+        "value": "1400000"
+      },
+      {
+        "metric": "cash_usd",
+        "source_labels": [
+          "SRC-AUDIT-FY24"
+        ],
+        "status": "confirmed",
+        "value": "21000000"
+      },
+      {
+        "metric": "top_customer_revenue_pct",
+        "source_labels": [
+          "SRC-DECK"
+        ],
+        "status": "reported",
+        "value": "38"
+      },
+      {
+        "metric": "net_revenue_retention_pct",
+        "source_labels": [
+          "SRC-DECK"
+        ],
+        "status": "disputed",
+        "value": "104"
+      },
+      {
+        "metric": "logo_churn_pct",
+        "source_labels": [
+          "SRC-DECK",
+          "SRC-CUSTOMER"
+        ],
+        "status": "reported",
+        "value": "11"
+      },
+      {
+        "metric": "tam_usd",
+        "source_labels": [
+          "SRC-MARKET"
+        ],
+        "status": "estimated",
+        "value": "8400000000"
+      },
+      {
+        "metric": "market_growth_pct",
+        "source_labels": [
+          "SRC-MARKET"
+        ],
+        "status": "estimated",
+        "value": "19"
+      },
+      {
+        "metric": "competitor_count",
+        "source_labels": [
+          "SRC-MARKET"
+        ],
+        "status": "estimated",
+        "value": "14"
+      },
+      {
+        "metric": "founder_voting_control_pct",
+        "source_labels": [
+          "SRC-CAPTABLE"
+        ],
+        "status": "confirmed",
+        "value": "56"
+      },
+      {
+        "metric": "independent_board_seats",
+        "source_labels": [
+          "SRC-CAPTABLE"
+        ],
+        "status": "confirmed",
+        "value": "1"
+      },
+      {
+        "metric": "audit_status",
+        "source_labels": [
+          "SRC-AUDIT-FY24"
+        ],
+        "status": "confirmed",
+        "value": "audited"
+      },
+      {
+        "metric": "reporting_cadence",
+        "source_labels": [
+          "SRC-DECK"
+        ],
+        "status": "reported",
+        "value": "monthly"
+      }
+    ],
+    "document_version": "yukti-investment-document/0.1",
+    "id": "orbital-series-b",
+    "noted_conflicts": [
+      {
+        "metric": "net_revenue_retention_pct",
+        "note": "Customer reference calls describe contraction at two accounts, which is inconsistent with the retention figure in the deck."
+      }
+    ],
+    "sector": "supply chain software",
+    "sources": [
+      {
+        "kind": "audit",
+        "label": "SRC-AUDIT-FY24",
+        "origin": "Independent audit of FY2024 statements"
+      },
+      {
+        "kind": "management",
+        "label": "SRC-DECK",
+        "origin": "Management investor deck, Q1"
+      },
+      {
+        "kind": "audit",
+        "label": "SRC-CAPTABLE",
+        "origin": "Certified capitalisation table"
+      },
+      {
+        "kind": "third_party",
+        "label": "SRC-MARKET",
+        "origin": "Third-party market sizing report"
+      },
+      {
+        "kind": "interview",
+        "label": "SRC-CUSTOMER",
+        "origin": "Reference calls with six customers"
+      }
+    ],
+    "stage": "Series B",
+    "stated_assumptions": [
+      "The FY2024 audit scope covers all operating subsidiaries.",
+      "Market sizing uses the vendor's own segment definition."
+    ],
+    "title": "Orbital Logistics -- Series B"
+  },
+  "experiment": "rubric_reproduction",
+  "generated_by": "experiments/rubric_reproduction/ground_truth.py",
+  "ir_known_ids": [
+    "SRC-AUDIT-FY24",
+    "SRC-CAPTABLE",
+    "SRC-CUSTOMER",
+    "SRC-DECK",
+    "SRC-MARKET",
+    "asm-001",
+    "asm-002",
+    "clm-001",
+    "clm-002",
+    "clm-003",
+    "clm-004",
+    "clm-005",
+    "clm-006",
+    "clm-007",
+    "clm-008",
+    "clm-009",
+    "clm-010",
+    "clm-011",
+    "clm-012",
+    "clm-013",
+    "clm-014",
+    "clm-015",
+    "ent-company",
+    "ent-market",
+    "rel-001",
+    "rel-002",
+    "rel-003",
+    "rel-004",
+    "rel-005",
+    "rel-006",
+    "rel-007",
+    "rel-008",
+    "rel-009",
+    "rel-010",
+    "rel-011",
+    "rel-012",
+    "rel-013",
+    "rel-014",
+    "rel-015",
+    "rel-016",
+    "rel-017",
+    "rel-018"
+  ],
+  "note": "Derived by running choir_prototype's own pipeline. No expected value is hand-written here.",
+  "packet_id": "orbital-series-b",
+  "record": {
+    "artifacts": [
+      {
+        "assumptions": [
+          "Runway is derived as cash / net monthly burn, holding burn flat."
+        ],
+        "confidence": {
+          "band": "moderate",
+          "contradictions": 0,
+          "coverage": "5/5 expected inputs present",
+          "derivation": [
+            "rule 0: inputs -- 2 evidence item(s), coverage 5/5 (100%), 0 contradiction(s)",
+            "rule 1: evidence present -> continue",
+            "rule 2: coverage 100% >= 50% minimum -> continue",
+            "rule 3: weakest evidence is SRC-DECK (reported) -> start at moderate",
+            "rule 4: no contradictions -> no downgrade",
+            "rule 5: no coverage cap applied",
+            "result: moderate (limited by: weakest evidence is reported (SRC-DECK))"
+          ],
+          "evidence_floor": "reported",
+          "limiting_factor": "weakest evidence is reported (SRC-DECK)"
+        },
+        "evidence_references": [
+          "SRC-AUDIT-FY24",
+          "SRC-DECK"
+        ],
+        "findings": [
+          {
+            "claim_ids": [
+              "clm-002"
+            ],
+            "evidence_ids": [
+              "SRC-AUDIT-FY24",
+              "SRC-DECK"
+            ],
+            "id": "fin-growth",
+            "stance": "supports",
+            "statement": "Growth of 62% is strong against a 40% strong / 15% weak threshold.",
+            "topic": "growth"
+          },
+          {
+            "claim_ids": [
+              "clm-003"
+            ],
+            "evidence_ids": [
+              "SRC-AUDIT-FY24"
+            ],
+            "id": "fin-margin",
+            "stance": "supports",
+            "statement": "Gross margin of 74% is healthy for the category.",
+            "topic": "revenue_quality"
+          },
+          {
+            "claim_ids": [
+              "clm-005",
+              "clm-004"
+            ],
+            "evidence_ids": [
+              "SRC-AUDIT-FY24"
+            ],
+            "id": "fin-runway",
+            "stance": "conditional",
+            "statement": "Derived runway is 15.0 months against a 18-month comfort floor.",
+            "topic": "capital_efficiency"
+          }
+        ],
+        "kernel_name": "financial_posture",
+        "unresolved_questions": []
+      },
+      {
+        "assumptions": [],
+        "confidence": {
+          "band": "low",
+          "contradictions": 1,
+          "coverage": "5/5 expected inputs present",
+          "derivation": [
+            "rule 0: inputs -- 3 evidence item(s), coverage 5/5 (100%), 1 contradiction(s)",
+            "rule 1: evidence present -> continue",
+            "rule 2: coverage 100% >= 50% minimum -> continue",
+            "rule 3: weakest evidence is SRC-CUSTOMER (reported) -> start at moderate",
+            "rule 4: 1 contradiction(s) -> downgrade moderate to low (floor: low)",
+            "rule 5: no coverage cap applied",
+            "result: low (limited by: 1 contradicted claim(s) in scope)"
+          ],
+          "evidence_floor": "reported",
+          "limiting_factor": "1 contradicted claim(s) in scope"
+        },
+        "evidence_references": [
+          "SRC-AUDIT-FY24",
+          "SRC-CUSTOMER",
+          "SRC-DECK"
+        ],
+        "findings": [
+          {
+            "claim_ids": [
+              "clm-006"
+            ],
+            "evidence_ids": [
+              "SRC-DECK"
+            ],
+            "id": "risk-concentration",
+            "stance": "conditional",
+            "statement": "Top customer is 38% of revenue -- elevated against a 40% severe / 25% elevated threshold.",
+            "topic": "concentration_risk"
+          },
+          {
+            "claim_ids": [
+              "clm-007",
+              "clm-008"
+            ],
+            "evidence_ids": [
+              "SRC-CUSTOMER",
+              "SRC-DECK"
+            ],
+            "id": "risk-retention",
+            "stance": "opposes",
+            "statement": "Revenue durability: net revenue retention 104% is flat; logo churn 11% is contained.",
+            "topic": "revenue_quality"
+          },
+          {
+            "claim_ids": [
+              "clm-004",
+              "clm-001"
+            ],
+            "evidence_ids": [
+              "SRC-AUDIT-FY24"
+            ],
+            "id": "risk-burn",
+            "stance": "conditional",
+            "statement": "Annualised burn is 0.93x ARR against a 0.50x efficient / 1.00x unsustainable threshold.",
+            "topic": "capital_efficiency"
+          }
+        ],
+        "kernel_name": "risk_exposure",
+        "unresolved_questions": [
+          "Claim clm-007 (net_revenue_retention_pct) is contradicted elsewhere in the packet; this finding is provisional."
+        ]
+      },
+      {
+        "assumptions": [
+          "Market figures from SRC-MARKET are estimates, not measurements."
+        ],
+        "confidence": {
+          "band": "low",
+          "contradictions": 0,
+          "coverage": "3/3 expected inputs present",
+          "derivation": [
+            "rule 0: inputs -- 1 evidence item(s), coverage 3/3 (100%), 0 contradiction(s)",
+            "rule 1: evidence present -> continue",
+            "rule 2: coverage 100% >= 50% minimum -> continue",
+            "rule 3: weakest evidence is SRC-MARKET (estimated) -> start at low",
+            "rule 4: no contradictions -> no downgrade",
+            "rule 5: no coverage cap applied",
+            "result: low (limited by: weakest evidence is estimated (SRC-MARKET))"
+          ],
+          "evidence_floor": "estimated",
+          "limiting_factor": "weakest evidence is estimated (SRC-MARKET)"
+        },
+        "evidence_references": [
+          "SRC-MARKET"
+        ],
+        "findings": [
+          {
+            "claim_ids": [
+              "clm-009",
+              "clm-010"
+            ],
+            "evidence_ids": [
+              "SRC-MARKET"
+            ],
+            "id": "mkt-opportunity",
+            "stance": "supports",
+            "statement": "Market opportunity: addressable market $8.4B is large; market growing 19% a year.",
+            "topic": "market_opportunity"
+          },
+          {
+            "claim_ids": [
+              "clm-011"
+            ],
+            "evidence_ids": [
+              "SRC-MARKET"
+            ],
+            "id": "mkt-competition",
+            "stance": "conditional",
+            "statement": "14 named competitors against a crowding threshold of 12.",
+            "topic": "competitive_position"
+          }
+        ],
+        "kernel_name": "market_position",
+        "unresolved_questions": []
+      },
+      {
+        "assumptions": [],
+        "confidence": {
+          "band": "moderate",
+          "contradictions": 0,
+          "coverage": "4/4 expected inputs present",
+          "derivation": [
+            "rule 0: inputs -- 3 evidence item(s), coverage 4/4 (100%), 0 contradiction(s)",
+            "rule 1: evidence present -> continue",
+            "rule 2: coverage 100% >= 50% minimum -> continue",
+            "rule 3: weakest evidence is SRC-DECK (reported) -> start at moderate",
+            "rule 4: no contradictions -> no downgrade",
+            "rule 5: no coverage cap applied",
+            "result: moderate (limited by: weakest evidence is reported (SRC-DECK))"
+          ],
+          "evidence_floor": "reported",
+          "limiting_factor": "weakest evidence is reported (SRC-DECK)"
+        },
+        "evidence_references": [
+          "SRC-AUDIT-FY24",
+          "SRC-CAPTABLE",
+          "SRC-DECK"
+        ],
+        "findings": [
+          {
+            "claim_ids": [
+              "clm-012",
+              "clm-013"
+            ],
+            "evidence_ids": [
+              "SRC-CAPTABLE"
+            ],
+            "id": "gov-control",
+            "stance": "conditional",
+            "statement": "Control and oversight: founders retain 56% voting control; 1 independent board seat(s).",
+            "topic": "governance_quality"
+          },
+          {
+            "claim_ids": [
+              "clm-014"
+            ],
+            "evidence_ids": [
+              "SRC-AUDIT-FY24"
+            ],
+            "id": "gov-transparency",
+            "stance": "supports",
+            "statement": "Financial statements are audited.",
+            "topic": "financial_transparency"
+          }
+        ],
+        "kernel_name": "governance",
+        "unresolved_questions": []
+      }
+    ],
+    "ir": {
+      "assumptions": [
+        {
+          "basis": "stated in packet",
+          "id": "asm-001",
+          "statement": "The FY2024 audit scope covers all operating subsidiaries."
+        },
+        {
+          "basis": "stated in packet",
+          "id": "asm-002",
+          "statement": "Market sizing uses the vendor's own segment definition."
+        }
+      ],
+      "claims": [
+        {
+          "evidence_ids": [
+            "SRC-AUDIT-FY24"
+          ],
+          "id": "clm-001",
+          "predicate": "arr_usd",
+          "subject_id": "ent-company",
+          "uncertainty": "settled",
+          "value": "18000000"
+        },
+        {
+          "evidence_ids": [
+            "SRC-AUDIT-FY24",
+            "SRC-DECK"
+          ],
+          "id": "clm-002",
+          "predicate": "yoy_growth_pct",
+          "subject_id": "ent-company",
+          "uncertainty": "settled",
+          "value": "62"
+        },
+        {
+          "evidence_ids": [
+            "SRC-AUDIT-FY24"
+          ],
+          "id": "clm-003",
+          "predicate": "gross_margin_pct",
+          "subject_id": "ent-company",
+          "uncertainty": "settled",
+          "value": "74"
+        },
+        {
+          "evidence_ids": [
+            "SRC-AUDIT-FY24"
+          ],
+          "id": "clm-004",
+          "predicate": "net_burn_monthly_usd",
+          "subject_id": "ent-company",
+          "uncertainty": "settled",
+          "value": "1400000"
+        },
+        {
+          "evidence_ids": [
+            "SRC-AUDIT-FY24"
+          ],
+          "id": "clm-005",
+          "predicate": "cash_usd",
+          "subject_id": "ent-company",
+          "uncertainty": "settled",
+          "value": "21000000"
+        },
+        {
+          "evidence_ids": [
+            "SRC-DECK"
+          ],
+          "id": "clm-006",
+          "predicate": "top_customer_revenue_pct",
+          "subject_id": "ent-company",
+          "uncertainty": "likely",
+          "value": "38"
+        },
+        {
+          "evidence_ids": [
+            "SRC-DECK"
+          ],
+          "id": "clm-007",
+          "predicate": "net_revenue_retention_pct",
+          "subject_id": "ent-company",
+          "uncertainty": "disputed",
+          "value": "104"
+        },
+        {
+          "evidence_ids": [
+            "SRC-DECK",
+            "SRC-CUSTOMER"
+          ],
+          "id": "clm-008",
+          "predicate": "logo_churn_pct",
+          "subject_id": "ent-company",
+          "uncertainty": "likely",
+          "value": "11"
+        },
+        {
+          "evidence_ids": [
+            "SRC-MARKET"
+          ],
+          "id": "clm-009",
+          "predicate": "tam_usd",
+          "subject_id": "ent-market",
+          "uncertainty": "likely",
+          "value": "8400000000"
+        },
+        {
+          "evidence_ids": [
+            "SRC-MARKET"
+          ],
+          "id": "clm-010",
+          "predicate": "market_growth_pct",
+          "subject_id": "ent-market",
+          "uncertainty": "likely",
+          "value": "19"
+        },
+        {
+          "evidence_ids": [
+            "SRC-MARKET"
+          ],
+          "id": "clm-011",
+          "predicate": "competitor_count",
+          "subject_id": "ent-market",
+          "uncertainty": "likely",
+          "value": "14"
+        },
+        {
+          "evidence_ids": [
+            "SRC-CAPTABLE"
+          ],
+          "id": "clm-012",
+          "predicate": "founder_voting_control_pct",
+          "subject_id": "ent-company",
+          "uncertainty": "settled",
+          "value": "56"
+        },
+        {
+          "evidence_ids": [
+            "SRC-CAPTABLE"
+          ],
+          "id": "clm-013",
+          "predicate": "independent_board_seats",
+          "subject_id": "ent-company",
+          "uncertainty": "settled",
+          "value": "1"
+        },
+        {
+          "evidence_ids": [
+            "SRC-AUDIT-FY24"
+          ],
+          "id": "clm-014",
+          "predicate": "audit_status",
+          "subject_id": "ent-company",
+          "uncertainty": "settled",
+          "value": "audited"
+        },
+        {
+          "evidence_ids": [
+            "SRC-DECK"
+          ],
+          "id": "clm-015",
+          "predicate": "reporting_cadence",
+          "subject_id": "ent-company",
+          "uncertainty": "likely",
+          "value": "monthly"
+        }
+      ],
+      "entities": [
+        {
+          "attributes": {
+            "sector": "supply chain software",
+            "stage": "Series B"
+          },
+          "id": "ent-company",
+          "kind": "company",
+          "label": "Orbital Logistics Inc."
+        },
+        {
+          "attributes": {
+            "sector": "supply chain software"
+          },
+          "id": "ent-market",
+          "kind": "market",
+          "label": "supply chain software market"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "SRC-AUDIT-FY24",
+          "quality": "audited",
+          "source": "Independent audit of FY2024 statements",
+          "statement": "Independent audit of FY2024 statements (audit)"
+        },
+        {
+          "id": "SRC-DECK",
+          "quality": "reported",
+          "source": "Management investor deck, Q1",
+          "statement": "Management investor deck, Q1 (management)"
+        },
+        {
+          "id": "SRC-CAPTABLE",
+          "quality": "audited",
+          "source": "Certified capitalisation table",
+          "statement": "Certified capitalisation table (audit)"
+        },
+        {
+          "id": "SRC-MARKET",
+          "quality": "estimated",
+          "source": "Third-party market sizing report",
+          "statement": "Third-party market sizing report (third_party)"
+        },
+        {
+          "id": "SRC-CUSTOMER",
+          "quality": "reported",
+          "source": "Reference calls with six customers",
+          "statement": "Reference calls with six customers (interview)"
+        }
+      ],
+      "metadata": {
+        "domain": "investment",
+        "ir_version": "choir-ir/0.1",
+        "packet_id": "orbital-series-b",
+        "packet_title": "Orbital Logistics -- Series B",
+        "translator": "investment.v0"
+      },
+      "relationships": [
+        {
+          "id": "rel-001",
+          "kind": "supports",
+          "note": "",
+          "source_id": "SRC-AUDIT-FY24",
+          "target_id": "clm-001"
+        },
+        {
+          "id": "rel-002",
+          "kind": "supports",
+          "note": "",
+          "source_id": "SRC-AUDIT-FY24",
+          "target_id": "clm-002"
+        },
+        {
+          "id": "rel-003",
+          "kind": "supports",
+          "note": "",
+          "source_id": "SRC-DECK",
+          "target_id": "clm-002"
+        },
+        {
+          "id": "rel-004",
+          "kind": "supports",
+          "note": "",
+          "source_id": "SRC-AUDIT-FY24",
+          "target_id": "clm-003"
+        },
+        {
+          "id": "rel-005",
+          "kind": "supports",
+          "note": "",
+          "source_id": "SRC-AUDIT-FY24",
+          "target_id": "clm-004"
+        },
+        {
+          "id": "rel-006",
+          "kind": "supports",
+          "note": "",
+          "source_id": "SRC-AUDIT-FY24",
+          "target_id": "clm-005"
+        },
+        {
+          "id": "rel-007",
+          "kind": "supports",
+          "note": "",
+          "source_id": "SRC-DECK",
+          "target_id": "clm-006"
+        },
+        {
+          "id": "rel-008",
+          "kind": "supports",
+          "note": "",
+          "source_id": "SRC-DECK",
+          "target_id": "clm-007"
+        },
+        {
+          "id": "rel-009",
+          "kind": "supports",
+          "note": "",
+          "source_id": "SRC-DECK",
+          "target_id": "clm-008"
+        },
+        {
+          "id": "rel-010",
+          "kind": "supports",
+          "note": "",
+          "source_id": "SRC-CUSTOMER",
+          "target_id": "clm-008"
+        },
+        {
+          "id": "rel-011",
+          "kind": "supports",
+          "note": "",
+          "source_id": "SRC-MARKET",
+          "target_id": "clm-009"
+        },
+        {
+          "id": "rel-012",
+          "kind": "supports",
+          "note": "",
+          "source_id": "SRC-MARKET",
+          "target_id": "clm-010"
+        },
+        {
+          "id": "rel-013",
+          "kind": "supports",
+          "note": "",
+          "source_id": "SRC-MARKET",
+          "target_id": "clm-011"
+        },
+        {
+          "id": "rel-014",
+          "kind": "supports",
+          "note": "",
+          "source_id": "SRC-CAPTABLE",
+          "target_id": "clm-012"
+        },
+        {
+          "id": "rel-015",
+          "kind": "supports",
+          "note": "",
+          "source_id": "SRC-CAPTABLE",
+          "target_id": "clm-013"
+        },
+        {
+          "id": "rel-016",
+          "kind": "supports",
+          "note": "",
+          "source_id": "SRC-AUDIT-FY24",
+          "target_id": "clm-014"
+        },
+        {
+          "id": "rel-017",
+          "kind": "supports",
+          "note": "",
+          "source_id": "SRC-DECK",
+          "target_id": "clm-015"
+        },
+        {
+          "id": "rel-018",
+          "kind": "contradicts",
+          "note": "Customer reference calls describe contraction at two accounts, which is inconsistent with the retention figure in the deck.",
+          "source_id": "packet-review",
+          "target_id": "clm-007"
+        }
+      ]
+    },
+    "synthesis": {
+      "agreements": [
+        {
+          "positions": [
+            {
+              "finding_id": "fin-runway",
+              "kernel_name": "financial_posture",
+              "stance": "conditional",
+              "statement": "Derived runway is 15.0 months against a 18-month comfort floor."
+            },
+            {
+              "finding_id": "risk-burn",
+              "kernel_name": "risk_exposure",
+              "stance": "conditional",
+              "statement": "Annualised burn is 0.93x ARR against a 0.50x efficient / 1.00x unsustainable threshold."
+            }
+          ],
+          "topic": "capital_efficiency"
+        }
+      ],
+      "conditional_count": 5,
+      "confidence": "low",
+      "confidence_limiting_factor": "1 unresolved topic disagreement(s); weakest contributing kernel is market_position (weakest evidence is estimated (SRC-MARKET))",
+      "disagreements": [
+        {
+          "positions": [
+            {
+              "finding_id": "fin-margin",
+              "kernel_name": "financial_posture",
+              "stance": "supports",
+              "statement": "Gross margin of 74% is healthy for the category."
+            },
+            {
+              "finding_id": "risk-retention",
+              "kernel_name": "risk_exposure",
+              "stance": "opposes",
+              "statement": "Revenue durability: net revenue retention 104% is flat; logo churn 11% is contained."
+            }
+          ],
+          "topic": "revenue_quality"
+        }
+      ],
+      "oppose_weight": 1,
+      "rationale": [
+        "4 of 4 kernels reached a usable confidence band.",
+        "Weighted support 7 against opposition 1, with 5 conditional finding(s).",
+        "1 topic(s) carry opposing findings, but the leading side is ahead by 6, clearing the 3-point margin.",
+        "Support leads, but conditional findings remain outstanding; those become the conditions."
+      ],
+      "recommendation": "proceed with conditions",
+      "remaining_uncertainty": [
+        "[financial_posture] Assumed: Runway is derived as cash / net monthly burn, holding burn flat.",
+        "[market_position] Assumed: Market figures from SRC-MARKET are estimates, not measurements.",
+        "[risk_exposure] Claim clm-007 (net_revenue_retention_pct) is contradicted elsewhere in the packet; this finding is provisional."
+      ],
+      "rules_evaluated": [
+        {
+          "condition": "usable kernels < 2",
+          "fired": false,
+          "name": "R1 insufficient-basis",
+          "observed": "4 usable of 4",
+          "outcome": "fall through"
+        },
+        {
+          "condition": "disagreements > 0 and margin < 3",
+          "fired": false,
+          "name": "R2 live-disagreement",
+          "observed": "1 disagreement(s), margin 6",
+          "outcome": "fall through"
+        },
+        {
+          "condition": "support > opposition and conditional findings > 0",
+          "fired": true,
+          "name": "R3 proceed-with-conditions",
+          "observed": "support 7, opposition 1, conditional 5",
+          "outcome": "PROCEED_WITH_CONDITIONS"
+        }
+      ],
+      "support_weight": 7,
+      "tally_detail": [
+        {
+          "finding_id": "fin-growth",
+          "kernel_band": "moderate",
+          "kernel_name": "financial_posture",
+          "running_conditional": 0,
+          "running_oppose": 0,
+          "running_support": 2,
+          "stance": "supports",
+          "weight": 2
+        },
+        {
+          "finding_id": "fin-margin",
+          "kernel_band": "moderate",
+          "kernel_name": "financial_posture",
+          "running_conditional": 0,
+          "running_oppose": 0,
+          "running_support": 4,
+          "stance": "supports",
+          "weight": 2
+        },
+        {
+          "finding_id": "fin-runway",
+          "kernel_band": "moderate",
+          "kernel_name": "financial_posture",
+          "running_conditional": 1,
+          "running_oppose": 0,
+          "running_support": 4,
+          "stance": "conditional",
+          "weight": 0
+        },
+        {
+          "finding_id": "risk-concentration",
+          "kernel_band": "low",
+          "kernel_name": "risk_exposure",
+          "running_conditional": 2,
+          "running_oppose": 0,
+          "running_support": 4,
+          "stance": "conditional",
+          "weight": 0
+        },
+        {
+          "finding_id": "risk-retention",
+          "kernel_band": "low",
+          "kernel_name": "risk_exposure",
+          "running_conditional": 2,
+          "running_oppose": 1,
+          "running_support": 4,
+          "stance": "opposes",
+          "weight": 1
+        },
+        {
+          "finding_id": "risk-burn",
+          "kernel_band": "low",
+          "kernel_name": "risk_exposure",
+          "running_conditional": 3,
+          "running_oppose": 1,
+          "running_support": 4,
+          "stance": "conditional",
+          "weight": 0
+        },
+        {
+          "finding_id": "mkt-opportunity",
+          "kernel_band": "low",
+          "kernel_name": "market_position",
+          "running_conditional": 3,
+          "running_oppose": 1,
+          "running_support": 5,
+          "stance": "supports",
+          "weight": 1
+        },
+        {
+          "finding_id": "mkt-competition",
+          "kernel_band": "low",
+          "kernel_name": "market_position",
+          "running_conditional": 4,
+          "running_oppose": 1,
+          "running_support": 5,
+          "stance": "conditional",
+          "weight": 0
+        },
+        {
+          "finding_id": "gov-control",
+          "kernel_band": "moderate",
+          "kernel_name": "governance",
+          "running_conditional": 5,
+          "running_oppose": 1,
+          "running_support": 5,
+          "stance": "conditional",
+          "weight": 0
+        },
+        {
+          "finding_id": "gov-transparency",
+          "kernel_band": "moderate",
+          "kernel_name": "governance",
+          "running_conditional": 5,
+          "running_oppose": 1,
+          "running_support": 7,
+          "stance": "supports",
+          "weight": 2
+        }
+      ],
+      "topic_views": [
+        {
+          "positions": [
+            {
+              "finding_id": "fin-runway",
+              "kernel_name": "financial_posture",
+              "stance": "conditional",
+              "statement": "Derived runway is 15.0 months against a 18-month comfort floor."
+            },
+            {
+              "finding_id": "risk-burn",
+              "kernel_name": "risk_exposure",
+              "stance": "conditional",
+              "statement": "Annualised burn is 0.93x ARR against a 0.50x efficient / 1.00x unsustainable threshold."
+            }
+          ],
+          "topic": "capital_efficiency"
+        },
+        {
+          "positions": [
+            {
+              "finding_id": "mkt-competition",
+              "kernel_name": "market_position",
+              "stance": "conditional",
+              "statement": "14 named competitors against a crowding threshold of 12."
+            }
+          ],
+          "topic": "competitive_position"
+        },
+        {
+          "positions": [
+            {
+              "finding_id": "risk-concentration",
+              "kernel_name": "risk_exposure",
+              "stance": "conditional",
+              "statement": "Top customer is 38% of revenue -- elevated against a 40% severe / 25% elevated threshold."
+            }
+          ],
+          "topic": "concentration_risk"
+        },
+        {
+          "positions": [
+            {
+              "finding_id": "gov-transparency",
+              "kernel_name": "governance",
+              "stance": "supports",
+              "statement": "Financial statements are audited."
+            }
+          ],
+          "topic": "financial_transparency"
+        },
+        {
+          "positions": [
+            {
+              "finding_id": "gov-control",
+              "kernel_name": "governance",
+              "stance": "conditional",
+              "statement": "Control and oversight: founders retain 56% voting control; 1 independent board seat(s)."
+            }
+          ],
+          "topic": "governance_quality"
+        },
+        {
+          "positions": [
+            {
+              "finding_id": "fin-growth",
+              "kernel_name": "financial_posture",
+              "stance": "supports",
+              "statement": "Growth of 62% is strong against a 40% strong / 15% weak threshold."
+            }
+          ],
+          "topic": "growth"
+        },
+        {
+          "positions": [
+            {
+              "finding_id": "mkt-opportunity",
+              "kernel_name": "market_position",
+              "stance": "supports",
+              "statement": "Market opportunity: addressable market $8.4B is large; market growing 19% a year."
+            }
+          ],
+          "topic": "market_opportunity"
+        },
+        {
+          "positions": [
+            {
+              "finding_id": "fin-margin",
+              "kernel_name": "financial_posture",
+              "stance": "supports",
+              "statement": "Gross margin of 74% is healthy for the category."
+            },
+            {
+              "finding_id": "risk-retention",
+              "kernel_name": "risk_exposure",
+              "stance": "opposes",
+              "statement": "Revenue durability: net revenue retention 104% is flat; logo churn 11% is contained."
+            }
+          ],
+          "topic": "revenue_quality"
+        }
+      ],
+      "usable_kernels": [
+        "financial_posture",
+        "risk_exposure",
+        "market_position",
+        "governance"
+      ]
+    },
+    "trace": [
+      {
+        "action": "packet-loaded",
+        "component": "pipeline",
+        "detail": "packet orbital-series-b: Orbital Logistics -- Series B",
+        "inputs": [],
+        "notes": [
+          "5 source document(s)",
+          "15 data point(s)",
+          "2 stated assumption(s)",
+          "1 flagged conflict(s)"
+        ],
+        "outputs": [
+          "packet:orbital-series-b"
+        ],
+        "stage": "1. packet intake",
+        "step": 1
+      },
+      {
+        "action": "translate-start",
+        "component": "translator",
+        "detail": "mapping 15 data points to IR",
+        "inputs": [
+          "packet:orbital-series-b"
+        ],
+        "notes": [
+          "translator performs no reasoning; it maps shapes only"
+        ],
+        "outputs": [],
+        "stage": "2. translation",
+        "step": 2
+      },
+      {
+        "action": "translate-complete",
+        "component": "translator",
+        "detail": "2 entities, 15 claims, 5 evidence, 18 relationships",
+        "inputs": [],
+        "notes": [
+          "1 claim(s) marked contradicted",
+          "2 assumption(s) carried through"
+        ],
+        "outputs": [
+          "ir:orbital-series-b"
+        ],
+        "stage": "2. translation",
+        "step": 3
+      },
+      {
+        "action": "ir-sealed",
+        "component": "pipeline",
+        "detail": "kernels receive the IR and nothing else",
+        "inputs": [
+          "ir:orbital-series-b"
+        ],
+        "notes": [
+          "kernels cannot see the packet",
+          "kernels cannot see each other's artifacts",
+          "kernels cannot see the synthesizer"
+        ],
+        "outputs": [],
+        "stage": "3. handoff",
+        "step": 4
+      },
+      {
+        "action": "dispatch-start",
+        "component": "runtime",
+        "detail": "4 kernels queued over IR orbital-series-b",
+        "inputs": [
+          "ir:orbital-series-b"
+        ],
+        "notes": [
+          "financial_posture",
+          "risk_exposure",
+          "market_position",
+          "governance"
+        ],
+        "outputs": [],
+        "stage": "4. kernel execution",
+        "step": 5
+      },
+      {
+        "action": "kernel-start",
+        "component": "financial_posture",
+        "detail": "reading 5 of 5 predicates",
+        "inputs": [
+          "arr_usd",
+          "yoy_growth_pct",
+          "gross_margin_pct",
+          "net_burn_monthly_usd",
+          "cash_usd"
+        ],
+        "notes": [],
+        "outputs": [],
+        "stage": "4. kernel execution",
+        "step": 6
+      },
+      {
+        "action": "kernel-returned",
+        "component": "financial_posture",
+        "detail": "3 finding(s), confidence moderate, 0 unresolved",
+        "inputs": [],
+        "notes": [
+          "cites 6 IR object(s)",
+          "confidence limited by: weakest evidence is reported (SRC-DECK)"
+        ],
+        "outputs": [
+          "fin-growth",
+          "fin-margin",
+          "fin-runway"
+        ],
+        "stage": "4. kernel execution",
+        "step": 7
+      },
+      {
+        "action": "artifact-validated",
+        "component": "runtime",
+        "detail": "financial_posture artifact accepted",
+        "inputs": [
+          "SRC-AUDIT-FY24",
+          "SRC-DECK",
+          "clm-002",
+          "clm-003",
+          "clm-004",
+          "clm-005"
+        ],
+        "notes": [
+          "every cited id exists in the IR",
+          "kernel produced findings or unresolved questions",
+          "confidence carries a limiting factor (so it was derived)"
+        ],
+        "outputs": [],
+        "stage": "4. kernel execution",
+        "step": 8
+      },
+      {
+        "action": "kernel-start",
+        "component": "risk_exposure",
+        "detail": "reading 5 of 5 predicates",
+        "inputs": [
+          "top_customer_revenue_pct",
+          "net_revenue_retention_pct",
+          "logo_churn_pct",
+          "net_burn_monthly_usd",
+          "arr_usd"
+        ],
+        "notes": [],
+        "outputs": [],
+        "stage": "4. kernel execution",
+        "step": 9
+      },
+      {
+        "action": "kernel-returned",
+        "component": "risk_exposure",
+        "detail": "3 finding(s), confidence low, 1 unresolved",
+        "inputs": [],
+        "notes": [
+          "cites 8 IR object(s)",
+          "confidence limited by: 1 contradicted claim(s) in scope"
+        ],
+        "outputs": [
+          "risk-concentration",
+          "risk-retention",
+          "risk-burn"
+        ],
+        "stage": "4. kernel execution",
+        "step": 10
+      },
+      {
+        "action": "artifact-validated",
+        "component": "runtime",
+        "detail": "risk_exposure artifact accepted",
+        "inputs": [
+          "SRC-AUDIT-FY24",
+          "SRC-CUSTOMER",
+          "SRC-DECK",
+          "clm-001",
+          "clm-004",
+          "clm-006",
+          "clm-007",
+          "clm-008"
+        ],
+        "notes": [
+          "every cited id exists in the IR",
+          "kernel produced findings or unresolved questions",
+          "confidence carries a limiting factor (so it was derived)"
+        ],
+        "outputs": [],
+        "stage": "4. kernel execution",
+        "step": 11
+      },
+      {
+        "action": "kernel-start",
+        "component": "market_position",
+        "detail": "reading 3 of 3 predicates",
+        "inputs": [
+          "tam_usd",
+          "market_growth_pct",
+          "competitor_count"
+        ],
+        "notes": [],
+        "outputs": [],
+        "stage": "4. kernel execution",
+        "step": 12
+      },
+      {
+        "action": "kernel-returned",
+        "component": "market_position",
+        "detail": "2 finding(s), confidence low, 0 unresolved",
+        "inputs": [],
+        "notes": [
+          "cites 4 IR object(s)",
+          "confidence limited by: weakest evidence is estimated (SRC-MARKET)"
+        ],
+        "outputs": [
+          "mkt-opportunity",
+          "mkt-competition"
+        ],
+        "stage": "4. kernel execution",
+        "step": 13
+      },
+      {
+        "action": "artifact-validated",
+        "component": "runtime",
+        "detail": "market_position artifact accepted",
+        "inputs": [
+          "SRC-MARKET",
+          "clm-009",
+          "clm-010",
+          "clm-011"
+        ],
+        "notes": [
+          "every cited id exists in the IR",
+          "kernel produced findings or unresolved questions",
+          "confidence carries a limiting factor (so it was derived)"
+        ],
+        "outputs": [],
+        "stage": "4. kernel execution",
+        "step": 14
+      },
+      {
+        "action": "kernel-start",
+        "component": "governance",
+        "detail": "reading 4 of 4 predicates",
+        "inputs": [
+          "founder_voting_control_pct",
+          "independent_board_seats",
+          "audit_status",
+          "reporting_cadence"
+        ],
+        "notes": [],
+        "outputs": [],
+        "stage": "4. kernel execution",
+        "step": 15
+      },
+      {
+        "action": "kernel-returned",
+        "component": "governance",
+        "detail": "2 finding(s), confidence moderate, 0 unresolved",
+        "inputs": [],
+        "notes": [
+          "cites 5 IR object(s)",
+          "confidence limited by: weakest evidence is reported (SRC-DECK)"
+        ],
+        "outputs": [
+          "gov-control",
+          "gov-transparency"
+        ],
+        "stage": "4. kernel execution",
+        "step": 16
+      },
+      {
+        "action": "artifact-validated",
+        "component": "runtime",
+        "detail": "governance artifact accepted",
+        "inputs": [
+          "SRC-AUDIT-FY24",
+          "SRC-CAPTABLE",
+          "clm-012",
+          "clm-013",
+          "clm-014"
+        ],
+        "notes": [
+          "every cited id exists in the IR",
+          "kernel produced findings or unresolved questions",
+          "confidence carries a limiting factor (so it was derived)"
+        ],
+        "outputs": [],
+        "stage": "4. kernel execution",
+        "step": 17
+      },
+      {
+        "action": "dispatch-complete",
+        "component": "runtime",
+        "detail": "4 artifacts collected",
+        "inputs": [],
+        "notes": [],
+        "outputs": [
+          "financial_posture",
+          "risk_exposure",
+          "market_position",
+          "governance"
+        ],
+        "stage": "4. kernel execution",
+        "step": 18
+      },
+      {
+        "action": "synthesis-start",
+        "component": "synthesizer",
+        "detail": "4 artifacts received",
+        "inputs": [
+          "financial_posture",
+          "risk_exposure",
+          "market_position",
+          "governance"
+        ],
+        "notes": [
+          "synthesizer sees artifacts only, never the IR or the packet"
+        ],
+        "outputs": [],
+        "stage": "5. synthesis",
+        "step": 19
+      },
+      {
+        "action": "synthesis-complete",
+        "component": "synthesizer",
+        "detail": "proceed with conditions at low confidence",
+        "inputs": [],
+        "notes": [
+          "1 agreement(s), 1 disagreement(s)",
+          "decided by rule R3 proceed-with-conditions",
+          "confidence limited by: 1 unresolved topic disagreement(s); weakest contributing kernel is market_position (weakest evidence is estimated (SRC-MARKET))"
+        ],
+        "outputs": [
+          "PROCEED_WITH_CONDITIONS"
+        ],
+        "stage": "5. synthesis",
+        "step": 20
+      }
+    ]
+  },
+  "record_digest": "580a5b279f18a7f13b71e5d36c226bf044d738b1b53d5c53ef32d03792154445",
+  "report_digest": "a0b2d270f7086874d88602991e536c741b7aa7426858b6ca351ce6b1d116f6f3",
+  "report_text": "==============================================================================\nCHOIR PROTOTYPE V0 -- INSTITUTIONAL REASONING REPORT\n==============================================================================\nPacket      : orbital-series-b\nTitle       : Orbital Logistics -- Series B\nDomain      : investment\nTranslator  : investment.v0\nIR version  : choir-ir/0.1\n\n==============================================================================\n1. TRANSLATION INTO THE INTERMEDIATE REPRESENTATION\n==============================================================================\n2 entities, 15 claims, 5 evidence items, 2 assumptions, 18 relationships.\n\nEntities:\n  ent-company    company    Orbital Logistics Inc.\n  ent-market     market     supply chain software market\n\nClaims:\n  clm-001    arr_usd                      = 18000000     [settled]\n             backed by: SRC-AUDIT-FY24\n  clm-002    yoy_growth_pct               = 62           [settled]\n             backed by: SRC-AUDIT-FY24, SRC-DECK\n  clm-003    gross_margin_pct             = 74           [settled]\n             backed by: SRC-AUDIT-FY24\n  clm-004    net_burn_monthly_usd         = 1400000      [settled]\n             backed by: SRC-AUDIT-FY24\n  clm-005    cash_usd                     = 21000000     [settled]\n             backed by: SRC-AUDIT-FY24\n  clm-006    top_customer_revenue_pct     = 38           [likely]\n             backed by: SRC-DECK\n  clm-007    net_revenue_retention_pct    = 104          [disputed]\n             backed by: SRC-DECK\n  clm-008    logo_churn_pct               = 11           [likely]\n             backed by: SRC-DECK, SRC-CUSTOMER\n  clm-009    tam_usd                      = 8400000000   [likely]\n             backed by: SRC-MARKET\n  clm-010    market_growth_pct            = 19           [likely]\n             backed by: SRC-MARKET\n  clm-011    competitor_count             = 14           [likely]\n             backed by: SRC-MARKET\n  clm-012    founder_voting_control_pct   = 56           [settled]\n             backed by: SRC-CAPTABLE\n  clm-013    independent_board_seats      = 1            [settled]\n             backed by: SRC-CAPTABLE\n  clm-014    audit_status                 = audited      [settled]\n             backed by: SRC-AUDIT-FY24\n  clm-015    reporting_cadence            = monthly      [likely]\n             backed by: SRC-DECK\n\nContradicted claims flagged during translation:\n  clm-007: Customer reference calls describe contraction at two accounts, which is inconsistent with the retention figure in the deck.\n\nAssumptions carried from the packet:\n  asm-001: The FY2024 audit scope covers all operating subsidiaries.\n  asm-002: Market sizing uses the vendor's own segment definition.\n\n==============================================================================\n2. RECOMMENDATION\n==============================================================================\nPROCEED WITH CONDITIONS\n\nRationale:\n  1. 4 of 4 kernels reached a usable confidence band.\n  2. Weighted support 7 against opposition 1, with 5 conditional finding(s).\n  3. 1 topic(s) carry opposing findings, but the leading side is ahead by 6, clearing the 3-point margin.\n  4. Support leads, but conditional findings remain outstanding; those become the conditions.\n\n==============================================================================\n3. CONFIDENCE\n==============================================================================\nBand            : low\nLimited by      : 1 unresolved topic disagreement(s); weakest contributing kernel is market_position (weakest evidence is estimated (SRC-MARKET))\nContributing    : financial_posture, risk_exposure, market_position, governance\nWeighted tally  : support 7, opposition 1, conditional 5\n\nConfidence is derived from evidence quality, input coverage and contradiction count. No kernel may assign it.\n\n==============================================================================\n4. KERNEL FINDINGS\n==============================================================================\nKernels ran independently and could not observe one another.\n\n------------------------------------------------------------------------------\nKERNEL: financial_posture\n  confidence : moderate\n  limited by : weakest evidence is reported (SRC-DECK)\n  coverage   : 5/5 expected inputs present\n  weakest ev.: reported\n  findings:\n    [supports   ] (growth) Growth of 62% is strong against a 40% strong / 15% weak threshold.\n                  cites: clm-002, SRC-AUDIT-FY24, SRC-DECK\n    [supports   ] (revenue_quality) Gross margin of 74% is healthy for the category.\n                  cites: clm-003, SRC-AUDIT-FY24\n    [conditional] (capital_efficiency) Derived runway is 15.0 months against a 18-month comfort floor.\n                  cites: clm-005, clm-004, SRC-AUDIT-FY24\n  assumptions:\n    - Runway is derived as cash / net monthly burn, holding burn flat.\n\n------------------------------------------------------------------------------\nKERNEL: risk_exposure\n  confidence : low\n  limited by : 1 contradicted claim(s) in scope\n  coverage   : 5/5 expected inputs present\n  weakest ev.: reported\n  findings:\n    [conditional] (concentration_risk) Top customer is 38% of revenue -- elevated against a 40% severe / 25% elevated threshold.\n                  cites: clm-006, SRC-DECK\n    [opposes    ] (revenue_quality) Revenue durability: net revenue retention 104% is flat; logo churn 11% is contained.\n                  cites: clm-007, clm-008, SRC-CUSTOMER, SRC-DECK\n    [conditional] (capital_efficiency) Annualised burn is 0.93x ARR against a 0.50x efficient / 1.00x unsustainable threshold.\n                  cites: clm-004, clm-001, SRC-AUDIT-FY24\n  unresolved:\n    - Claim clm-007 (net_revenue_retention_pct) is contradicted elsewhere in the packet; this finding is provisional.\n\n------------------------------------------------------------------------------\nKERNEL: market_position\n  confidence : low\n  limited by : weakest evidence is estimated (SRC-MARKET)\n  coverage   : 3/3 expected inputs present\n  weakest ev.: estimated\n  findings:\n    [supports   ] (market_opportunity) Market opportunity: addressable market $8.4B is large; market growing 19% a year.\n                  cites: clm-009, clm-010, SRC-MARKET\n    [conditional] (competitive_position) 14 named competitors against a crowding threshold of 12.\n                  cites: clm-011, SRC-MARKET\n  assumptions:\n    - Market figures from SRC-MARKET are estimates, not measurements.\n\n------------------------------------------------------------------------------\nKERNEL: governance\n  confidence : moderate\n  limited by : weakest evidence is reported (SRC-DECK)\n  coverage   : 4/4 expected inputs present\n  weakest ev.: reported\n  findings:\n    [conditional] (governance_quality) Control and oversight: founders retain 56% voting control; 1 independent board seat(s).\n                  cites: clm-012, clm-013, SRC-CAPTABLE\n    [supports   ] (financial_transparency) Financial statements are audited.\n                  cites: clm-014, SRC-AUDIT-FY24\n\n==============================================================================\n5. AGREEMENTS\n==============================================================================\nTopics where two or more independent kernels reached the same stance.\n\nTopic: capital_efficiency\n  financial_posture    conditional Derived runway is 15.0 months against a 18-month comfort floor.\n  risk_exposure        conditional Annualised burn is 0.93x ARR against a 0.50x efficient / 1.00x unsustainable threshold.\n\n==============================================================================\n6. DISAGREEMENTS\n==============================================================================\nTopics where kernels reached directly opposing stances.\n\nTopic: revenue_quality\n  financial_posture    supports    Gross margin of 74% is healthy for the category.\n  risk_exposure        opposes     Revenue durability: net revenue retention 104% is flat; logo churn 11% is contained.\n\n==============================================================================\n7. REMAINING UNCERTAINTY\n==============================================================================\n  - [financial_posture] Assumed: Runway is derived as cash / net monthly burn, holding burn flat.\n  - [market_position] Assumed: Market figures from SRC-MARKET are estimates, not measurements.\n  - [risk_exposure] Claim clm-007 (net_revenue_retention_pct) is contradicted elsewhere in the packet; this finding is provisional.\n\n==============================================================================\n8. SUPPORTING EVIDENCE\n==============================================================================\n  SRC-AUDIT-FY24     [audited  ] Independent audit of FY2024 statements\n                     status: used\n  SRC-DECK           [reported ] Management investor deck, Q1\n                     status: used\n  SRC-CAPTABLE       [audited  ] Certified capitalisation table\n                     status: used\n  SRC-MARKET         [estimated] Third-party market sizing report\n                     status: used\n  SRC-CUSTOMER       [reported ] Reference calls with six customers\n                     status: used\n\n==============================================================================\n9. EXECUTION TRACE\n==============================================================================\nSummary view. For inputs, outputs and per-step notes, run with --inspect trace.\n\n  -- stage 1. packet intake --\n    1. pipeline           packet-loaded        packet orbital-series-b: Orbital Logistics -- Series B\n  -- stage 2. translation --\n    2. translator         translate-start      mapping 15 data points to IR\n    3. translator         translate-complete   2 entities, 15 claims, 5 evidence, 18 relationships\n  -- stage 3. handoff --\n    4. pipeline           ir-sealed            kernels receive the IR and nothing else\n  -- stage 4. kernel execution --\n    5. runtime            dispatch-start       4 kernels queued over IR orbital-series-b\n    6. financial_posture  kernel-start         reading 5 of 5 predicates\n    7. financial_posture  kernel-returned      3 finding(s), confidence moderate, 0 unresolved\n    8. runtime            artifact-validated   financial_posture artifact accepted\n    9. risk_exposure      kernel-start         reading 5 of 5 predicates\n   10. risk_exposure      kernel-returned      3 finding(s), confidence low, 1 unresolved\n   11. runtime            artifact-validated   risk_exposure artifact accepted\n   12. market_position    kernel-start         reading 3 of 3 predicates\n   13. market_position    kernel-returned      2 finding(s), confidence low, 0 unresolved\n   14. runtime            artifact-validated   market_position artifact accepted\n   15. governance         kernel-start         reading 4 of 4 predicates\n   16. governance         kernel-returned      2 finding(s), confidence moderate, 0 unresolved\n   17. runtime            artifact-validated   governance artifact accepted\n   18. runtime            dispatch-complete    4 artifacts collected\n  -- stage 5. synthesis --\n   19. synthesizer        synthesis-start      4 artifacts received\n   20. synthesizer        synthesis-complete   proceed with conditions at low confidence",
+  "source_fingerprint": "f73955abd4088d98c0b25f982d1eb464b470bc5836561133bf4fb9c6f08cd699"
+}

@@ -1,8 +1,15 @@
 /*
   YUKTI Website — PrimaryNav (Motion System §4.1; Build Order Step 2: static
-  states only). No scroll listener, no .scrolled toggle, and no functioning
-  MenuTrigger/PanelTakeover yet — those are later, explicitly scoped steps.
-  The trigger button exists and is honestly disabled rather than faked.
+  states only). No scroll listener, no .scrolled toggle yet — later, scoped
+  step.
+
+  Bug fix: below 759px the link list was `display:none` with no way to
+  reach it — the trigger button rendered but was `disabled`, so mobile had
+  no working navigation at all. Wired via nav-toggle.js: the trigger opens
+  `.yukti-nav__links` as a dropdown panel, closes on link click, Escape, or
+  an outside click. Still no animated PanelTakeover (that stays a later,
+  larger step) — this is the minimal functional fix, styled with existing
+  tokens only.
 */
 
 .yukti-nav {
@@ -19,6 +26,13 @@
      behavior is built — not part of this step */
 }
 
+.yukti-nav.scrolled {
+  background: var(--yukti-color-graphite-950);
+  border-bottom: var(--yukti-border-width-hairline) solid var(--yukti-color-border-hairline-dark);
+  padding-block: var(--yukti-space-2);
+  backdrop-filter: none;
+}
+
 .yukti-nav__wordmark {
   font-family: var(--yukti-font-display);
   font-size: 1.125rem;
@@ -26,6 +40,7 @@
   letter-spacing: 0.02em;
   color: var(--yukti-color-bone-100);
   text-decoration: none;
+  flex-shrink: 0;
 }
 
 .yukti-nav__links {
@@ -52,9 +67,7 @@
     letter-spacing var(--yukti-duration-quick) var(--yukti-ease-micro);
 }
 
-/* precision-underline (Motion Addendum §15.1/§15.2) — supersedes the
-   Motion System's original padding-left-nudge nav grammar. Documented
-   amendment, not silent drift: see Motion System §15.1. */
+/* Precision-underline (Motion Addendum §15.2) */
 .yukti-nav__links a::after {
   content: '';
   position: absolute;
@@ -90,6 +103,9 @@
   font-size: var(--yukti-type-label-size);
   letter-spacing: var(--yukti-type-label-tracking);
   text-transform: uppercase;
+  transition:
+    border-color var(--yukti-duration-quick) var(--yukti-ease-micro),
+    color var(--yukti-duration-quick) var(--yukti-ease-micro);
 }
 
 .yukti-nav__menu-trigger:disabled {
@@ -97,11 +113,83 @@
   cursor: not-allowed;
 }
 
-@media (max-width: 759px) {
+.yukti-nav__menu-trigger[aria-expanded='true'] {
+  color: var(--yukti-color-bone-100);
+  border-color: var(--yukti-color-yellow-500);
+}
+
+.yukti-nav__menu-trigger:hover:not(:disabled) {
+  border-color: var(--yukti-color-bone-300);
+  background: var(--yukti-color-graphite-800);
+}
+
+/* Mobile dropdown panel */
+@media (max-width: 760px) {
   .yukti-nav__links {
     display: none;
   }
+
+  .yukti-nav[data-nav-open] .yukti-nav__links {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--yukti-color-graphite-950);
+    border-bottom: var(--yukti-border-width-hairline) solid var(--yukti-color-border-hairline-dark);
+    padding: var(--yukti-space-2) var(--yukti-grid-margin) var(--yukti-space-4);
+    animation: nav-panel-in var(--yukti-duration-quick) var(--yukti-ease-standard);
+  }
+
+  @keyframes nav-panel-in {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: none; }
+  }
+
+  .yukti-nav[data-nav-open] .yukti-nav__links a {
+    padding-block: var(--yukti-space-3);
+    border-bottom: var(--yukti-border-width-hairline) solid var(--yukti-color-border-hairline-dark);
+  }
+
+  .yukti-nav[data-nav-open] .yukti-nav__links li:last-child a {
+    border-bottom: none;
+  }
+
+  /* No precision-underline on mobile - full-width tap targets don't need it */
+  .yukti-nav[data-nav-open] .yukti-nav__links a::after {
+    display: none;
+  }
+
   .yukti-nav__menu-trigger {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--yukti-space-2);
+  }
+
+  .yukti-nav__menu-trigger::before {
+    content: '';
+    display: block;
+    width: 18px;
+    height: 2px;
+    background: currentColor;
+    box-shadow: 0 6px 0 currentColor, 0 -6px 0 currentColor;
+    transition: transform var(--yukti-duration-quick) var(--yukti-ease-micro);
+  }
+
+  .yukti-nav[data-nav-open] .yukti-nav__menu-trigger::before {
+    transform: rotate(45deg);
+    box-shadow: 0 6px 0 currentColor, 0 -6px 0 currentColor;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yukti-nav[data-nav-open] .yukti-nav__links {
+    animation: none;
+  }
+
+  .yukti-nav__menu-trigger::before {
+    transition: none;
   }
 }

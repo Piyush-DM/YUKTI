@@ -1,0 +1,42 @@
+{
+  "artifacts": [
+    {
+      "kernel_name": "<financial_posture | risk_exposure | market_position | governance>",
+      "findings": [
+        {
+          "id": "<finding id from the rubric's finding catalogue>",
+          "topic": "<topic from the rubric's topic list>",
+          "stance": "<supports | opposes | conditional | neutral>",
+          "statement": "<the statement text the rule specifies>",
+          "claim_ids": ["clm-0NN", "..."],
+          "evidence_ids": ["SRC-...", "..."]
+        }
+      ],
+      "evidence_references": ["SRC-...", "..."],
+      "confidence": {
+        "band": "<high | moderate | low | insufficient>",
+        "limiting_factor": "<the limiting-factor string the rule specifies>",
+        "evidence_floor": "<audited | reported | estimated | asserted | none>",
+        "coverage": "<found>/<expected> expected inputs present",
+        "contradictions": <integer>,
+        "derivation": ["rule 0: ...", "rule 1: ...", "..."]
+      },
+      "assumptions": ["...", "..."],
+      "unresolved_questions": ["...", "..."]
+    }
+  ],
+  "synthesis": {
+    "recommendation": "<proceed | proceed with conditions | decline | contested | insufficient basis>",
+    "confidence": "<high | moderate | low | insufficient>",
+    "confidence_limiting_factor": "<string>",
+    "support_weight": <integer>,
+    "oppose_weight": <integer>,
+    "conditional_count": <integer>,
+    "usable_kernels": ["<kernel name>", "..."],
+    "agreements": [{"topic": "<topic>"}],
+    "disagreements": [{"topic": "<topic>"}],
+    "rules_evaluated": [{"name": "R1 insufficient-basis", "fired": false}, "..."],
+    "remaining_uncertainty": ["[kernel] ...", "..."],
+    "rationale": ["...", "..."]
+  }
+}

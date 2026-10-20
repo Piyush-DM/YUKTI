@@ -18,11 +18,11 @@ commitment is restated, strengthened, weakened or merged. Where the freeze says
 a commitment is only *specified*, this register cites no evidence, and the lock
 reports it as unexercised rather than passing.
 
-Why it can be built while ``DECISION-005`` is open
---------------------------------------------------
+Why it can be built without an answer to ``DECISION-005``
+---------------------------------------------------------
 
-``DECISION-005`` prohibits implementation that assumes an answer to *what DAALE
-is* (options A-D). Nothing here does. The commitments are CHOIR's, frozen, and
+``DECISION-005`` asked what DAALE *is* (options A-D) and was invalidated on
+2026-08-22 without an answer being selected. Nothing here assumes one. The commitments are CHOIR's, frozen, and
 identical under every one of those options -- DAALE must conform to §3 whether
 it becomes the reference implementation, remains a separate target, is retired
 as a name, or is the product-side engine boundary. The register also imports

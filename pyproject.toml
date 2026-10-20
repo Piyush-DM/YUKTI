@@ -19,6 +19,13 @@ dependencies = [
     "typer",
 ]
 
+[project.optional-dependencies]
+# The workspace's optional language model. Everything works without it: with no
+# key configured the deterministic reader and the record projection are used.
+assist = [
+    "anthropic",
+]
+
 [project.scripts]
 daale = "daale.cli:main"
 

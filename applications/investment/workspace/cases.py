@@ -26,6 +26,7 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
+from applications.investment.workspace.diligence import SCHEDULE
 from applications.investment.workspace.material import (
     MaterialSnapshot,
     compute_material_digest,
@@ -135,6 +136,41 @@ class LedgerEntry:
 
 
 @dataclass(frozen=True)
+class IntakeRecord:
+    """How one figure came to be recorded: the prose it was read from.
+
+    The gap this closes is named in two places. ``CHOIR_v0.1_RESEARCH_FREEZE.md``
+    section 4.3: *"evidence cites a source label, not a locus in an edition."*
+    The implementation log, on material identity: it records *that* someone
+    recorded a figure and when, *"but not why or from what."* This is the from
+    what — the exact passage a reader was looking at when they accepted it.
+
+    Deliberately **not** part of ``material_payload``, and therefore not part of
+    the material digest. Two reasons, and the second is the load-bearing one:
+
+    1. It is provenance about how material was formed, not material itself. A
+       figure typed by hand and the identical figure accepted from a memo are
+       the same material and must hash the same.
+    2. Every existing decision verifies against a material digest computed
+       without it. Folding it in would silently invalidate them, which is the
+       one thing an append-only institutional record must never do.
+
+    ``edited`` distinguishes a reader who accepted a reading from one who
+    corrected it. A correction is the more informative event of the two.
+    """
+
+    record_id: str
+    metric: str
+    value: str
+    status: str
+    source_label: str
+    quote: str
+    basis: str
+    recorded_on: str
+    edited: bool = False
+
+
+@dataclass(frozen=True)
 class Case:
     """One institutional decision, with everything assembled against it."""
 
@@ -153,6 +189,7 @@ class Case:
     snapshots: tuple[MaterialSnapshot, ...] = ()
     judgments: tuple[JudgmentRecord, ...] = ()
     ledger: tuple[LedgerEntry, ...] = ()
+    intake_records: tuple[IntakeRecord, ...] = ()
 
     @property
     def title(self) -> str:
@@ -321,6 +358,63 @@ class CaseStore:
             updated = replace(updated, snapshots=updated.snapshots + (snapshot,))
 
         return self.save(updated)
+
+    def accept_intake(
+        self,
+        case_id: str,
+        accepted: tuple[IntakeRecord, ...],
+        recorded_on: str | None = None,
+    ) -> Case:
+        """Fold confirmed readings into the material, keeping what they came from.
+
+        Each record carries a figure a person has confirmed and the passage it
+        was read from. The figure enters material by exactly the route a typed
+        figure does -- ``record_material``, with its validation and its snapshot
+        -- so nothing here can put material on file that the diligence screen
+        could not. The provenance is appended alongside, never into the digest.
+
+        A metric already on file is replaced, because a reader confirming a
+        second reading of the same figure is correcting the first, not asserting
+        both. The intake log keeps both, which is where the correction shows.
+        """
+        case = self.load(case_id)
+        stamp = recorded_on or date.today().isoformat()
+
+        by_metric = {figure.metric: figure for figure in case.figures}
+        for record in accepted:
+            by_metric[record.metric] = Figure(
+                metric=record.metric,
+                value=record.value,
+                status=record.status,
+                source_labels=(record.source_label,) if record.source_label else (),
+            )
+
+        # Schedule order, so material reads the way the diligence pack does and
+        # the positional claim ids downstream stay stable.
+        order = {item.metric: index for index, item in enumerate(SCHEDULE)}
+        figures = tuple(
+            sorted(by_metric.values(), key=lambda item: order.get(item.metric, 99))
+        )
+
+        start = len(case.intake_records)
+        stamped = tuple(
+            replace(
+                record,
+                record_id=f"INTAKE-{start + offset + 1:03d}",
+                recorded_on=record.recorded_on or stamp,
+            )
+            for offset, record in enumerate(accepted)
+        )
+        self.save(replace(case, intake_records=case.intake_records + stamped))
+
+        return self.record_material(
+            case_id,
+            sources=case.sources,
+            figures=figures,
+            assumptions=case.assumptions,
+            flagged_conflicts=case.flagged_conflicts,
+            recorded_on=stamp,
+        )
 
     def judgments_directory(self, case_id: str) -> Path:
         """Where every judgment this case has ever reached is kept."""
@@ -503,5 +597,21 @@ def _case_from_dict(raw: dict[str, Any]) -> Case:
                 snapshot_id=entry.get("snapshot_id", ""),
             )
             for entry in raw.get("ledger", [])
+        ),
+        # ``.get`` with a default, like every field added after the first cases
+        # were written: a case file from before this existed still loads.
+        intake_records=tuple(
+            IntakeRecord(
+                record_id=entry["record_id"],
+                metric=entry["metric"],
+                value=entry["value"],
+                status=entry["status"],
+                source_label=entry.get("source_label", ""),
+                quote=entry.get("quote", ""),
+                basis=entry.get("basis", ""),
+                recorded_on=entry.get("recorded_on", ""),
+                edited=bool(entry.get("edited", False)),
+            )
+            for entry in raw.get("intake_records", [])
         ),
     )

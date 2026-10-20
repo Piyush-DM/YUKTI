@@ -2,9 +2,9 @@
 
 Phase 0 of the DAALE execution plan -- "map each frozen CHOIR commitment to
 executable contract + test", with no R-Fabric and no executor. It is the one
-phase that carries no dependency on the open question in ``DECISION-005``,
-because the commitments it locks are CHOIR's and are identical whichever of that
-ADR's options A-D is eventually accepted.
+phase that carries no dependency on the question ``DECISION-005`` raised,
+because the commitments it locks are CHOIR's and are identical under every one
+of that ADR's options A-D.
 
 Run it:
 

@@ -15,10 +15,27 @@
 .yukti-mega-line {
   display: block;
   font-family: var(--yukti-font-display);
-  font-size: var(--yukti-type-mega-size);
+  /* Reduced from --yukti-type-mega-size (up to 180px) to
+     --yukti-type-display-size (the hero headline's own scale, up to
+     96px) — the mega tier put words like "Institutional"/"Philosophy"
+     wider than their column could ever hold, at any viewport, which no
+     amount of wrap/hyphenate tuning fixes cleanly. Verified against
+     measured column widths (729px at 1200px viewport, ~880px at
+     1440px+) that even the longest words fit on one line at this size
+     with real margin to spare. */
+  font-size: var(--yukti-type-display-size);
   font-weight: var(--yukti-type-mega-weight);
   letter-spacing: var(--yukti-type-mega-tracking);
   line-height: var(--yukti-type-mega-line-height);
   text-transform: uppercase;
   color: var(--yukti-color-bone-100);
+  /* Bug fix: one word per line, by design (content-loader.js), means a
+     single long word (e.g. "Institutional") has no space to wrap at.
+     Confirmed this needs to be unconditional, not just for narrow
+     viewports — see layout.css's matching comment. hyphens:auto (html
+     lang="en" is set, so the dictionary is available) means a break, when
+     one is genuinely unavoidable, inserts a hyphen and reads as
+     deliberate typography rather than a bare mid-word split. */
+  overflow-wrap: break-word;
+  hyphens: auto;
 }

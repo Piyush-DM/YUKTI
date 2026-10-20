@@ -1,5 +1,31 @@
 # ADR — Canonical Definition of DAALE
 
+> **Current governance — ruled 2026-08-22**
+>
+> ```
+> DECISION-005
+> Historical status at closure: Open / Not accepted
+> Current governance status:    INVALIDATED
+> Reason:                       no longer governing
+> Replacement ruling:           not yet recorded
+> ```
+>
+> **This ADR no longer governs.** Everything below this block is preserved
+> exactly as written and is *historical record* — the status line, the options,
+> and the constraint section state what was the case at closure, not what is
+> the case now.
+>
+> Invalidation is not a verdict. This ADR is **not** marked `Approved` and
+> **not** marked `Rejected`, because neither happened: the question was never
+> answered, the decision was retired. Collapsing those two layers would destroy
+> the record of what was actually true at closure.
+>
+> **The ruling does not select option A or B, and introduces no replacement
+> evaluator architecture.** The evaluator boundary in `daale/` therefore stands
+> unchanged until the architectural artifact that supersedes this ADR is
+> recorded.
+
+
 **Status: Open. Not accepted.** Raised under Authorization 5. **No
 implementation shall depend on assumptions regarding DAALE until this ADR is
 accepted.**
@@ -82,3 +108,12 @@ Recorded as the operative rule, not as advice:
 ## Approval Status
 
 Open. Requires architect acceptance.
+
+## Governance record
+
+Appended, never edited. Every section above is preserved as written.
+
+| Date | Event |
+|---|---|
+| 2026-08-06 | Raised under Authorization 5. Status at raising: open, not accepted. |
+| 2026-08-22 | **INVALIDATED.** No longer governing. Not approved and not rejected — the question was never answered. No replacement ruling recorded, and evaluator option A or B is not selected. |

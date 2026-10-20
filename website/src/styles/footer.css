@@ -1,50 +1,71 @@
 /*
-  Footer — "blueprint sign-off" (Addendum v1.2/§16). Implemented now, direct
-  authorization from the v3 brief (superseding the earlier "pending Build
-  Order Step 5" placeholder).
+  Footer — "Blueprint sign-off," Addendum v1.2
+  Clean boundary between narrative and administrative.
 */
 
 .yukti-footer {
+  border-top: var(--yukti-border-width-hairline) solid var(--yukti-color-border-hairline-dark);
+  background: var(--yukti-color-graphite-950);
   padding-block: var(--yukti-space-6);
+  margin-top: var(--yukti-space-7);
 }
 
 .yukti-footer__inner {
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
+  flex-direction: column;
+  align-items: center;
   gap: var(--yukti-space-4);
-  padding-block: var(--yukti-space-4);
+  text-align: center;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding-inline: var(--yukti-grid-margin);
 }
 
 .yukti-footer__word {
   font-family: var(--yukti-font-display);
-  font-size: 1.5rem;
+  font-size: clamp(1.5rem, 1.2rem + 2vw, 2.5rem);
   font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   color: var(--yukti-color-bone-100);
-  letter-spacing: 0.02em;
 }
 
 .yukti-footer__tagline {
-  font-family: var(--yukti-font-data);
-  font-size: var(--yukti-type-data-size);
+  font-family: var(--yukti-font-body);
+  font-size: var(--yukti-type-body-size);
   color: var(--yukti-color-bone-300);
   opacity: 0.7;
+  max-width: 40ch;
 }
 
 .yukti-footer__meta {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: var(--yukti-space-5);
   font-family: var(--yukti-font-data);
-  font-size: var(--yukti-type-data-size);
-  color: var(--yukti-color-bone-300);
-  opacity: 0.55;
+  font-size: var(--yukti-type-caption-size);
+  letter-spacing: var(--yukti-type-caption-tracking);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  color: var(--yukti-color-bone-300);
+  opacity: 0.45;
+}
+
+.yukti-footer__meta span {
+  display: flex;
+  flex-direction: column;
+  gap: var(--yukti-space-1);
 }
 
 .yukti-footer__meta b {
-  color: var(--yukti-color-yellow-500);
   font-weight: 400;
-  margin-right: var(--yukti-space-1);
+  color: var(--yukti-color-yellow-500);
+  opacity: 0.7;
+}
+
+@media (max-width: 480px) {
+  .yukti-footer__meta {
+    flex-direction: column;
+    gap: var(--yukti-space-3);
+  }
 }

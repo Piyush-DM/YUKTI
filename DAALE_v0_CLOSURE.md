@@ -228,3 +228,33 @@ built to the edge of an open architectural question and stopped there with the
 question intact.
 
 The next act is not Phase 3. It is a ruling on `DECISION-005`.
+
+---
+
+## 10. Governance update — 2026-08-22
+
+Appended, never edited. Sections 1–9 are the closure record as written on
+2026-08-14 and state what was the case then.
+
+**`DECISION-005` was invalidated on 2026-08-22 and no longer governs.**
+
+Where §4 and §7 above say the ADR "is open", read that as the status at
+closure. The current governance state is recorded on the ADR itself:
+
+```
+Historical status at closure: Open / Not accepted
+Current governance status:    INVALIDATED
+Reason:                       no longer governing
+Replacement ruling:           not yet recorded
+```
+
+**Nothing in §5 "What is frozen" changes.** The ruling selected neither option
+A nor B and recorded no replacement evaluator architecture, so the evaluator
+question is still unanswered and the boundary in §4 still stands — it is now
+held by the ruling rather than by an open ADR. The D-Core still has no
+evaluator and no placeholder for one, and
+`test_the_d_core_has_no_evaluator` still guards it.
+
+The item at §7.1 therefore stays open in substance and changes only in kind:
+it is no longer "a ruling on `DECISION-005`" but "the architectural artifact
+that supersedes it", which has not been recorded.

@@ -171,14 +171,18 @@ Build the chain from specifications to implementation artifacts.
 DAALE v0 is frozen. Nothing below is started, and the first item gates most of
 the rest.
 
-- [ ] **Rule on `DECISION-005`.** This is the next act, not Phase 3. The exact
+- [ ] **Record the architectural artifact that supersedes `DECISION-005`.**
+  That ADR was invalidated 2026-08-22 and no longer governs; the invalidation
+  selected neither option, so the question it raised is still unanswered. This
+  is the next act, not Phase 3. The exact
   dependency: an execution plan is a plan over units of evaluation, and whether
   DAALE calls the frozen kernels or evaluates for itself is options B and A of
   that ADR.
 - [ ] **Adjudicate `E12`.** Either name the evidence, or correct the recorded
   status in the freeze. Not to be closed by finding something plausible to cite.
 - [ ] **DAALE v0 Phases 3–5** — planner, R-Fabric parallelism, shadow/replay
-  lanes. Blocked on `DECISION-005`. The *dependency index* half of Phase 3 is
+  lanes. Blocked on the unanswered evaluator question. The *dependency index*
+  half of Phase 3 is
   not blocked. The snapshot and lease machinery Phase 5 needs already exists.
 - [ ] **Phase 6 — coprocessor adapters.** Partially unblocked: the gate already
   routes by origin and `DECISION-007` governs which may commit. Adapters are
@@ -209,7 +213,8 @@ issued. Product work is governed by
 - [x] Material Snapshot layer (`DECISION-006`). Institutional material has an
   immutable identity; supersession keys on material; ledger verification
   covers reasoning and material as separate claims.
-- [ ] **Blocked on `DECISION-005`** (open ADR): anything that assumes a
+- [ ] **Blocked on the unanswered evaluator question** (`DECISION-005`,
+  invalidated 2026-08-22, no replacement recorded): anything that assumes a
   definition of DAALE, or moves code into or out of `daale/`.
 - [ ] Retire `applications/investment/prototype-ui/`. Now unblocked: the rename
   it was waiting on is approved. Superseded by the workspace; removal touches a

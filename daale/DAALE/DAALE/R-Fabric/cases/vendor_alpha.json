@@ -1,0 +1,71 @@
+{
+  "case_id": "DD-001",
+  "decision_stage": "post_technical_due_diligence_approval",
+  "decision_question": "Has Vendor Alpha passed technical due diligence and is it ready for final approval?",
+  "claims": [
+    {
+      "claim_id": "C1",
+      "text": "Vendor Alpha has completed the required security and technical due-diligence controls."
+    },
+    {
+      "claim_id": "C2",
+      "text": "Vendor Alpha's documented risk profile is acceptable for final approval."
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "E1",
+      "text": "Audited revenue grew by 18 percent year over year.",
+      "source": {
+        "source_id": "S1",
+        "source_type": "DOCUMENT",
+        "title": "Vendor Alpha audited financial statement",
+        "collected_at": "2026-08-15T10:00:00Z",
+        "document_id": "DOC-FIN-2026-001",
+        "source_uri": "file:///evidence/DOC-FIN-2026-001.pdf",
+        "page": 3,
+        "section": "Revenue Analysis",
+        "paragraph": "Year-over-year growth",
+        "extraction_method": "PARSER",
+        "document_version": "1.0",
+        "content_hash": "a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456"
+      }
+    },
+    {
+      "evidence_id": "E2",
+      "text": "The largest customer represents 42 percent of revenue.",
+      "source": {
+        "source_id": "S2",
+        "source_type": "DOCUMENT",
+        "title": "Vendor Alpha customer concentration schedule",
+        "collected_at": "2026-08-15T10:05:00Z",
+        "document_id": "DOC-CUST-2026-002",
+        "source_uri": "file:///evidence/DOC-CUST-2026-002.pdf",
+        "page": 1,
+        "section": "Top Customers",
+        "paragraph": "Customer concentration table",
+        "extraction_method": "PARSER",
+        "document_version": "1.0",
+        "content_hash": "b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef12345678"
+      }
+    },
+    {
+      "evidence_id": "E3",
+      "text": "The security questionnaire is incomplete and no SOC 2 report was supplied.",
+      "source": {
+        "source_id": "S3",
+        "source_type": "SYSTEM_RECORD",
+        "title": "Due-diligence evidence register",
+        "collected_at": "2026-08-15T10:10:00Z",
+        "document_id": "SYS-EVD-REG-2026-003",
+        "source_uri": "system://evidence-register/2026-003",
+        "page": 1,
+        "section": "Security Documentation",
+        "paragraph": "Questionnaire completion status",
+        "extraction_method": "API",
+        "document_version": "2.1",
+        "content_hash": "c3d4e5f6789012345678901234567890abcdef1234567890abcdef1234567890"
+      }
+    }
+  ]
+}

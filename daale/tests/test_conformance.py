@@ -10,8 +10,8 @@ Three things are defended here, in rising order of importance.
    control, and it is the test that makes every other passing result mean
    something.
 3. **The lock carries no engine dependency.** This is what allows Phase 0 to
-   proceed while ``DECISION-005`` is open, so it is asserted mechanically in a
-   subprocess rather than claimed in a docstring.
+   proceed without an answer to ``DECISION-005``, so it is asserted mechanically
+   in a subprocess rather than claimed in a docstring.
 """
 
 from __future__ import annotations
@@ -114,7 +114,7 @@ class TestResolution(unittest.TestCase):
         self.assertIs(report.results[0].outcome, Outcome.UNRESOLVED)
 
     def test_an_open_decision_does_not_resolve(self) -> None:
-        """DECISION-005 is open, so anything resting on it must fail to resolve.
+        """DECISION-005 never reached approval, so nothing may rest on it.
 
         This is the lock refusing to let an unaccepted ADR support a
         conformance claim, which is the governance rule made mechanical.
@@ -152,6 +152,48 @@ class TestResolution(unittest.TestCase):
         """
         self.assertEqual(self.index.decisions["DECISION-001"], "Approved 2026-08-04.")
         self.assertEqual(self.index.decisions["DECISION-005"], "Open. Not accepted.")
+
+    def test_the_lock_reads_historical_status_not_the_governance_block(self) -> None:
+        """DECISION-005 carries two layers, and the lock reads the lower one.
+
+        The ADR was invalidated on 2026-08-22. It now opens with a
+        current-governance block above its preserved historical status line,
+        because a reader needs the current state first and the historical
+        record must survive intact.
+
+        The lock takes the first line containing ``Status:``, so that block
+        must not contain one -- it writes ``status:`` in lower case throughout
+        for exactly this reason. That is a property of casing: easy to break by
+        accident, and completely silent when broken, which is why it is pinned
+        rather than trusted.
+
+        The lock reporting historical status is correct for its purpose. It
+        resolves evidence, and an invalidated decision never resolves anyway
+        because the status carries no "Approved".
+        """
+        adr = ROOT / "docs/architecture/DECISION-005_canonical_definition_of_daale.md"
+        text = adr.read_text(encoding="utf-8")
+        preamble = text.split("**Status: Open")[0]
+
+        self.assertIn("INVALIDATED", preamble)
+        self.assertNotIn("Status:", preamble)
+        self.assertEqual(self.index.decisions["DECISION-005"], "Open. Not accepted.")
+
+    def test_an_invalidated_decision_still_does_not_resolve(self) -> None:
+        """Invalidation must not accidentally make a decision citable.
+
+        Nothing in the register cites DECISION-005, but if anything ever did,
+        an invalidated ADR must not satisfy it.
+        """
+        resting = Commitment(
+            "Z6",
+            EXECUTION,
+            "A commitment resting on an invalidated ADR.",
+            Status.DEMONSTRATED,
+            (Evidence(EvidenceKind.DECISION, "DECISION-005"),),
+        )
+        report = evaluate((resting,), self.index)
+        self.assertIs(report.results[0].outcome, Outcome.UNRESOLVED)
 
     def test_every_recorded_decision_status_is_ascii(self) -> None:
         """Status prose is transcribed from Markdown and must stay printable."""
@@ -313,7 +355,7 @@ class TestClassification(unittest.TestCase):
 
 
 class TestEngineBoundary(unittest.TestCase):
-    """The claim that lets Phase 0 proceed while DECISION-005 is open."""
+    """The claim that lets Phase 0 proceed without an answer to DECISION-005."""
 
     def test_conformance_never_imports_the_engine(self) -> None:
         """Reading source is not importing it, and the difference is the point.

@@ -4,10 +4,51 @@ Version 1 of the YUKTI application. Institutional software for carrying an
 investment case from intake to a recorded committee decision.
 
 ```powershell
-python -m applications.investment.workspace
+python yukti.py
 ```
 
-Then open `http://127.0.0.1:8770/`.
+From the repository root, or from anywhere — `yukti.py` resolves the repository
+from its own location. Windows users can double-click `yukti.cmd`; macOS and
+Linux have `./yukti.sh`. It starts the workspace and opens a browser at
+`http://127.0.0.1:8770/`.
+
+There is nothing to install. The workspace and the reasoning engine beneath it
+are standard library only; Python 3.12 or newer is the whole requirement.
+
+`python -m applications.investment.workspace` still works and is the same
+thing. `--port`, `--host` and `--no-browser` are accepted by both.
+
+## The two surfaces
+
+**`/` — the chat.** The way in. Paste a memo in plain English and it reads the
+diligence figures and the sources out of it, each one showing the sentence it
+came from and why it was read that way. You confirm, correct or reject every
+figure; nothing goes on file until you do. Then ask it to run the analysis, and
+ask it questions about the result.
+
+There is **no language model here.** Answers are projections of the reasoning
+record on disk — `explain.py` returns the limiting factor the pipeline computed,
+not a sentence about it — which is commitment E9 extended into a conversation.
+The visible cost is that it answers a bounded set of questions and says so when
+a question is outside it. A chat that declines is the same discipline as a
+judgment that declines. `intake.propose_from_assistant` is the seam a model
+would occupy; it is declared, unimplemented, and governed by `DECISION-008`.
+
+Prose intake rests on **`DECISION-008`, which is proposed and not yet accepted.**
+It asks for a narrower thing than the prose-plus-extraction `DECISION-002`
+declined: the reader authors every figure, and the passage it came from is kept.
+
+**`record.html` — the case record.** The register, material, judgment, audit
+trail, judgment history and decision ledger, unchanged. This is where a decision
+gets defended. The chat links into it per case; the record links back.
+
+**First run.** The register is empty. Either open a case, or use
+**Load the worked example** — it creates a case already carrying the reference
+implementation's own material, so the first thing you do is request a judgment
+rather than type fifteen figures. It stops at *Material assembled* deliberately:
+requesting the judgment and recording the decision are the two steps worth
+walking, and doing them for you would hand back a finished case rather than a
+startable one.
 
 The reasoning engine is infrastructure here. A user never sees a kernel, a
 translator, an intermediate representation, or a runtime artifact — except in

@@ -1,5 +1,24 @@
 # YUKTI
 
+## Run it
+
+```powershell
+python yukti.py
+```
+
+Windows: double-click `yukti.cmd`. macOS and Linux: `./yukti.sh`.
+
+That starts the YUKTI investment committee workspace and opens a browser at
+`http://127.0.0.1:8770/`. Nothing to install — the application and the reasoning
+engine beneath it are standard library only, so Python 3.12 or newer is the
+whole requirement. The register starts empty; **Load the worked example** gives
+you a case with real material on file, and from there the four steps are Open a
+case → Assemble material → Request a judgment → Record the decision.
+
+Everything below is the research and engineering record behind that application.
+
+---
+
 YUKTI is an early-stage repository for CHOIR research artifacts and the DAALE
 implementation scaffold.
 
@@ -86,7 +105,8 @@ propose; only the D-Core commits.
 **DAALE still contains no reasoning logic, and that is v0's boundary rather than
 a gap.** Emitting a judgment requires deciding whether DAALE calls the frozen
 prototype's kernels or evaluates for itself — options B and A of
-`DECISION-005`, which is open. There is no evaluator and no placeholder for one;
+`DECISION-005`, which was invalidated on 2026-08-22 without selecting either
+and with no replacement recorded. There is no evaluator and no placeholder for one;
 a stub would settle the ADR by implication. See `DAALE_v0_CLOSURE.md`.
 
 The remaining areas — `ontology/`, `reasoning/`, `arbitration/`,

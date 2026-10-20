@@ -16,8 +16,11 @@ Everything else is workflow.
 from __future__ import annotations
 
 import json
+import os
+import pathlib
 import tempfile
 import unittest
+import unittest.mock
 from pathlib import Path
 
 from choir_prototype.core.pipeline import execute
@@ -25,11 +28,19 @@ from choir_prototype.core.synthesizer import synthesize
 from choir_prototype.domains import investment
 
 from applications.investment.vertical_slice.parse import parse_document
-from applications.investment.workspace import analysis, diligence, material
+from applications.investment.workspace import (
+    analysis,
+    assistant,
+    diligence,
+    explain,
+    intake,
+    material,
+)
 from applications.investment.workspace.cases import (
     CaseStore,
     Figure,
     FlaggedConflict,
+    IntakeRecord,
     LedgerEntry,
     Source,
 )
@@ -119,6 +130,555 @@ class WorkspaceTestCase(unittest.TestCase):
             for figure in figures
         )
         self.store.record_material(case_id, sources, edited, assumptions, conflicts)
+
+
+MEMO = """\
+Meridian closed FY2024 with annual recurring revenue of $18M, per the \
+independent audit.
+Year-over-year growth came in at 62%, confirmed in the same audit.
+Gross margin is 74% on the audited statements.
+Net burn is running at $1.4M a month against cash on hand of $21M at year end, \
+per the audit.
+The largest customer represents 38% of revenue according to the management deck.
+Net revenue retention is 104% in the deck.
+Logo churn sits at 11% per reference calls with customers.
+The third-party market sizing report puts the addressable market at $8.4bn, \
+with market growth of 19% a year and 14 competitors identified.
+Founders retain 56% voting control and there is 1 independent board seat on the \
+certified capitalisation table.
+The FY2024 statements were audited. The company reports monthly per the deck.
+"""
+
+
+class TestProseIntake(unittest.TestCase):
+    """Claim: prose is read into proposals, and proposals are not material.
+
+    The boundary `DECISION-008` rests on. If any of these fail, the intake path
+    has become the prose-plus-extraction `DECISION-002` declined.
+    """
+
+    def test_a_memo_yields_the_whole_schedule(self) -> None:
+        reading = intake.read(MEMO)
+        self.assertEqual(len(reading.figures), len(diligence.SCHEDULE))
+
+    def test_values_match_what_the_prose_says(self) -> None:
+        by_metric = {item.metric: item.value for item in intake.read(MEMO).figures}
+        self.assertEqual(by_metric["arr_usd"], "18000000")
+        self.assertEqual(by_metric["net_burn_monthly_usd"], "1400000")
+        self.assertEqual(by_metric["tam_usd"], "8400000000")
+        self.assertEqual(by_metric["yoy_growth_pct"], "62")
+        self.assertEqual(by_metric["independent_board_seats"], "1")
+        self.assertEqual(by_metric["audit_status"], "audited")
+
+    def test_a_year_is_not_read_as_a_money_figure(self) -> None:
+        """`FY2024` was being read as annual recurring revenue."""
+        figures = intake.read("ARR for FY2024 was $18M per the audit.").figures
+        self.assertEqual(figures[0].value, "18000000")
+
+    def test_one_sentence_can_name_several_figures(self) -> None:
+        reading = intake.read(
+            "The market sizing report puts the addressable market at $8.4bn, "
+            "with market growth of 19% a year and 14 competitors identified."
+        )
+        by_metric = {item.metric: item.value for item in reading.figures}
+        self.assertEqual(by_metric["tam_usd"], "8400000000")
+        self.assertEqual(by_metric["market_growth_pct"], "19")
+        self.assertEqual(by_metric["competitor_count"], "14")
+
+    def test_every_proposal_carries_the_passage_it_came_from(self) -> None:
+        for proposal in intake.read(MEMO).figures:
+            self.assertTrue(proposal.span.quote)
+            self.assertIn(proposal.span.quote, MEMO)
+            self.assertTrue(proposal.basis)
+
+    def test_the_prose_names_its_own_sources(self) -> None:
+        labels = {source.label for source in intake.read(MEMO).sources}
+        self.assertIn("SRC-AUDIT", labels)
+        self.assertIn("SRC-DECK", labels)
+        self.assertIn("SRC-MARKET", labels)
+
+    def test_nothing_is_proposed_that_the_prose_does_not_establish(self) -> None:
+        """It never invents a value to fill the schedule.
+
+        A blank is a gap and is reported as one, exactly as it is when a figure
+        is left empty on the diligence screen.
+        """
+        reading = intake.read("Gross margin is 74%.")
+        self.assertEqual(
+            [item.metric for item in reading.figures], ["gross_margin_pct"]
+        )
+        proposed = {item.metric for item in reading.figures}
+        for item in diligence.SCHEDULE:
+            if item.metric != "gross_margin_pct":
+                self.assertNotIn(item.metric, proposed)
+
+    def test_reading_is_deterministic(self) -> None:
+        self.assertEqual(intake.read(MEMO), intake.read(MEMO))
+
+    def test_the_model_seam_refuses_rather_than_guessing(self) -> None:
+        """With no key it raises, so the caller falls back to the reader.
+
+        The failure mode this forbids is a silent one: a model path that
+        returns nothing on a missing key would look like prose that established
+        nothing, which is a different and much worse claim.
+        """
+        with self.assertRaises(assistant.AssistantUnavailable):
+            intake.propose_from_assistant(MEMO)
+
+
+# The exact closing line of experiments/messy_intake memo 4, which used to
+# register a Certified capitalisation table -- an audit-rank source -- from a
+# sentence stating one does not exist.
+MEMO_4_ABSENCE_LINE = (
+    "Nothing else has been shared. No accounts, no cap table, no customer data."
+)
+
+MEMO_4 = (
+    "Very early look at Kestrel Instruments, almost nothing firm yet.\n"
+    "From the founder's email summary: they're at about nine hundred thousand "
+    "of recurring revenue, and he says growth is 140%.\n"
+    "The trade association sector note sizes the market at two billion, growing "
+    "11% a year.\n"
+    + MEMO_4_ABSENCE_LINE
+    + "\n"
+)
+
+
+class TestSourceMentionStanding(unittest.TestCase):
+    """Claim: a source mention registers a source only if the prose asserts the
+
+    document exists and is held. An assertion of absence -- "no cap table",
+    "wasn't provided", "still outstanding" -- is not a weak assertion of
+    presence, and must not instantiate a source or hand it an evidence rank.
+    """
+
+    def _labels(self, text: str) -> set[str]:
+        return {source.label for source in intake.propose_sources(text)}
+
+    def test_a_held_document_registers(self) -> None:
+        for phrasing in (
+            "We have a cap table.",
+            "The cap table is attached.",
+            "Per the certified capitalisation table, founders hold 31%.",
+            "We doubt the growth story, but the cap table is clean.",
+        ):
+            with self.subTest(phrasing=phrasing):
+                self.assertIn("SRC-CAPTABLE", self._labels(phrasing))
+
+    def test_an_asserted_absence_registers_nothing(self) -> None:
+        for phrasing in (
+            "We don't have a cap table.",
+            "No cap table is available.",
+            "There is no cap table.",
+            "Cap table wasn't provided.",
+            "The cap table wasn't shared with us.",
+            "Nothing yet on cash or the cap table.",
+        ):
+            with self.subTest(phrasing=phrasing):
+                self.assertNotIn("SRC-CAPTABLE", self._labels(phrasing))
+
+    def test_a_bare_reference_registers_nothing(self) -> None:
+        for phrasing in (
+            "The cap table was discussed.",
+            "The cap table is still outstanding with the company.",
+            "They referenced a cap table on the call.",
+            "We asked for the cap table.",
+        ):
+            with self.subTest(phrasing=phrasing):
+                self.assertNotIn("SRC-CAPTABLE", self._labels(phrasing))
+
+    def test_the_exact_memo_4_line_registers_no_cap_table(self) -> None:
+        """The specific failure this change was made for."""
+        self.assertNotIn("SRC-CAPTABLE", self._labels(MEMO_4_ABSENCE_LINE))
+        self.assertNotIn("SRC-CAPTABLE", self._labels(MEMO_4))
+
+    def test_negation_does_not_reach_across_a_full_stop(self) -> None:
+        """"No accounts." then a separate sentence naming a held cap table."""
+        text = "No accounts were provided. The cap table is on file."
+        self.assertIn("SRC-CAPTABLE", self._labels(text))
+
+    def test_a_present_mention_elsewhere_still_registers(self) -> None:
+        """One absent mention does not veto a present one for the same source."""
+        text = (
+            "The cap table wasn't in the first pack. "
+            "The cap table was provided yesterday and we have it now."
+        )
+        self.assertIn("SRC-CAPTABLE", self._labels(text))
+
+    def test_the_reference_memo_still_names_all_five_sources(self) -> None:
+        """Regression guard: the fix must not cost a single real source."""
+        labels = self._labels(MEMO)
+        for expected in (
+            "SRC-AUDIT",
+            "SRC-DECK",
+            "SRC-MARKET",
+            "SRC-CAPTABLE",
+            "SRC-CUSTOMER",
+        ):
+            with self.subTest(label=expected):
+                self.assertIn(expected, labels)
+
+
+class TestAssistantGuards(unittest.TestCase):
+    """Claim: the model cannot fabricate a passage or a figure.
+
+    These are the two enforcement points `DECISION-008` promises. They are
+    tested against the verification functions directly, so they hold without a
+    key and without a network call.
+    """
+
+    def test_it_is_off_unless_a_key_is_configured(self) -> None:
+        with unittest.mock.patch.dict(os.environ, {}, clear=True):
+            self.assertFalse(assistant.enabled())
+        with unittest.mock.patch.dict(
+            os.environ, {"ANTHROPIC_API_KEY": "x"}, clear=True
+        ):
+            self.assertTrue(assistant.enabled())
+
+    def test_the_kill_switch_wins_over_a_present_key(self) -> None:
+        with unittest.mock.patch.dict(
+            os.environ, {"ANTHROPIC_API_KEY": "x", "YUKTI_ASSIST": "off"}, clear=True
+        ):
+            self.assertFalse(assistant.enabled())
+
+    def test_status_never_returns_the_key(self) -> None:
+        with unittest.mock.patch.dict(
+            os.environ, {"ANTHROPIC_API_KEY": "sk-secret-value"}, clear=True
+        ):
+            self.assertNotIn("sk-secret-value", json.dumps(assistant.status()))
+
+    def test_a_phrasing_that_invents_a_figure_is_discarded(self) -> None:
+        """The guard that keeps commitment E9 true with a model in the loop."""
+        grounded = "Institutional confidence is Low, limited by Market."
+        with unittest.mock.patch.object(
+            assistant, "_call", return_value="Confidence is Low, and ARR is $42M."
+        ):
+            reply = assistant.phrase(
+                "why?", _stub_case(), grounded, "a record extract containing no figures"
+            )
+        self.assertFalse(reply.model_used)
+        self.assertEqual(reply.text, grounded)
+        self.assertIn("not in the record", reply.note)
+
+    def test_a_faithful_phrasing_is_kept(self) -> None:
+        grounded = "Institutional confidence is Low, limited by Market."
+        with unittest.mock.patch.object(
+            assistant,
+            "_call",
+            return_value="Confidence sits at Low; Market is what holds it there.",
+        ):
+            reply = assistant.phrase("why?", _stub_case(), grounded, "")
+        self.assertTrue(reply.model_used)
+        self.assertIn("Market", reply.text)
+
+    def test_an_unreachable_model_returns_the_computed_answer(self) -> None:
+        grounded = "Institutional confidence is Low."
+        with unittest.mock.patch.object(
+            assistant,
+            "_call",
+            side_effect=assistant.AssistantUnavailable("network down"),
+        ):
+            reply = assistant.phrase("why?", _stub_case(), grounded, "")
+        self.assertFalse(reply.model_used)
+        self.assertEqual(reply.text, grounded)
+
+    def test_a_quote_the_model_did_not_copy_is_dropped(self) -> None:
+        """A reading that cannot be located in the text is not a reading."""
+        text = "Gross margin is 74% on the audited statements."
+        payload = json.dumps(
+            {
+                "figures": [
+                    {
+                        "metric": "gross_margin_pct",
+                        "value": "74",
+                        "status": "confirmed",
+                        "source_label": "",
+                        "quote": "Gross margin is 74% on the audited statements.",
+                    },
+                    {
+                        "metric": "arr_usd",
+                        "value": "18000000",
+                        "status": "confirmed",
+                        "source_label": "",
+                        "quote": "ARR was $18M, as the memo clearly states.",
+                    },
+                ]
+            }
+        )
+        with unittest.mock.patch.dict(
+            os.environ, {"ANTHROPIC_API_KEY": "x"}, clear=True
+        ):
+            with unittest.mock.patch.object(assistant, "_call", return_value=payload):
+                proposals = assistant.propose(text, ())
+        self.assertEqual([item.metric for item in proposals], ["gross_margin_pct"])
+        self.assertEqual(proposals[0].span.quote, text)
+
+    def test_an_unregistered_source_is_stripped_not_trusted(self) -> None:
+        text = "Gross margin is 74%."
+        payload = json.dumps(
+            {
+                "figures": [
+                    {
+                        "metric": "gross_margin_pct",
+                        "value": "74",
+                        "status": "confirmed",
+                        "source_label": "SRC-INVENTED",
+                        "quote": "Gross margin is 74%.",
+                    }
+                ]
+            }
+        )
+        with unittest.mock.patch.dict(
+            os.environ, {"ANTHROPIC_API_KEY": "x"}, clear=True
+        ):
+            with unittest.mock.patch.object(assistant, "_call", return_value=payload):
+                proposals = assistant.propose(text, ())
+        self.assertEqual(proposals[0].source_label, "")
+
+    def test_model_proposals_are_still_only_proposals(self) -> None:
+        """Nothing in the assistant module can write to a case store."""
+        source = pathlib.Path(assistant.__file__).read_text(encoding="utf-8").lower()
+        for forbidden in ("record_material", "accept_intake", "append_ledger"):
+            self.assertNotIn(forbidden, source)
+
+
+def _stub_case() -> object:
+    """The minimum a phrasing call reads from a case: its title."""
+
+    class _Stub:
+        title = "Test Co -- Series B"
+
+    return _Stub()
+
+
+class TestIntakeIsNotMaterial(WorkspaceTestCase):
+    """Claim: a proposal changes nothing until a person accepts it."""
+
+    def _accepted(self, reading: intake.Reading) -> tuple[IntakeRecord, ...]:
+        return tuple(
+            IntakeRecord(
+                record_id="",
+                metric=item.metric,
+                value=item.value,
+                status=item.status,
+                source_label=item.source_label,
+                quote=item.span.quote,
+                basis=item.basis,
+                recorded_on="2026-09-07",
+            )
+            for item in reading.figures
+        )
+
+    def _prepared(self) -> tuple[str, intake.Reading]:
+        case_id = self.store.open_case(
+            company="Meridian Robotics",
+            sector="Industrial automation",
+            stage="Series B",
+            requested_decision="Approve",
+            thesis="",
+            owner="P. Sharma",
+            opened_on="2026-09-07",
+        ).case_id
+        reading = intake.read(MEMO)
+        self.store.record_material(
+            case_id,
+            tuple(
+                Source(label=item.label, origin=item.origin, kind=item.kind)
+                for item in reading.sources
+            ),
+            (),
+            (),
+            (),
+        )
+        return case_id, reading
+
+    def test_proposing_records_nothing(self) -> None:
+        case_id, reading = self._prepared()
+        self.assertTrue(reading.figures)
+        self.assertEqual(self.store.load(case_id).figures, ())
+        self.assertEqual(self.store.load(case_id).intake_records, ())
+
+    def test_accepting_records_the_figures_and_their_provenance(self) -> None:
+        case_id, reading = self._prepared()
+        case = self.store.accept_intake(case_id, self._accepted(reading))
+        self.assertEqual(len(case.figures), len(diligence.SCHEDULE))
+        self.assertEqual(len(case.intake_records), len(diligence.SCHEDULE))
+        for record in case.intake_records:
+            self.assertIn(record.quote, MEMO)
+            self.assertTrue(record.record_id.startswith("INTAKE-"))
+
+    def test_provenance_is_outside_material_identity(self) -> None:
+        """A figure typed by hand and the same figure accepted from a memo
+        are the same material, and must hash the same."""
+        case_id, reading = self._prepared()
+        accepted = self._accepted(reading)
+        from_prose = self.store.accept_intake(case_id, accepted)
+
+        typed_id = self.store.open_case(
+            company="Meridian Robotics",
+            sector="Industrial automation",
+            stage="Series B",
+            requested_decision="Approve",
+            thesis="",
+            owner="P. Sharma",
+            opened_on="2026-09-07",
+        ).case_id
+        self.store.record_material(
+            typed_id,
+            tuple(
+                Source(label=item.label, origin=item.origin, kind=item.kind)
+                for item in reading.sources
+            ),
+            tuple(
+                Figure(
+                    metric=record.metric,
+                    value=record.value,
+                    status=record.status,
+                    source_labels=(record.source_label,),
+                )
+                for record in accepted
+            ),
+            (),
+            (),
+        )
+        typed = self.store.load(typed_id)
+
+        self.assertEqual(typed.intake_records, ())
+        self.assertEqual(
+            material.compute_material_digest(from_prose),
+            material.compute_material_digest(typed),
+        )
+
+    def test_accepted_material_reaches_the_same_judgment(self) -> None:
+        case_id, reading = self._prepared()
+        self.store.accept_intake(case_id, self._accepted(reading))
+        judgment = analysis.request_judgment(self.store, case_id)
+        self.assertEqual(judgment.recommendation, "Proceed With Conditions")
+
+    def test_a_figure_cannot_cite_an_unregistered_source(self) -> None:
+        """The existing rule still bites on the intake path."""
+        case_id, reading = self._prepared()
+        rogue = (
+            IntakeRecord(
+                record_id="",
+                metric="arr_usd",
+                value="18000000",
+                status="confirmed",
+                source_label="SRC-NOT-REGISTERED",
+                quote="x",
+                basis="x",
+                recorded_on="2026-09-07",
+            ),
+        )
+        with self.assertRaises(ValueError):
+            self.store.accept_intake(case_id, rogue)
+
+
+class TestExplainAnswersFromTheRecord(WorkspaceTestCase):
+    """Claim: the chat projects the record and declines everything else."""
+
+    def _analysed(self) -> tuple[object, analysis.Judgment]:
+        case_id = self.open_reference_case()
+        judgment = analysis.request_judgment(self.store, case_id)
+        return self.store.load(case_id), judgment
+
+    def test_it_declines_what_it_cannot_answer(self) -> None:
+        case, judgment = self._analysed()
+        reply = explain.answer("what is the weather in Paris?", case, judgment)
+        self.assertFalse(reply.understood)
+
+    def test_the_limiting_factor_is_the_engine_s_own(self) -> None:
+        """The chat must not compute a second answer to the same question."""
+        case, judgment = self._analysed()
+        reply = explain.answer("why is confidence low?", case, judgment)
+        self.assertIn(judgment.confidence_note, reply.text)
+        self.assertIn(judgment.confidence, reply.text)
+
+    def test_the_binding_review_area_is_the_weakest_one(self) -> None:
+        case, judgment = self._analysed()
+        reply = explain.answer("what would change it?", case, judgment)
+        weakest = max(
+            judgment.review_areas,
+            key=lambda area: ["High", "Moderate", "Low", "Insufficient"].index(
+                area.confidence
+            ),
+        )
+        self.assertIn(weakest.review_area, reply.text)
+
+    def test_rationale_is_quoted_not_rewritten(self) -> None:
+        case, judgment = self._analysed()
+        reply = explain.answer("why this recommendation?", case, judgment)
+        for line in judgment.rationale:
+            self.assertIn(line, reply.text)
+
+    def test_every_answer_names_the_record_fields_it_used(self) -> None:
+        case, judgment = self._analysed()
+        for question in (
+            "what did it conclude",
+            "why",
+            "what is limiting confidence",
+            "what are the conditions",
+            "what is missing",
+            "what is contested",
+            "what sources were used",
+        ):
+            reply = explain.answer(question, case, judgment)
+            self.assertTrue(reply.understood, question)
+            self.assertTrue(reply.sources, question)
+
+    def test_it_says_so_when_there_is_no_judgment(self) -> None:
+        case_id = self.open_reference_case()
+        reply = explain.answer("why?", self.store.load(case_id), None)
+        self.assertIn("No judgment on file", reply.text)
+
+
+class TestFirstRun(WorkspaceTestCase):
+    """A new reader can reach a startable case without typing fifteen figures.
+
+    The register is empty on a fresh install. These defend the one action
+    offered there, which is the whole first-run path.
+    """
+
+    def test_the_worked_example_arrives_ready_to_analyse(self) -> None:
+        """One call produces a case whose material is complete."""
+        case = analysis.open_worked_example(self.store)
+        self.assertEqual(case.status(), "Material assembled")
+        self.assertEqual(len(case.figures), len(diligence.SCHEDULE))
+        self.assertFalse(diligence.outstanding(case.recorded_metrics()))
+
+    def test_the_worked_example_stops_short_of_the_judgment(self) -> None:
+        """Requesting the judgment stays the reader's step, not the loader's."""
+        case = analysis.open_worked_example(self.store)
+        self.assertEqual(case.judgments, ())
+        self.assertEqual(case.ledger, ())
+
+    def test_the_worked_example_carries_the_reference_material(self) -> None:
+        """It is the reference implementation's own document, not a copy."""
+        case = analysis.open_worked_example(self.store)
+        expected = analysis.reference_material()
+        self.assertEqual(
+            [figure.metric for figure in case.figures],
+            [entry["metric"] for entry in expected["figures"]],
+        )
+        self.assertEqual(
+            [source.label for source in case.sources],
+            [entry["label"] for entry in expected["sources"]],
+        )
+        self.assertEqual(case.flagged_conflicts[0].metric, "net_revenue_retention_pct")
+
+    def test_the_worked_example_reaches_the_reference_judgment(self) -> None:
+        """The case it produces analyses to the result the engine reaches."""
+        case = analysis.open_worked_example(self.store)
+        judgment = analysis.request_judgment(self.store, case.case_id)
+        self.assertEqual(judgment.recommendation, "Proceed With Conditions")
+        self.assertEqual(judgment.confidence, "Low")
+
+    def test_loading_it_twice_gives_two_separate_cases(self) -> None:
+        """Nothing is overwritten; the register accumulates like any other case."""
+        first = analysis.open_worked_example(self.store)
+        second = analysis.open_worked_example(self.store)
+        self.assertNotEqual(first.case_id, second.case_id)
+        self.assertEqual(len(self.store.list_ids()), 2)
 
 
 class TestCaseLifecycle(WorkspaceTestCase):
@@ -353,12 +913,19 @@ class TestJudgment(WorkspaceTestCase):
         self.assertNotEqual(first, second.case_id)
 
     def test_the_same_material_reproduces_the_same_digest(self) -> None:
-        """Re-running a case gives the identical record. Determinism survives."""
+        """Re-running frozen material gives one record. Reasoning cannot vary.
+
+        The freeze boundary is the recorded material: once it exists, the engine
+        is a pure function of it. Reading variance lives upstream of here; from
+        here down, eight runs must produce one digest and one verdict.
+        """
         case_id = self.open_reference_case()
-        first = analysis.request_judgment(self.store, case_id)
-        second = analysis.request_judgment(self.store, case_id)
-        self.assertEqual(first.record_digest, second.record_digest)
-        self.assertNotEqual(first.record_digest, "")
+        runs = [analysis.request_judgment(self.store, case_id) for _ in range(8)]
+        digests = {run.record_digest for run in runs}
+        verdicts = {(run.recommendation, run.confidence) for run in runs}
+        self.assertEqual(len(digests), 1, digests)
+        self.assertEqual(len(verdicts), 1, verdicts)
+        self.assertNotEqual(runs[0].record_digest, "")
 
     def test_no_internal_vocabulary_reaches_the_judgment(self) -> None:
         """A user never reads a kernel name, a claim id, or an artifact label.

@@ -1,0 +1,141 @@
+# DAALE
+
+DAALE is the implementation of the reasoning execution substrate for this
+repository.
+
+**v0 is CLOSED and frozen as of 2026-08-14.** See
+[`DAALE_v0_CLOSURE.md`](../DAALE_v0_CLOSURE.md) at the repository root for what
+v0 contains, the ten properties frozen with it, what it deliberately does not
+do, and the five items carried out of it unresolved.
+
+v0 is a **canonical control plane**: it validates, names, orders, versions,
+commits, traces and terminates. It does not reason, and the reason it does not
+is `DECISION-005`, described below.
+
+Areas outside `conformance/` and `execution/` remain scaffold. They preserve
+architectural names so future work can add behavior only after the
+corresponding CHOIR specifications or approved architecture documents exist.
+
+## Directory Intent
+
+- `conformance/`: **Implemented (v0 Phase 0).** The frozen CHOIR v0.1
+  commitments as a machine-readable register, the lock that resolves every
+  piece of evidence they rest on, and the classification of every gap the lock
+  finds. Reads the subject as source; imports nothing from it.
+- `execution/`: **Implemented (v0 Phases 1–2).** The D-Core, the Reasoning
+  State Store, the execution trace, CHOIR contract validation, and the
+  candidate-to-commit gate. No evaluator — see below.
+- `rfabric.py`: **Implemented, ruling `DECISION-005` for this working copy.**
+  Translates one finished R-Fabric trace into a package and candidate the
+  gate above already knew how to take. Imports nothing from R-Fabric; reads
+  its trace as plain JSON. See the boundary section below.
+- `ontology/`: Python module boundaries for ontology-related primitives and
+  relationships.
+- `reasoning/`: Reserved for approved reasoning interfaces and behavior.
+- `arbitration/`: Reserved for approved arbitration interfaces and behavior.
+- `traceability/`: Reserved for approved traceability interfaces and behavior.
+- `runtime/`: Reserved for approved runtime coordination behavior.
+- `tests/`: Standard-library tests that protect scaffold stability.
+
+## The DECISION-005 boundary
+
+DAALE v0 stops at one specific point, and it is worth stating plainly because
+everything else in `execution/` is complete without it.
+
+The D-Core validates, orders, versions, commits, traces and terminates. It does
+not evaluate. Evaluating requires deciding *who evaluates* — whether DAALE
+calls the frozen prototype's kernels or evaluates for itself — and those are
+options **B** and **A** of `DECISION-005` verbatim. There is no neutral third
+answer, because "who evaluates" is exactly what that ADR asks.
+
+There is therefore **no evaluator and no placeholder for one**. A stub raising
+`NotImplementedError` would still assert that the evaluator belongs inside
+DAALE, which is itself one of the answers. `test_the_d_core_has_no_evaluator`
+guards the boundary mechanically so it cannot erode one convenient method at a
+time.
+
+Every `ExecutionSummary` reports `emits_judgment=False` and carries the reason,
+so a completed execution cannot be mistaken for an adjudicated one.
+
+**A ruling on `DECISION-005` is the next act, not Phase 3.**
+
+That ruling has now been made for this working copy: see
+[`../docs/architecture/DECISION-005_RULING_rfabric_evaluates.md`](../docs/architecture/DECISION-005_RULING_rfabric_evaluates.md).
+**R-Fabric evaluates; D-Core commits.** `rfabric.py` translates one finished
+R-Fabric trace (read as plain JSON — this module never imports R-Fabric's own
+code) into a CHOIR-shaped package and a candidate carrying `origin="rfabric"`,
+which was already in `DETERMINISTIC_ORIGINS` before this existed. Nothing
+about the boundary above changed: the D-Core still does not evaluate, still
+has no evaluator, and `test_the_d_core_has_no_evaluator` still guards exactly
+the same set of forbidden methods. What changed is that something now
+produces the kind of candidate the closure note said Phase 3 onward would
+need.
+
+Run it from the repository directory:
+
+```powershell
+python -m daale admit-rfabric path/to/a/run/trace.json
+```
+
+or run R-Fabric and this in one step from the parent directory:
+
+```powershell
+python run_pipeline.py --offline
+```
+
+## Who may commit
+
+A candidate passing every active gate check is decided by its origin:
+`dcore`, `rfabric` and `algorithm` may commit; **anything else escalates** to
+`REVIEW_REQUIRED` and never reaches canonical state.
+
+The rule is an allow-list by decision, not by convenience — an origin nobody
+thought to name escalates rather than committing silently. Codified in
+[`DECISION-007`](../docs/architecture/DECISION-007_candidate_escalation_rule.md).
+Adding to `DETERMINISTIC_ORIGINS` grants canonical write authority and requires
+an approved decision.
+
+## Implementation Boundary
+
+Until a specification is approved, DAALE modules should contain documentation,
+typing scaffolds, and tests that verify stability rather than behavior. Do not
+introduce new runtime dependencies or frameworks without explicit approval.
+
+**One exception, and its limits.** `conformance/` contains behavior. It was
+built under direct architectural instruction to implement the DAALE v0
+execution plan, which the rules permit as an alternative to a specification. It
+carries no dependency on `DECISION-005`: the commitments it locks are CHOIR's
+and are identical under every option that ADR leaves open, and the package
+imports nothing from `choir_prototype` or `applications`. Nothing else in
+`daale/` has been unblocked by it.
+
+## Conformance
+
+Run the lock from the repository directory:
+
+```powershell
+python -m daale conformance
+```
+
+It exits non-zero when a frozen commitment cites evidence that no longer
+exists, and writes `reports/daale/conformance/`. Current result: 28
+commitments, 20 conforming, 8 unexercised, 0 unresolved.
+
+The eight unexercised commitments are **classified, not queued**. Each carries
+the source that says why it is unimplemented — a research question, a recorded
+prototype limit, an unmade decision, or an evidence discrepancy. Four are §4
+research programmes, and research freeze §9 forbids partially implementing one
+to make a current problem easier. `E12` is the single evidence discrepancy: the
+freeze marks it demonstrated while the repository cites nothing, and it stays
+surfaced until an architect adjudicates it.
+
+## Validation
+
+Run these commands from the repository directory:
+
+```powershell
+ruff check .
+ruff format --check .
+python -m unittest
+python -m compileall .
+```

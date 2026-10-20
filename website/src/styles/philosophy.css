@@ -1,15 +1,17 @@
 /*
-  Philosophy Scene — fullscreen scroll-snap statements (Addendum v1.2/§16;
-  Motion Addendum §16 scroll-snap-statement primitive). Native CSS
-  scroll-snap, NOT a JS scroll-jack/pin (Motion Rule 5). "proximity", not
-  "mandatory" — a gentle pause, not a hard lock ("not dramatic, just enough
-  pause").
+  Philosophy Scene — Addendum v1.2: intro block (numbered, mega heading) +
+  four fullscreen scroll-snap statements.
 */
 
 .yukti-philosophy-intro {
-  padding-block: var(--yukti-space-6);
+  padding-bottom: var(--yukti-space-7);
 }
 
+.yukti-philosophy-intro .yukti-type-mega {
+  /* Word-stacked via .yukti-heading-mega */
+}
+
+/* Philosophy statements — fullscreen scroll-snap */
 .yukti-philosophy-statements {
   display: flex;
   flex-direction: column;
@@ -19,29 +21,87 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   text-align: center;
-  gap: var(--yukti-space-1);
+  padding: var(--yukti-space-7) var(--yukti-grid-margin);
   scroll-snap-align: start;
+  scroll-snap-stop: normal;
+  position: relative;
+}
+
+.yukti-philosophy__statement::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: var(--yukti-texture-grain);
+  opacity: 0.015;
 }
 
 .yukti-philosophy__word {
   font-family: var(--yukti-font-display);
-  font-size: clamp(2.5rem, 1.5rem + 6vw, 6rem);
+  font-size: clamp(3rem, 2rem + 8vw, 10rem);
   font-weight: 700;
-  line-height: 1.05;
+  letter-spacing: -0.025em;
+  line-height: 0.95;
   color: var(--yukti-color-bone-100);
   text-transform: uppercase;
   margin: 0;
+  max-width: 90vw;
 }
 
 .yukti-philosophy__over {
-  font-family: var(--yukti-font-display);
-  font-style: italic;
-  font-weight: 400;
-  font-size: clamp(1.125rem, 0.9rem + 1.2vw, 1.75rem);
+  font-family: var(--yukti-font-data);
+  font-size: var(--yukti-type-label-size);
+  letter-spacing: var(--yukti-type-label-tracking);
+  text-transform: uppercase;
   color: var(--yukti-color-yellow-500);
-  text-transform: lowercase;
-  margin: 0;
+  opacity: 0.6;
+  margin: var(--yukti-space-2) 0;
+  white-space: nowrap;
+}
+
+/* Alternating background tones for visual rhythm */
+.yukti-philosophy__statement:nth-child(odd) {
+  background: var(--yukti-color-graphite-900);
+}
+
+.yukti-philosophy__statement:nth-child(even) {
+  background: var(--yukti-color-graphite-850);
+}
+
+/* Scroll indicator */
+.yukti-philosophy__statement::after {
+  content: '';
+  position: absolute;
+  bottom: var(--yukti-space-6);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1px;
+  height: 40px;
+  background: var(--yukti-color-border-hairline-dark);
+  animation: philosophy-scroll-hint 2s ease-in-out infinite;
+}
+
+.yukti-philosophy__statement:last-child::after {
+  display: none;
+}
+
+@keyframes philosophy-scroll-hint {
+  0%, 100% { opacity: 0.3; transform: translateX(-50%) translateY(0); }
+  50% { opacity: 0.7; transform: translateX(-50%) translateY(8px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yukti-philosophy__statement::after {
+    animation: none;
+    opacity: 0.4;
+  }
+}
+
+@media (max-width: 760px) {
+  .yukti-philosophy__word {
+    font-size: clamp(2.5rem, 3rem + 6vw, 6rem);
+  }
 }

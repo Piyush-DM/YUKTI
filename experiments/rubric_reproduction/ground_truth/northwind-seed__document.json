@@ -1,0 +1,58 @@
+{
+  "company_name": "Northwind Instruments Ltd.",
+  "data_points": [
+    {
+      "metric": "arr_usd",
+      "source_labels": [
+        "SRC-FOUNDER"
+      ],
+      "status": "reported",
+      "value": "400000"
+    },
+    {
+      "metric": "yoy_growth_pct",
+      "source_labels": [
+        "SRC-FOUNDER"
+      ],
+      "status": "reported",
+      "value": "120"
+    },
+    {
+      "metric": "tam_usd",
+      "source_labels": [
+        "SRC-SECTOR"
+      ],
+      "status": "estimated",
+      "value": "1200000000"
+    },
+    {
+      "metric": "market_growth_pct",
+      "source_labels": [
+        "SRC-SECTOR"
+      ],
+      "status": "estimated",
+      "value": "7"
+    }
+  ],
+  "document_version": "yukti-investment-document/0.1",
+  "id": "northwind-seed",
+  "noted_conflicts": [],
+  "sector": "laboratory hardware",
+  "sources": [
+    {
+      "kind": "assertion",
+      "label": "SRC-FOUNDER",
+      "origin": "Founder email summary"
+    },
+    {
+      "kind": "third_party",
+      "label": "SRC-SECTOR",
+      "origin": "Trade association sector note"
+    }
+  ],
+  "stage": "Seed",
+  "stated_assumptions": [
+    "Founder figures are unaudited and self-reported."
+  ],
+  "title": "Northwind Instruments -- Seed"
+}

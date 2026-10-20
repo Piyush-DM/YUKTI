@@ -1,0 +1,464 @@
+/*
+  YUKTI Website — Individual document page (technical report layout)
+  A report is one continuous sheet: a title block, then body matter at a fixed
+  measure, with a contents rail in the margin on wide viewports.
+*/
+
+.yukti-doc {
+  position: relative;
+  z-index: var(--yukti-z-content);
+  padding-block: calc(var(--yukti-space-7) * 1.15) var(--yukti-space-7);
+}
+
+/* Loading state — subtle, on-brand */
+.yukti-doc__loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 20vh;
+  opacity: 0.5;
+  font-family: var(--yukti-font-data);
+  font-size: var(--yukti-type-label-size);
+  letter-spacing: var(--yukti-type-label-tracking);
+  text-transform: uppercase;
+  color: var(--yukti-color-yellow-500);
+}
+
+/* Skeleton loading for perceived performance */
+.yukti-doc__skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--yukti-space-4);
+  max-width: 72ch;
+}
+
+.yukti-doc__skeleton .skeleton-line {
+  display: block;
+  height: var(--yukti-space-2);
+  border-radius: var(--yukti-radius-sm);
+  background: var(--yukti-color-graphite-800);
+  animation: skeleton-breath 1.8s var(--yukti-ease-standard) infinite;
+}
+
+@keyframes skeleton-breath {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yukti-doc__skeleton .skeleton-line { animation: none; }
+}
+
+/* ============================================================
+   Title block — the drafting header of the sheet
+   ============================================================ */
+
+.yukti-doc__titleblock {
+  border-top: var(--yukti-border-width-hairline) solid var(--yukti-color-yellow-500);
+  padding-top: var(--yukti-space-3);
+  position: relative;
+}
+
+.yukti-doc__titleblock::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--yukti-color-border-hairline-dark);
+}
+
+/* ID / REV / STATUS */
+.yukti-doc__stamp {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--yukti-space-3);
+  font-family: var(--yukti-font-data);
+  font-size: var(--yukti-type-data-size);
+  font-variant-numeric: var(--yukti-type-data-numeric);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.yukti-doc__stamp-id {
+  color: var(--yukti-color-yellow-500);
+  font-size: clamp(0.875rem, 0.8rem + 0.3vw, 1.0625rem);
+}
+
+.yukti-doc__stamp-rev {
+  color: var(--yukti-color-bone-300);
+  opacity: 0.55;
+}
+
+.yukti-doc__title {
+  font-family: var(--yukti-font-display);
+  font-size: clamp(2rem, 1.4rem + 3.2vw, 4rem);
+  font-weight: var(--yukti-type-display-weight);
+  letter-spacing: var(--yukti-type-display-tracking);
+  line-height: 1.02;
+  color: var(--yukti-color-bone-100);
+  margin: var(--yukti-space-4) 0 var(--yukti-space-5);
+  max-width: 20ch;
+}
+
+/* Provenance strip */
+.yukti-doc__provenance {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: var(--yukti-space-3) var(--yukti-space-4);
+  padding-block: var(--yukti-space-4);
+  border-top: var(--yukti-border-width-hairline) solid var(--yukti-color-border-hairline-dark);
+  border-bottom: var(--yukti-border-width-hairline) solid var(--yukti-color-border-hairline-dark);
+}
+
+.yukti-doc__provenance div {
+  display: flex;
+  flex-direction: column;
+  gap: var(--yukti-space-1);
+  min-width: 0;
+}
+
+.yukti-doc__provenance dt,
+.yukti-doc__provenance b {
+  font-family: var(--yukti-font-data);
+  font-size: var(--yukti-type-label-size);
+  font-weight: var(--yukti-type-data-weight);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--yukti-color-yellow-500);
+  opacity: 0.75;
+}
+
+.yukti-doc__provenance dd,
+.yukti-doc__provenance span {
+  margin: 0;
+  font-family: var(--yukti-font-data);
+  font-size: var(--yukti-type-data-size);
+  color: var(--yukti-color-bone-300);
+  overflow-wrap: anywhere;
+}
+
+/* ============================================================
+   Body matter
+   ============================================================ */
+
+.yukti-doc__body {
+  margin-top: var(--yukti-space-6);
+}
+
+/* Prose measure */
+.yukti-doc__body > p,
+.yukti-doc__body > ul,
+.yukti-doc__body > ol,
+.yukti-doc__body > blockquote {
+  max-width: 72ch;
+}
+
+@media (max-width: 760px) {
+  .yukti-doc__body > p,
+  .yukti-doc__body > ul,
+  .yukti-doc__body > ol,
+  .yukti-doc__body > blockquote {
+    max-width: 100%;
+  }
+}
+
+/* Headings */
+.yukti-doc__body h2 {
+  font-family: var(--yukti-font-display);
+  font-size: clamp(1.5rem, 1.25rem + 1.4vw, 2.25rem);
+  font-weight: var(--yukti-type-heading-weight);
+  letter-spacing: var(--yukti-type-heading-tracking);
+  color: var(--yukti-color-bone-100);
+  margin: var(--yukti-space-7) 0 var(--yukti-space-4);
+  padding-top: var(--yukti-space-3);
+  border-top: var(--yukti-border-width-hairline) solid var(--yukti-color-border-hairline-dark);
+  scroll-margin-top: var(--yukti-space-6);
+}
+
+.yukti-doc__body h2:first-child { margin-top: 0; }
+
+.yukti-doc__body h3 {
+  font-family: var(--yukti-font-display);
+  font-size: clamp(1.0625rem, 1rem + 0.5vw, 1.3125rem);
+  font-weight: var(--yukti-type-heading-weight);
+  color: var(--yukti-color-bone-100);
+  margin: var(--yukti-space-5) 0 var(--yukti-space-3);
+}
+
+.yukti-doc__body h4 {
+  font-family: var(--yukti-font-data);
+  font-size: var(--yukti-type-data-size);
+  font-weight: var(--yukti-type-label-weight);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--yukti-color-yellow-500);
+  opacity: 0.85;
+  margin: var(--yukti-space-4) 0 var(--yukti-space-2);
+}
+
+/* Body text */
+.yukti-doc__body p {
+  font-family: var(--yukti-font-body);
+  font-size: var(--yukti-type-body-size);
+  line-height: var(--yukti-type-body-line-height);
+  color: var(--yukti-color-bone-300);
+  margin: 0 0 var(--yukti-space-3);
+  text-wrap: balance;
+}
+
+.yukti-doc__body strong { color: var(--yukti-color-bone-100); font-weight: 600; }
+.yukti-doc__body em { font-style: italic; }
+
+.yukti-doc__body a {
+  color: var(--yukti-color-bone-100);
+  text-decoration: underline;
+  text-decoration-color: var(--yukti-color-yellow-500);
+  text-underline-offset: 3px;
+  transition: color var(--yukti-duration-quick) var(--yukti-ease-micro);
+}
+
+.yukti-doc__body a:hover,
+.yukti-doc__body a:focus-visible { color: var(--yukti-color-yellow-500); }
+
+/* Lists */
+.yukti-doc__body ul,
+.yukti-doc__body ol {
+  margin: 0 0 var(--yukti-space-4);
+  padding-left: var(--yukti-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--yukti-space-2);
+}
+
+.yukti-doc__body li {
+  font-family: var(--yukti-font-body);
+  font-size: var(--yukti-type-body-size);
+  line-height: var(--yukti-type-body-line-height);
+  color: var(--yukti-color-bone-300);
+  text-wrap: balance;
+}
+
+.yukti-doc__body li::marker { color: var(--yukti-color-yellow-500); }
+
+/* Blockquotes */
+.yukti-doc__body blockquote {
+  margin: var(--yukti-space-4) 0;
+  padding: var(--yukti-space-1) 0 var(--yukti-space-1) var(--yukti-space-4);
+  border-left: var(--yukti-border-width-hairline) solid var(--yukti-color-yellow-500);
+}
+
+.yukti-doc__body blockquote p:last-child { margin-bottom: 0; }
+.yukti-doc__body blockquote p { color: var(--yukti-color-bone-100); text-wrap: balance; }
+
+/* Inline code */
+.yukti-doc__body code {
+  font-family: var(--yukti-font-data);
+  font-size: 0.875em;
+  color: var(--yukti-color-bone-100);
+  background: var(--yukti-color-graphite-800);
+  border: var(--yukti-border-width-hairline) solid var(--yukti-color-border-hairline-dark);
+  border-radius: var(--yukti-radius-focus);
+  padding: 1px var(--yukti-space-1);
+  overflow-wrap: anywhere;
+}
+
+/* Code blocks */
+.yukti-doc__body pre {
+  margin: var(--yukti-space-4) 0;
+  padding: var(--yukti-space-3);
+  background: var(--yukti-color-graphite-800);
+  border: var(--yukti-border-width-hairline) solid var(--yukti-color-border-hairline-dark);
+  border-radius: var(--yukti-radius-sm);
+  overflow-x: auto;
+}
+
+.yukti-doc__body pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: var(--yukti-type-data-size);
+  line-height: 1.55;
+  white-space: pre;
+  overflow-wrap: normal;
+}
+
+.yukti-doc__body pre:focus-visible {
+  outline: var(--yukti-focus-ring-width) solid var(--yukti-color-yellow-focus);
+  outline-offset: var(--yukti-focus-ring-offset);
+}
+
+/* Tables — drafting schedules */
+.yukti-doc__tablewrap {
+  margin: var(--yukti-space-4) 0;
+  overflow-x: auto;
+  border: var(--yukti-border-width-hairline) solid var(--yukti-color-border-hairline-dark);
+  border-radius: var(--yukti-radius-sm);
+}
+
+.yukti-doc__tablewrap table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--yukti-font-body);
+  font-size: var(--yukti-type-label-size);
+  line-height: 1.5;
+}
+
+.yukti-doc__tablewrap th {
+  text-align: left;
+  font-family: var(--yukti-font-data);
+  font-weight: var(--yukti-type-data-weight);
+  font-size: var(--yukti-type-label-size);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--yukti-color-yellow-500);
+  background: var(--yukti-color-graphite-800);
+  white-space: nowrap;
+}
+
+.yukti-doc__tablewrap th,
+.yukti-doc__tablewrap td {
+  padding: var(--yukti-space-2) var(--yukti-space-3);
+  border-bottom: var(--yukti-border-width-hairline) solid var(--yukti-color-border-hairline-dark);
+  vertical-align: top;
+  color: var(--yukti-color-bone-300);
+}
+
+.yukti-doc__tablewrap tr:last-child td { border-bottom: none; }
+
+/* ============================================================
+   Contents rail — wide viewports only
+   ============================================================ */
+
+.yukti-doc__layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--yukti-space-6);
+}
+
+.yukti-doc__contents { display: none; }
+
+@media (min-width: 1200px) {
+  .yukti-doc__layout {
+    grid-template-columns: minmax(0, 1fr) 13rem;
+    align-items: start;
+  }
+
+  .yukti-doc__contents {
+    display: block;
+    position: sticky;
+    top: calc(var(--yukti-space-6) + var(--yukti-space-3));
+    padding-left: var(--yukti-space-4);
+    border-left: var(--yukti-border-width-hairline) solid var(--yukti-color-border-hairline-dark);
+  }
+
+  .yukti-doc__contents h2 {
+    font-family: var(--yukti-font-data);
+    font-size: var(--yukti-type-label-size);
+    font-weight: var(--yukti-type-data-weight);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--yukti-color-yellow-500);
+    opacity: 0.75;
+    margin: 0 0 var(--yukti-space-3);
+  }
+
+  .yukti-doc__contents ol {
+    list-style: none;
+    margin: 0; padding: 0;
+    display: flex; flex-direction: column; gap: var(--yukti-space-2);
+    counter-reset: toc;
+  }
+
+  .yukti-doc__contents a {
+    display: flex; gap: var(--yukti-space-2);
+    font-family: var(--yukti-font-body);
+    font-size: var(--yukti-type-label-size);
+    line-height: 1.4;
+    color: var(--yukti-color-bone-300);
+    opacity: 0.65;
+    text-decoration: none;
+    counter-increment: toc;
+  }
+
+  .yukti-doc__contents a::before {
+    content: counter(toc, decimal-leading-zero);
+    font-family: var(--yukti-font-data);
+    color: var(--yukti-color-yellow-500);
+    opacity: 0.6;
+    flex: none;
+  }
+
+  .yukti-doc__contents a:hover,
+  .yukti-doc__contents a:focus-visible {
+    opacity: 1;
+    color: var(--yukti-color-bone-100);
+  }
+}
+
+/* ============================================================
+   Sheet footer — previous / next, and the sheet counter
+   ============================================================ */
+
+.yukti-doc__foot {
+  margin-top: var(--yukti-space-7);
+  padding-top: var(--yukti-space-4);
+  border-top: var(--yukti-border-width-hairline) solid var(--yukti-color-yellow-500);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--yukti-space-4);
+}
+
+.yukti-doc__foot-nav {
+  display: flex; flex-wrap: wrap; gap: var(--yukti-space-5);
+}
+
+.yukti-doc__sheet {
+  font-family: var(--yukti-font-data);
+  font-size: var(--yukti-type-label-size);
+  font-variant-numeric: var(--yukti-type-data-numeric);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--yukti-color-bone-300);
+  opacity: 0.45;
+}
+
+/* Error state */
+.yukti-doc__missing {
+  max-width: 60ch;
+  padding: var(--yukti-space-6) 0;
+  text-align: center;
+}
+
+.yukti-doc__missing h1 {
+  font-family: var(--yukti-font-display);
+  font-size: var(--yukti-type-heading-size);
+  color: var(--yukti-color-bone-100);
+  margin: 0 0 var(--yukti-space-3);
+}
+
+.yukti-doc__missing p { max-width: 48ch; margin: 0 auto var(--yukti-space-4); color: var(--yukti-color-bone-300); }
+.yukti-doc__missing .yukti-quiet-link { margin-top: var(--yukti-space-4); }
+
+/* Empty state */
+.yukti-doc__empty {
+  max-width: 60ch;
+  margin: var(--yukti-space-7) auto;
+  padding: var(--yukti-space-6) var(--yukti-space-4);
+  text-align: center;
+  border: var(--yukti-border-width-hairline) dashed var(--yukti-color-border-hairline-dark);
+  border-radius: var(--yukti-radius-sm);
+}
+
+.yukti-doc__empty h2 {
+  font-family: var(--yukti-font-display);
+  font-size: clamp(1.5rem, 1.25rem + 1.4vw, 2.25rem);
+  color: var(--yukti-color-bone-100);
+  margin: 0 0 var(--yukti-space-3);
+}
+
+.yukti-doc__empty p { color: var(--yukti-color-bone-300); opacity: 0.75; margin: 0; }

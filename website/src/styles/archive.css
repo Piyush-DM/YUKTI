@@ -1,0 +1,397 @@
+/*
+  YUKTI Website — Research Archive (Drawing Register)
+  The archive is a drawing register, not a blog index.
+  - Rows, not cards. No elevation, no radius beyond 3px, no hover lift.
+  - Status is carried by weight, fill and opacity — never by a second hue.
+  - Every value below resolves to a token in tokens.design.css.
+*/
+
+/* ============================================================
+   Archive Header
+   ============================================================ */
+
+.yukti-archive__preamble {
+  display: flex;
+  flex-direction: column;
+  gap: var(--yukti-space-3);
+  max-width: 64ch;
+  margin-block: var(--yukti-space-4) var(--yukti-space-5);
+}
+
+.yukti-archive__preamble strong {
+  color: var(--yukti-color-bone-100);
+  font-weight: var(--yukti-type-label-weight);
+}
+
+/* Status key — reads as a drawing legend */
+.yukti-archive__legend {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: var(--yukti-space-3) var(--yukti-space-4);
+  margin: var(--yukti-space-5) 0 0;
+}
+
+.yukti-archive__legend > div {
+  display: flex;
+  flex-direction: column;
+  gap: var(--yukti-space-1);
+  padding-left: var(--yukti-space-3);
+  border-left: var(--yukti-border-width-hairline) solid var(--yukti-color-border-hairline-dark);
+}
+
+.yukti-archive__legend dt {
+  font-family: var(--yukti-font-data);
+  font-size: var(--yukti-type-data-size);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--yukti-color-yellow-500);
+}
+
+.yukti-archive__legend dd {
+  margin: 0;
+  font-family: var(--yukti-font-body);
+  font-size: var(--yukti-type-label-size);
+  line-height: 1.5;
+  color: var(--yukti-color-bone-300);
+  opacity: 0.75;
+}
+
+/* ============================================================
+   Series grouping
+   ============================================================ */
+
+.yukti-archive__series + .yukti-archive__series {
+  margin-top: var(--yukti-space-7);
+}
+
+.yukti-archive__series-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--yukti-space-4);
+  padding-bottom: var(--yukti-space-3);
+  border-bottom: var(--yukti-border-width-hairline) solid var(--yukti-color-border-hairline-dark);
+}
+
+.yukti-archive__series-name {
+  font-family: var(--yukti-font-display);
+  font-size: var(--yukti-type-heading-size);
+  font-weight: var(--yukti-type-heading-weight);
+  letter-spacing: var(--yukti-type-heading-tracking);
+  color: var(--yukti-color-bone-100);
+  margin: 0;
+}
+
+.yukti-archive__series-count {
+  font-family: var(--yukti-font-data);
+  font-size: var(--yukti-type-data-size);
+  font-variant-numeric: var(--yukti-type-data-numeric);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--yukti-color-bone-300);
+  opacity: 0.5;
+  white-space: nowrap;
+}
+
+/* ============================================================
+   Register row — the archive's only "card"
+   ============================================================ */
+
+.yukti-archive__row {
+  display: grid;
+  grid-template-columns: 9rem 1fr;
+  gap: var(--yukti-space-4);
+  padding-block: var(--yukti-space-4);
+  border-top: var(--yukti-border-width-hairline) solid var(--yukti-color-border-hairline-dark);
+  text-decoration: none;
+  color: inherit;
+  position: relative;
+  transition: background-color var(--yukti-duration-quick) var(--yukti-ease-micro);
+}
+
+.yukti-archive__row:last-child {
+  border-bottom: var(--yukti-border-width-hairline) solid var(--yukti-color-border-hairline-dark);
+}
+
+/* Hover — hairline brightening at leading edge */
+.yukti-archive__row::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: -1px;
+  width: 100%;
+  height: var(--yukti-border-width-hairline);
+  background: var(--yukti-color-yellow-500);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--yukti-duration-quick) var(--yukti-ease-micro);
+}
+
+.yukti-archive__row:hover::before,
+.yukti-archive__row:focus-visible::before {
+  transform: scaleX(1);
+}
+
+.yukti-archive__row:hover .yukti-archive__title,
+.yukti-archive__row:focus-visible .yukti-archive__title {
+  color: var(--yukti-color-yellow-500);
+}
+
+/* --- left column: identifier stack --- */
+.yukti-archive__ident {
+  display: flex;
+  flex-direction: column;
+  gap: var(--yukti-space-2);
+}
+
+.yukti-archive__id {
+  font-family: var(--yukti-font-data);
+  font-size: var(--yukti-type-data-size);
+  font-variant-numeric: var(--yukti-type-data-numeric);
+  letter-spacing: 0.1em;
+  color: var(--yukti-color-yellow-500);
+}
+
+.yukti-archive__rev {
+  font-family: var(--yukti-font-data);
+  font-size: var(--yukti-type-label-size);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--yukti-color-bone-300);
+  opacity: 0.45;
+}
+
+/* --- right column: the document itself --- */
+.yukti-archive__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--yukti-space-2);
+  min-width: 0;
+}
+
+.yukti-archive__title {
+  font-family: var(--yukti-font-display);
+  font-size: clamp(1.25rem, 1.05rem + 0.9vw, 1.75rem);
+  font-weight: var(--yukti-type-heading-weight);
+  letter-spacing: var(--yukti-type-heading-tracking);
+  line-height: 1.15;
+  color: var(--yukti-color-bone-100);
+  margin: 0;
+  transition: color var(--yukti-duration-quick) var(--yukti-ease-micro);
+}
+
+.yukti-archive__abstract {
+  font-family: var(--yukti-font-body);
+  font-size: var(--yukti-type-body-size);
+  line-height: var(--yukti-type-body-line-height);
+  color: var(--yukti-color-bone-300);
+  margin: 0;
+  max-width: 72ch;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.yukti-archive__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--yukti-space-3);
+  margin-top: var(--yukti-space-1);
+  font-family: var(--yukti-font-data);
+  font-size: var(--yukti-type-label-size);
+  font-variant-numeric: var(--yukti-type-data-numeric);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--yukti-color-bone-300);
+  opacity: 0.55;
+}
+
+/* ============================================================
+   Status marker — one hue, four weights
+   ============================================================ */
+
+.yukti-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--yukti-space-2);
+  padding: 2px var(--yukti-space-2);
+  border: var(--yukti-border-width-hairline) solid var(--yukti-color-border-hairline-dark);
+  border-radius: var(--yukti-radius-focus);
+  font-family: var(--yukti-font-data);
+  font-size: var(--yukti-type-label-size);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.yukti-status::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  flex: none;
+  border: var(--yukti-border-width-hairline) solid var(--yukti-color-yellow-500);
+}
+
+/* Approved and governing — the only filled marker */
+.yukti-status--published {
+  border-color: var(--yukti-color-yellow-500);
+  color: var(--yukti-color-yellow-500);
+  opacity: 1;
+}
+.yukti-status--published::before { background: var(--yukti-color-yellow-500); }
+
+/* Drafted, not accepted — outline only */
+.yukti-status--active {
+  color: var(--yukti-color-yellow-500);
+  opacity: 0.9;
+}
+
+/* A proposal, not a finding — drops to bone */
+.yukti-status--open {
+  color: var(--yukti-color-bone-300);
+  opacity: 0.7;
+}
+.yukti-status--open::before {
+  border-color: var(--yukti-color-bone-300);
+  border-style: dashed;
+}
+
+/* No longer governing — struck through */
+.yukti-status--superseded {
+  color: var(--yukti-color-bone-300);
+  opacity: 0.45;
+  text-decoration: line-through;
+}
+.yukti-status--superseded::before {
+  border-color: var(--yukti-color-bone-300);
+  text-decoration: none;
+}
+
+/* ============================================================
+   Reserved numbers
+   ============================================================ */
+
+.yukti-archive__reserved-note {
+  max-width: 64ch;
+  margin-block: var(--yukti-space-3) var(--yukti-space-4);
+}
+
+.yukti-archive__reserved {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+  gap: 0;
+  border-top: var(--yukti-border-width-hairline) solid var(--yukti-color-border-hairline-dark);
+}
+
+.yukti-archive__reserved-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--yukti-space-3);
+  padding-block: var(--yukti-space-3);
+  padding-right: var(--yukti-space-4);
+  border-bottom: var(--yukti-border-width-hairline) solid var(--yukti-color-border-hairline-dark);
+  font-family: var(--yukti-font-data);
+  font-size: var(--yukti-type-label-size);
+  color: var(--yukti-color-bone-300);
+  opacity: 0.55;
+}
+
+.yukti-archive__reserved-row b {
+  font-weight: var(--yukti-type-data-weight);
+  letter-spacing: 0.1em;
+  color: var(--yukti-color-yellow-500);
+  opacity: 0.7;
+}
+
+/* ============================================================
+   Loading skeleton
+   ============================================================ */
+
+.yukti-archive__skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--yukti-space-3);
+}
+
+.yukti-archive__skeleton .skeleton-row {
+  display: grid;
+  grid-template-columns: 9rem 1fr;
+  gap: var(--yukti-space-4);
+  padding-block: var(--yukti-space-4);
+  border-top: var(--yukti-border-width-hairline) solid var(--yukti-color-border-hairline-dark);
+}
+
+.yukti-archive__skeleton .skeleton-line {
+  display: block;
+  height: var(--yukti-space-2);
+  border-radius: var(--yukti-radius-sm);
+  background: var(--yukti-color-graphite-800);
+  animation: skeleton-breath 1.8s var(--yukti-ease-standard) infinite;
+}
+
+@keyframes skeleton-breath {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yukti-archive__skeleton .skeleton-line { animation: none; }
+}
+
+@media (max-width: 760px) {
+  .yukti-archive__skeleton .skeleton-row {
+    grid-template-columns: 1fr;
+    gap: var(--yukti-space-2);
+  }
+}
+
+/* ============================================================
+   Empty state
+   ============================================================ */
+
+.yukti-archive__empty {
+  max-width: 60ch;
+  margin: var(--yukti-space-7) auto;
+  padding: var(--yukti-space-6) var(--yukti-space-4);
+  text-align: center;
+  border: var(--yukti-border-width-hairline) dashed var(--yukti-color-border-hairline-dark);
+  border-radius: var(--yukti-radius-sm);
+}
+
+.yukti-archive__empty h2 {
+  font-family: var(--yukti-font-display);
+  font-size: clamp(1.5rem, 1.25rem + 1.4vw, 2.25rem);
+  color: var(--yukti-color-bone-100);
+  margin: 0 0 var(--yukti-space-3);
+}
+
+.yukti-archive__empty p {
+  color: var(--yukti-color-bone-300);
+  opacity: 0.75;
+  margin: 0;
+}
+
+/* ============================================================
+   Responsive — identifier column folds above title
+   ============================================================ */
+
+@media (max-width: 760px) {
+  .yukti-archive__row {
+    grid-template-columns: 1fr;
+    gap: var(--yukti-space-2);
+  }
+
+  .yukti-archive__ident {
+    flex-direction: row;
+    align-items: baseline;
+    gap: var(--yukti-space-3);
+  }
+}
+
+@media (max-width: 480px) {
+  .yukti-archive__legend { grid-template-columns: 1fr; }
+  .yukti-archive__series-head { flex-direction: column; align-items: flex-start; gap: var(--yukti-space-1); }
+  .yukti-archive__meta { flex-direction: column; align-items: flex-start; gap: var(--yukti-space-2); }
+}

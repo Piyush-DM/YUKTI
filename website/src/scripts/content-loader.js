@@ -55,7 +55,10 @@ function renderNav() {
 function renderHero() {
   const { hero } = homepageContent;
   document.getElementById('hero-headline').textContent = hero.headline;
+
+  // Supporting line as annotation text
   document.getElementById('hero-supporting').textContent = hero.supporting;
+
   const link = document.getElementById('hero-link');
   link.textContent = hero.link.label;
   link.setAttribute('href', hero.link.href);
@@ -93,12 +96,12 @@ function renderEvidence() {
   renderMegaHeading(document.getElementById('evidence-heading'), evidence.heading);
 
   const { claim, evidenceNodes, result } = evidence.trace;
-  const stage = ({ label, value }, extraClass = '') =>
-    `<div class="yukti-pipeline__stage${extraClass ? ` ${extraClass}` : ''}">
+
+  const stage = ({ label, value }, extraClass = '') => `
+    <div class="yukti-pipeline__stage${extraClass ? ` ${extraClass}` : ''}">
       <span class="yukti-pipeline__label">${label}</span>
       <p class="yukti-pipeline__value">${value}</p>
     </div>`;
-  const arrow = '<span class="yukti-pipeline__arrow" aria-hidden="true">&#8595;</span>';
 
   const pipeline = document.getElementById('evidence-trace');
   pipeline.innerHTML = `
@@ -106,15 +109,11 @@ function renderEvidence() {
       <span class="yukti-pipeline__label">Claim</span>
       <p class="yukti-pipeline__value">${claim.value}</p>
     </div>
-    <hr class="yukti-rule--tick" data-reveal />
     <div class="yukti-pipeline__stages" data-reveal>
       ${stage(evidenceNodes[0])}
-      ${arrow}
       ${stage(evidenceNodes[1])}
-      ${arrow}
       ${stage(result, 'is-result')}
     </div>
-    <hr class="yukti-rule--tick" data-reveal />
     <div class="yukti-pipeline__annotation yukti-material-paper" data-reveal>
       <span class="yukti-pipeline__label">Annotation</span>
       <p class="yukti-pipeline__value">${evidence.closing}</p>
@@ -128,7 +127,9 @@ function renderEvidence() {
 function renderPullQuote() {
   const el = document.getElementById('pull-quote-text');
   if (!el) return;
-  el.innerHTML = pullQuote.lines.map((line) => `<span data-reveal>${line}</span>`).join('');
+  el.innerHTML = pullQuote.lines
+    .map((line, i) => `<span style="--stagger: ${i * 150}ms" data-reveal>${line}</span>`)
+    .join('');
 }
 
 /* ---------- applications (Addendum v1.2 — stacked sequence) ---------- */
@@ -174,16 +175,21 @@ function renderPhilosophy() {
   renderMarginNote('philosophy');
 }
 
-/* ---------- contact — UNCHANGED (v2 instruction still stands; v3 doesn't
-   mention Contact at all) ---------- */
+/* ---------- contact — UNCHANGED ---------- */
 
 function renderContact() {
   const { contact } = homepageContent;
   document.getElementById('contact-heading').textContent = contact.heading;
   document.getElementById('contact-statement').textContent = contact.statement;
-  const email = document.getElementById('contact-email');
-  email.textContent = contact.email;
-  email.setAttribute('href', `mailto:${contact.email}`);
+  const links = document.getElementById('contact-links');
+  links.innerHTML = contact.links
+    .map(
+      ({ name, role, url }) => `
+      <a class="yukti-quiet-link" href="${url}" target="_blank" rel="noopener noreferrer">
+        ${name.toUpperCase()} &mdash; ${role}
+      </a>`
+    )
+    .join('');
   document.getElementById('contact-location').textContent = contact.location;
 }
 
@@ -194,6 +200,8 @@ function renderFooter() {
   document.getElementById('footer-revision').textContent = footerContent.revision;
   document.getElementById('footer-prepared').textContent = footerContent.prepared;
 }
+
+/* ---------- init ---------- */
 
 renderNav();
 renderHero();

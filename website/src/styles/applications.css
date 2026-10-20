@@ -1,7 +1,7 @@
 /*
-  Applications Scene — stacked sequence (Addendum v1.2/§16). Huge domain
-  name, tiny supporting copy, drafting-tick divider between entries. No
-  icons, no cards — unchanged rule from v1.1.
+  Applications Scene — Stacked sequence (Addendum v1.2/§16).
+  Huge domain name, tiny supporting copy, drafting-tick divider between entries.
+  No icons, no cards — unchanged rule from v1.1.
 */
 
 .yukti-app-sequence {
@@ -9,21 +9,45 @@
   display: flex;
   flex-direction: column;
   max-width: 60ch;
+  min-width: 0; /* Prevent flex item overflow */
 }
 
 .yukti-app-entry {
-  padding-block: var(--yukti-space-4);
+  padding-block: var(--yukti-space-5);
+  position: relative;
+}
+
+.yukti-app-entry:not(:first-child)::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--yukti-border-width-hairline);
+  background: var(--yukti-color-border-hairline-dark);
+}
+
+.yukti-app-entry:not(:first-child)::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 18%;
+  width: var(--yukti-border-width-hairline);
+  height: 12px;
+  background: var(--yukti-color-border-hairline-dark);
 }
 
 .yukti-app-entry__name {
   font-family: var(--yukti-font-display);
-  font-size: clamp(1.75rem, 1.2rem + 3vw, 3.5rem);
+  font-size: clamp(2rem, 1.3rem + 4vw, 4rem);
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
   color: var(--yukti-color-bone-100);
-  margin: 0 0 var(--yukti-space-1);
+  margin: 0 0 var(--yukti-space-2);
   transition: letter-spacing var(--yukti-duration-quick) var(--yukti-ease-micro);
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 .yukti-app-entry:hover .yukti-app-entry__name {
@@ -34,11 +58,19 @@
   font-family: var(--yukti-font-body);
   font-size: var(--yukti-type-data-size);
   color: var(--yukti-color-bone-300);
-  opacity: 0.85;
+  opacity: 0.8;
   margin: 0;
   max-width: 42ch;
+  line-height: var(--yukti-type-body-line-height);
 }
 
+/* Divider styling inherited from layout.css .yukti-rule--tick */
 .yukti-app-divider {
   margin: 0;
+}
+
+@media (max-width: 480px) {
+  .yukti-app-entry {
+    padding-block: var(--yukti-space-4);
+  }
 }

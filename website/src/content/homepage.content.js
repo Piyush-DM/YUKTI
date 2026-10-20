@@ -92,7 +92,10 @@ export const homepageContent = {
     heading: 'Contact',
     statement:
       "If your organization depends on decisions that must withstand scrutiny, we'd be happy to start a conversation.",
-    email: 'contact@yukti.agency',
+    links: [
+      { name: 'Piyush Dhiman', role: 'CEO', url: 'https://www.linkedin.com/in/piyush-dhiman-yukti' },
+      { name: 'Piyush Dhingra', role: 'CTO', url: 'https://www.linkedin.com/in/piyush-ottolabs/' },
+    ],
     location: 'Chandigarh, India',
   },
 };
@@ -128,6 +131,7 @@ export const marginNotes = {
 export const marginNoteUpdatedDate = '29 JUL 2026';
 
 export const primaryNav = [
+  { label: 'Documents', href: '/documents.html' },
   { label: 'Reasoning', href: '#why-reasoning-matters' },
   { label: 'Approach', href: '#approach' },
   { label: 'Evidence', href: '#evidence' },

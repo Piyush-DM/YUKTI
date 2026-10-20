@@ -17,25 +17,46 @@
      ============================================================ */
 
   /* Foundation */
-  --yukti-color-graphite-900: #14140f; /* primary background — warm-neutral near-black, not pure #000 */
-  --yukti-color-graphite-700: #1f1f18; /* secondary/raised background, panels, alternating bands */
+  --yukti-color-graphite-950: #0a0a07;  /* Deepest - entry sequence, canvas */
+  --yukti-color-graphite-900: #14140f;  /* Primary background — warm-neutral near-black, not pure #000 */
+  --yukti-color-graphite-850: #1a1a14;  /* Raised surfaces, cards */
+  --yukti-color-graphite-800: #202018;  /* Panel backgrounds */
+  --yukti-color-graphite-700: #2a2a20;  /* Borders, subtle separators */
 
   /* Bone / editorial surfaces */
-  --yukti-color-bone-100: #f2efe6;     /* card surface, resting — warm off-white, not clinical #fff */
-  --yukti-color-bone-300: #d8d4c6;     /* body text on dark backgrounds — dimmed bone, not pure white */
+  --yukti-color-bone-50:  #faf9f4;      /* Lightest - hover states on bone */
+  --yukti-color-bone-100: #f2efe6;      /* Card surface, resting — warm off-white, not clinical #fff */
+  --yukti-color-bone-200: #e5e0d4;      /* Subtle borders on bone */
+  --yukti-color-bone-300: #c8c0ac;      /* Muted text on dark */
+  --yukti-color-bone-400: #a89e8a;      /* Placeholder, disabled */
 
   /* Ink (text on light surfaces) */
-  --yukti-color-ink-900: #14140f;      /* body text on bone/light surfaces — matches graphite-900 hue family */
+  --yukti-color-ink-950: #0a0a07;
+  --yukti-color-ink-900: #14140f;       /* Body text on bone/light surfaces — matches graphite-900 hue family */
+  --yukti-color-ink-800: #2a2a20;
+  --yukti-color-ink-700: #3a3a2e;
 
   /* Primary accent — construction yellow (D14: the ONLY accent hue in v1.0) */
-  --yukti-color-yellow-500: #f5c400;   /* industrial-machinery yellow — JCB/Caterpillar register, not gold/pastel/orange */
-  --yukti-color-yellow-600: #d9ac00;   /* pressed/:active state — darker/more saturated than 500 */
+  --yukti-color-yellow-400: #ffe066;    /* Subtle yellow tint backgrounds */
+  --yukti-color-yellow-500: #f5c400;    /* Industrial-machinery yellow — JCB/Caterpillar register, not gold/pastel/orange */
+  --yukti-color-yellow-600: #d9ac00;    /* Pressed/:active state — darker/more saturated than 500 */
+  --yukti-color-yellow-700: #b88f00;    /* Deep yellow for emphasis */
   --yukti-color-yellow-focus: var(--yukti-color-yellow-500); /* D8 — mandatory :focus-visible ring color */
 
+  /* Yellow with transparency for state signaling */
+  --yukti-color-yellow-500-10: rgba(245, 196, 0, 0.10);
+  --yukti-color-yellow-500-20: rgba(245, 196, 0, 0.20);
+
   /* Structural linework */
-  --yukti-color-line-blueprint: rgba(242, 239, 230, 0.06); /* background drafting linework — barely perceptible */
-  --yukti-color-border-hairline-dark: rgba(242, 239, 230, 0.14);  /* hairline border on graphite surfaces */
-  --yukti-color-border-hairline-light: rgba(20, 20, 15, 0.14);    /* hairline border on bone surfaces */
+  --yukti-color-line-blueprint: rgba(242, 239, 230, 0.04);  /* Background drafting linework — barely perceptible */
+  --yukti-color-line-blueprint-strong: rgba(242, 239, 230, 0.08); /* Stronger for registration marks */
+  --yukti-color-border-hairline-dark: rgba(242, 239, 230, 0.10);  /* Hairline border on graphite surfaces */
+  --yukti-color-border-hairline-light: rgba(20, 20, 15, 0.10);    /* Hairline border on bone surfaces */
+
+  /* Semantic state colors (derived from yellow, not new hues) */
+  --yukti-color-success: var(--yukti-color-yellow-600);
+  --yukti-color-warning: var(--yukti-color-yellow-500);
+  --yukti-color-error: var(--yukti-color-ink-900); /* Ink weight, not red */
 
   /* ============================================================
      2.2 — Typography (D2 final: Söhne / Inter / IBM Plex Mono)
@@ -51,36 +72,47 @@
 
   /* Addendum v1.2 — mega scene-heading tier (~180px ceiling), left-aligned,
      uppercase, multi-line word-stacked. See architecture §16. */
-  --yukti-type-mega-size: clamp(2.5rem, 1.1rem + 9vw, 11.25rem); /* up to ~180px */
+  --yukti-type-mega-size: clamp(3rem, 1.5rem + 10vw, 12rem); /* up to ~180px */
   --yukti-type-mega-weight: 700;
-  --yukti-type-mega-tracking: -0.02em;
-  --yukti-type-mega-line-height: 0.92;
+  --yukti-type-mega-tracking: -0.03em;
+  --yukti-type-mega-line-height: 0.88;
 
   --yukti-type-display-size: clamp(2.75rem, 2rem + 4.5vw, 6rem);   /* 44–96px */
   --yukti-type-display-weight: 700;
   --yukti-type-display-tracking: -0.02em;
+  --yukti-type-display-line-height: 1.02;
 
   --yukti-type-heading-size: clamp(1.75rem, 1.4rem + 2vw, 2.75rem); /* 28–44px — smaller in-context headings only */
   --yukti-type-heading-weight: 600;
   --yukti-type-heading-tracking: -0.01em;
+  --yukti-type-heading-line-height: 1.15;
 
   --yukti-type-body-size: clamp(1rem, 0.95rem + 0.2vw, 1.125rem);  /* 16–18px */
   --yukti-type-body-weight: 400;
   --yukti-type-body-tracking: 0em;
-  --yukti-type-body-line-height: 1.6;
+  --yukti-type-body-line-height: 1.65;
 
   --yukti-type-label-size: clamp(0.6875rem, 0.65rem + 0.1vw, 0.8125rem); /* 11–13px */
   --yukti-type-label-weight: 500;
   --yukti-type-label-tracking: 0.08em;
+  --yukti-type-label-line-height: 1.4;
 
   --yukti-type-data-size: clamp(0.75rem, 0.72rem + 0.1vw, 0.875rem); /* 12–14px */
   --yukti-type-data-weight: 400;
   --yukti-type-data-tracking: 0em;
   --yukti-type-data-numeric: tabular-nums; /* mandatory — see Section 2.2 data-register rule */
+  --yukti-type-data-line-height: 1.5;
+
+  /* Small caption */
+  --yukti-type-caption-size: clamp(0.625rem, 0.6rem + 0.05vw, 0.6875rem); /* 10–11px */
+  --yukti-type-caption-weight: 400;
+  --yukti-type-caption-tracking: 0.06em;
+  --yukti-type-caption-line-height: 1.4;
 
   /* ============================================================
      2.3 — Spacing Scale
      ============================================================ */
+  --yukti-space-0: 0;
   --yukti-space-1: 0.25rem;   /* 4px  — micro-gaps */
   --yukti-space-2: 0.5rem;    /* 8px  — tight internal padding */
   --yukti-space-3: 1rem;      /* 16px — standard internal padding */
@@ -88,38 +120,72 @@
   --yukti-space-5: 2.5rem;    /* 40px — sub-scene gaps */
   --yukti-space-6: 4rem;      /* 64px — scene-to-scene rhythm unit */
   --yukti-space-7: clamp(6rem, 4rem + 6vw, 8rem); /* 96–128px — major scene padding */
+  --yukti-space-8: clamp(8rem, 6rem + 8vw, 12rem); /* 128–192px — hero/major sections */
 
   /* Grid */
   --yukti-grid-columns: 12;
   --yukti-grid-columns-narrow: 4;   /* 480–760px, Section 5 */
   --yukti-grid-columns-standard: 8; /* 760–1200px, Section 5 */
   --yukti-grid-gutter: var(--yukti-space-4);
-  --yukti-grid-margin: clamp(1.25rem, 1rem + 2vw, 4rem);
+  --yukti-grid-margin: clamp(1.5rem, 1rem + 3vw, 5rem);
 
   /* ============================================================
      2.4 — Surface & Elevation
      ============================================================ */
-  --yukti-radius-sm: 3px; /* cards/panels — never a soft/pill radius */
+  --yukti-radius-none: 0;
+  --yukti-radius-sm: 2px;     /* Cards/panels — never a soft/pill radius */
+  --yukti-radius-md: 4px;
   --yukti-radius-focus: 2px;
   --yukti-border-width-hairline: 1px;
+  --yukti-border-width-standard: 1px;
   --yukti-focus-ring-width: 2px;
   --yukti-focus-ring-offset: 2px;
 
-  /* Addendum v1.2 — Materials. A shared low-opacity SVG-turbulence grain,
-     reused for both the "graphite" body feel and the "museum paper" bone
-     feel (opacity/tint differ per use, texture source is the same). */
+  /* Elevation via layering, not shadows */
+  --yukti-elevation-0: none;
+  --yukti-elevation-1: 0 1px 0 var(--yukti-color-border-hairline-dark);
+  --yukti-elevation-2: 0 4px 12px rgba(0,0,0,0.15);
+
+  /* ============================================================
+     2.5 — Materials
+     ============================================================ */
   --yukti-texture-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --yukti-texture-grain-fine: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='320'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 
   /* ============================================================
      2.6 — Z-Layer Scale (verbatim from Motion System §2.6)
      ============================================================ */
   --yukti-z-canvas: 1;
-  --yukti-z-veil: 2;
-  --yukti-z-content: 3;
+  --yukti-z-blueprint: 2;
+  --yukti-z-registration: 3;
+  --yukti-z-content: 10;
   --yukti-z-nav: 100;
+  --yukti-z-dropdown: 200;
   --yukti-z-panel: 500;
   --yukti-z-modal: 900;
   --yukti-z-toast: 950;
-  --yukti-z-entry-cover: 9999; /* Addendum v1.3 — above literally everything, including consent (999) */
+  --yukti-z-entry-cover: 9999; /* Addendum v1.3 — above literally everything */
   --yukti-z-consent: 999;
+
+  /* ============================================================
+     2.7 — Motion Tokens (referenced from tokens.motion.css)
+     ============================================================ */
+  --yukti-duration-instant: 120ms;
+  --yukti-duration-quick: 200ms;
+  --yukti-duration-standard: 300ms;
+  --yukti-duration-deliberate: 600ms;
+  --yukti-duration-reveal: 800ms;
+  --yukti-duration-cinematic: 1600ms;
+  --yukti-ease-standard: cubic-bezier(0.2, 0.7, 0, 1);
+  --yukti-ease-emphasis: cubic-bezier(0.76, 0, 0.24, 1);
+  --yukti-ease-micro: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --yukti-ease-linear: linear;
+
+  /* ============================================================
+     2.8 — Breakpoints
+     ============================================================ */
+  --yukti-bp-compact: 480px;
+  --yukti-bp-narrow: 760px;
+  --yukti-bp-standard: 1200px;
+  --yukti-bp-wide: 1600px;
 }
