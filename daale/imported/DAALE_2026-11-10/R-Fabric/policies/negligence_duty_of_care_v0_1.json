@@ -1,0 +1,123 @@
+{
+  "policy_id": "NEGLIGENCE-DUTY-OF-CARE",
+  "policy_version": "0.1",
+  "decision_stage": "negligence_duty_of_care_approval",
+  "decision_states": [
+    "ADVANCE",
+    "HOLD",
+    "REJECT",
+    "ESCALATE"
+  ],
+  "human_authority_required": true,
+  "requirements": [
+    {
+      "requirement_id": "R1",
+      "description": "A duty of care was owed by the manufacturer to the ultimate consumer.",
+      "mandatory": true,
+      "critical": true
+    },
+    {
+      "requirement_id": "R2",
+      "description": "The manufacturer breached that duty of care.",
+      "mandatory": true,
+      "critical": true
+    },
+    {
+      "requirement_id": "R3",
+      "description": "The breach caused the plaintiff's injury (causation).",
+      "mandatory": true,
+      "critical": true
+    },
+    {
+      "requirement_id": "R4",
+      "description": "The damage was not too remote (foreseeability).",
+      "mandatory": true,
+      "critical": true
+    },
+    {
+      "requirement_id": "R5",
+      "description": "The duty exists despite absence of contractual privity (neighbour principle).",
+      "mandatory": true,
+      "critical": true
+    }
+  ],
+  "rules": [
+    {
+      "rule_id": "ND100-NO-DUTY",
+      "priority": 100,
+      "description": "Reject if no duty of care established between parties.",
+      "condition": {
+        "metric": "failed_critical_requirements",
+        "operator": "gte",
+        "value": 1
+      },
+      "outcome": "REJECT"
+    },
+    {
+      "rule_id": "ND090-NO-BREACH",
+      "priority": 90,
+      "description": "Reject if no breach of duty established.",
+      "condition": {
+        "metric": "failed_critical_requirements",
+        "operator": "gte",
+        "value": 1
+      },
+      "outcome": "REJECT"
+    },
+    {
+      "rule_id": "ND080-NO-CAUSATION",
+      "priority": 80,
+      "description": "Reject if causation not established between breach and damage.",
+      "condition": {
+        "metric": "failed_critical_requirements",
+        "operator": "gte",
+        "value": 1
+      },
+      "outcome": "REJECT"
+    },
+    {
+      "rule_id": "ND070-REMOTE-DAMAGE",
+      "priority": 70,
+      "description": "Reject if damage too remote/unforeseeable.",
+      "condition": {
+        "metric": "failed_critical_requirements",
+        "operator": "gte",
+        "value": 1
+      },
+      "outcome": "REJECT"
+    },
+    {
+      "rule_id": "ND060-PRIVITY-BARRIER",
+      "priority": 60,
+      "description": "Hold if privity of contract is required but absent.",
+      "condition": {
+        "metric": "unknown_mandatory_requirements",
+        "operator": "gte",
+        "value": 1
+      },
+      "outcome": "HOLD"
+    },
+    {
+      "rule_id": "ND050-ALL-ELEMENTS-SATISFIED",
+      "priority": 50,
+      "description": "Advance if all elements of negligence satisfied.",
+      "condition": {
+        "metric": "failed_critical_requirements",
+        "operator": "eq",
+        "value": 0
+      },
+      "outcome": "ADVANCE"
+    },
+    {
+      "rule_id": "ND000-CONSERVATIVE-FALLBACK",
+      "priority": 0,
+      "description": "Escalate any valid state not covered by a more specific rule.",
+      "condition": {
+        "metric": "always",
+        "operator": "eq",
+        "value": true
+      },
+      "outcome": "ESCALATE"
+    }
+  ]
+}

@@ -1,0 +1,154 @@
+{
+  "case_id": "CARLILL-1893",
+  "kernel_id": "FIRST_PRINCIPLES",
+  "findings": [
+    {
+      "finding_id": "FP-001",
+      "finding_type": "REQUIREMENT_ASSESSMENT",
+      "target_type": "REQUIREMENT",
+      "target_id": "R1",
+      "evidence_ids": [
+        "E1",
+        "E3"
+      ],
+      "content": "Offer requires: (1) definite terms, (2) intention to be bound, (3) communication. E1 provides definite terms; E3 demonstrates intention.",
+      "status": "SATISFIED",
+      "severity": "HIGH",
+      "confidence": 0.95
+    },
+    {
+      "finding_id": "FP-002",
+      "finding_type": "REQUIREMENT_ASSESSMENT",
+      "target_type": "REQUIREMENT",
+      "target_id": "R2",
+      "evidence_ids": [
+        "E2",
+        "E1"
+      ],
+      "content": "Acceptance by performance requires: (1) knowledge of offer, (2) performance of specified act. E2 shows performance; E1 defines act.",
+      "status": "SATISFIED",
+      "severity": "HIGH",
+      "confidence": 0.95
+    },
+    {
+      "finding_id": "FP-003",
+      "finding_type": "REQUIREMENT_ASSESSMENT",
+      "target_type": "REQUIREMENT",
+      "target_id": "R3",
+      "evidence_ids": [
+        "E3"
+      ],
+      "content": "Intention to create legal relations required. \u00a31000 deposit (E3) is objective manifestation of intent, satisfying this necessary condition.",
+      "status": "SATISFIED",
+      "severity": "HIGH",
+      "confidence": 0.95
+    },
+    {
+      "finding_id": "FP-004",
+      "finding_type": "REQUIREMENT_ASSESSMENT",
+      "target_type": "REQUIREMENT",
+      "target_id": "R4",
+      "evidence_ids": [
+        "E1"
+      ],
+      "content": "Unilateral offer requires no notification; performance IS acceptance. Offer terms (E1) specify performance as acceptance mode.",
+      "status": "SATISFIED",
+      "severity": "HIGH",
+      "confidence": 0.9
+    },
+    {
+      "finding_id": "FP-005",
+      "finding_type": "ASSUMPTION",
+      "target_type": "POLICY",
+      "target_id": "R1",
+      "evidence_ids": [
+        "E1",
+        "E3"
+      ],
+      "content": "Advertisement's specific terms (reward amount, usage instructions, deposit) indicate legal offer, not puffery. This assumption is necessary for contract formation.",
+      "severity": "HIGH",
+      "confidence": 0.9
+    },
+    {
+      "finding_id": "FP-006",
+      "finding_type": "ASSUMPTION",
+      "target_type": "POLICY",
+      "target_id": "R2",
+      "evidence_ids": [
+        "E2"
+      ],
+      "content": "Mrs. Carlill's usage (E2) constitutes exact performance per printed directions. Assumption: directions were followed exactly.",
+      "severity": "HIGH",
+      "confidence": 0.85
+    },
+    {
+      "finding_id": "FP-007",
+      "finding_type": "ASSUMPTION",
+      "target_type": "POLICY",
+      "target_id": "R3",
+      "evidence_ids": [
+        "E3"
+      ],
+      "content": "\u00a31000 deposit at Alliance Bank (E3) is objective manifestation of intent, satisfying this necessary condition.",
+      "severity": "HIGH",
+      "confidence": 0.9
+    },
+    {
+      "finding_id": "FP-008",
+      "finding_type": "ALTERNATIVE",
+      "target_type": "CLAIM",
+      "target_id": "C1",
+      "evidence_ids": [
+        "E1",
+        "E3"
+      ],
+      "content": "Advertisement could be interpreted as invitation to treat, but specificity and deposit rebut this.",
+      "severity": "MEDIUM",
+      "confidence": 0.5
+    },
+    {
+      "finding_id": "FP-009",
+      "finding_type": "EVIDENCE_RELATION",
+      "target_type": "CLAIM",
+      "target_id": "C1",
+      "evidence_ids": [
+        "E1"
+      ],
+      "content": "Specific terms (reward amount, usage frequency, duration) indicate legal offer, not puffery.",
+      "relation": "SUPPORTS",
+      "severity": "HIGH",
+      "confidence": 0.95
+    },
+    {
+      "finding_id": "FP-009",
+      "finding_type": "EVIDENCE_RELATION",
+      "target_type": "CLAIM",
+      "target_id": "C3",
+      "evidence_ids": [
+        "E3"
+      ],
+      "content": "Deposit at Alliance Bank (not company's own bank) is objectively verifiable act of commitment.",
+      "relation": "SUPPORTS",
+      "severity": "HIGH",
+      "confidence": 0.95
+    },
+    {
+      "finding_id": "FP-010",
+      "finding_type": "EVIDENCE_RELATION",
+      "target_type": "CLAIM",
+      "target_id": "C3",
+      "evidence_ids": [
+        "E3"
+      ],
+      "content": "Deposit at Alliance Bank (not company's own bank) is objectively verifiable act of commitment.",
+      "relation": "SUPPORTS",
+      "severity": "HIGH",
+      "confidence": 0.95
+    }
+  ],
+  "summary": "First-principles analysis confirms all four requirements satisfied: offer with definite terms (R1), acceptance by performance (R2), intention to create legal relations (R3), and no notification required for unilateral offer (R4). Contract formed upon performance.",
+  "uncertainties": [
+    "Whether Mrs. Carlill's performance was exactly per printed directions",
+    "Whether modern courts would extend this to digital offers"
+  ]
+}

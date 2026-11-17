@@ -1,0 +1,125 @@
+{
+  "case_id": "DD-003",
+  "decision_stage": "post_technical_due_diligence_approval",
+  "decision_question": "Has Vendor Gamma passed technical due diligence and is it ready for final approval?",
+  "claims": [
+    {
+      "claim_id": "C1",
+      "text": "Vendor Gamma has completed the required security and technical due-diligence controls."
+    },
+    {
+      "claim_id": "C2",
+      "text": "Vendor Gamma's documented risk profile is acceptable for final approval."
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "E1",
+      "text": "The security questionnaire was returned fully completed, with all 138 questions answered and signed by the vendor's security officer on 6 October 2026.",
+      "source": {
+        "source_id": "S1",
+        "source_type": "SYSTEM_RECORD",
+        "title": "Due-diligence evidence register",
+        "collected_at": "2026-11-04T10:00:00Z",
+        "document_id": "REG-2026-003",
+        "source_uri": "file:///evidence/REG-2026-003.pdf",
+        "page": 1,
+        "section": "Questionnaire status",
+        "paragraph": "Summary",
+        "extraction_method": "MANUAL",
+        "document_version": "1.0",
+        "content_hash": "5e00a9f97573ff4c69264c8ac66c7a4fe72ec29cbb93edae9a5eae6d3cf53952"
+      }
+    },
+    {
+      "evidence_id": "E2",
+      "text": "Vendor Gamma supplied a SOC 2 Type II report covering 1 November 2025 to 31 October 2026, issued by an independent auditor with an unqualified opinion.",
+      "source": {
+        "source_id": "S2",
+        "source_type": "DOCUMENT",
+        "title": "Vendor Gamma SOC 2 Type II report",
+        "collected_at": "2026-11-04T10:00:00Z",
+        "document_id": "DOC-SOC2-2026-003",
+        "source_uri": "file:///evidence/DOC-SOC2-2026-003.pdf",
+        "page": 1,
+        "section": "Auditor's opinion",
+        "paragraph": "Summary",
+        "extraction_method": "MANUAL",
+        "document_version": "1.0",
+        "content_hash": "de3027c4d6baf85e2f91f8f00faf3baf24101584526ab885beac655af17f6192"
+      }
+    },
+    {
+      "evidence_id": "E3",
+      "text": "Vendor Gamma supplied technical architecture documentation: system context, data-flow and hosting diagrams, version 4.1, dated 18 September 2026.",
+      "source": {
+        "source_id": "S3",
+        "source_type": "DOCUMENT",
+        "title": "Vendor Gamma architecture pack",
+        "collected_at": "2026-11-04T10:00:00Z",
+        "document_id": "DOC-ARCH-2026-003",
+        "source_uri": "file:///evidence/DOC-ARCH-2026-003.pdf",
+        "page": 1,
+        "section": "Contents",
+        "paragraph": "Summary",
+        "extraction_method": "MANUAL",
+        "document_version": "1.0",
+        "content_hash": "7131a7efdf0614a9f28060e66a16694328c4a05cde93ca5de4d286b046d61738"
+      }
+    },
+    {
+      "evidence_id": "E4",
+      "text": "An independent penetration test completed on 22 September 2026 reported no critical or high findings; the single medium finding was remediated and retested.",
+      "source": {
+        "source_id": "S4",
+        "source_type": "DOCUMENT",
+        "title": "Vendor Gamma penetration-test report",
+        "collected_at": "2026-11-04T10:00:00Z",
+        "document_id": "DOC-PEN-2026-003",
+        "source_uri": "file:///evidence/DOC-PEN-2026-003.pdf",
+        "page": 1,
+        "section": "Findings summary",
+        "paragraph": "Summary",
+        "extraction_method": "MANUAL",
+        "document_version": "1.0",
+        "content_hash": "cd7f148ae70c400daedd603f2c4ccd2b51c2df142ffdcf63d4a0c84025b714ab"
+      }
+    },
+    {
+      "evidence_id": "E5",
+      "text": "Audited revenue grew by 9 percent year over year; the largest customer represents 21 percent of revenue.",
+      "source": {
+        "source_id": "S5",
+        "source_type": "DOCUMENT",
+        "title": "Vendor Gamma audited financial statement",
+        "collected_at": "2026-11-04T10:00:00Z",
+        "document_id": "DOC-FIN-2026-003",
+        "source_uri": "file:///evidence/DOC-FIN-2026-003.pdf",
+        "page": 1,
+        "section": "Revenue analysis",
+        "paragraph": "Summary",
+        "extraction_method": "MANUAL",
+        "document_version": "1.0",
+        "content_hash": "1dd78b3c9e76968a49f198eb7c30474cc84372d803c423e4e080efaa41a2904d"
+      }
+    },
+    {
+      "evidence_id": "E6",
+      "text": "The vendor risk committee minutes of 29 October 2026 record that the residual risks identified in diligence, including the 21 percent customer concentration and the one remediated medium penetration-test finding, fall within the organisation's documented risk appetite for a tier-2 supplier.",
+      "source": {
+        "source_id": "S6",
+        "source_type": "DOCUMENT",
+        "title": "Vendor risk committee minutes",
+        "collected_at": "2026-11-04T10:00:00Z",
+        "document_id": "DOC-MIN-2026-003",
+        "source_uri": "file:///evidence/DOC-MIN-2026-003.pdf",
+        "page": 1,
+        "section": "Residual risk",
+        "paragraph": "Summary",
+        "extraction_method": "MANUAL",
+        "document_version": "1.0",
+        "content_hash": "e0efbc6b0871a215d3eaecc75a0a1ef044e139e7e2949c0724e406f48179a0e3"
+      }
+    }
+  ]
+}

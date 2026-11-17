@@ -1,0 +1,139 @@
+{
+  "case_id": "DD-001",
+  "kernel_id": "EXPANSIONIST",
+  "findings": [
+    {
+      "finding_id": "EXP-001",
+      "finding_type": "ALTERNATIVE",
+      "target_type": "CLAIM",
+      "target_id": "C1",
+      "evidence_ids": ["E3"],
+      "content": "E3 states 'incomplete' not 'absent' - partial completion may exist but is unmeasured. The questionnaire could be 90% complete.",
+      "severity": "MEDIUM",
+      "confidence": 0.55
+    },
+    {
+      "finding_id": "EXP-002",
+      "finding_type": "ALTERNATIVE",
+      "target_type": "CLAIM",
+      "target_id": "C2",
+      "evidence_ids": ["E2"],
+      "content": "42% customer concentration (E2) could reflect a strategic partnership with contractual protections not captured in evidence.",
+      "severity": "LOW",
+      "confidence": 0.45
+    },
+    {
+      "finding_id": "EXP-003",
+      "finding_type": "CLAIM_ASSESSMENT",
+      "target_type": "CLAIM",
+      "target_id": "C1",
+      "evidence_ids": [],
+      "content": "Once the possibility of undisclosed partial completion is admitted, the supplied evidence alone is insufficient to resolve the claim either way.",
+      "status": "INSUFFICIENT_EVIDENCE",
+      "severity": "MEDIUM",
+      "confidence": 0.6
+    },
+    {
+      "finding_id": "EXP-004",
+      "finding_type": "UNCERTAINTY",
+      "target_type": "GENERAL",
+      "target_id": "R3",
+      "evidence_ids": [],
+      "content": "Technical architecture may be documented in systems not provided as evidence (e.g., internal wikis, code repositories).",
+      "severity": "LOW",
+      "confidence": 0.5
+    },
+    {
+      "finding_id": "EXP-005",
+      "finding_type": "UNCERTAINTY",
+      "target_type": "GENERAL",
+      "target_id": "R4",
+      "evidence_ids": [],
+      "content": "Penetration test may have been conducted but report not shared; 'current' is undefined (what timeframe?).",
+      "severity": "LOW",
+      "confidence": 0.5
+    },
+    {
+      "finding_id": "EXP-006",
+      "finding_type": "ALTERNATIVE",
+      "target_type": "REQUIREMENT",
+      "target_id": "R3",
+      "evidence_ids": ["E1"],
+      "content": "Sustained revenue growth (E1) implies some technical competence; architecture may be adequate but undocumented.",
+      "severity": "LOW",
+      "confidence": 0.35
+    },
+    {
+      "finding_id": "EXP-007",
+      "finding_type": "EVIDENCE_RELATION",
+      "target_type": "CLAIM",
+      "target_id": "C1",
+      "evidence_ids": ["E1"],
+      "content": "Revenue growth is background context but does not itself bear on control completion.",
+      "relation": "CONTEXTUAL",
+      "severity": "LOW",
+      "confidence": 0.5
+    },
+    {
+      "finding_id": "EXP-008",
+      "finding_type": "EVIDENCE_RELATION",
+      "target_type": "CLAIM",
+      "target_id": "C1",
+      "evidence_ids": ["E2"],
+      "content": "Customer concentration is background context but does not itself bear on control completion.",
+      "relation": "CONTEXTUAL",
+      "severity": "LOW",
+      "confidence": 0.5
+    },
+    {
+      "finding_id": "EXP-009",
+      "finding_type": "EVIDENCE_RELATION",
+      "target_type": "CLAIM",
+      "target_id": "C1",
+      "evidence_ids": ["E3"],
+      "content": "An incomplete questionnaire weakens the completed-controls claim, though ambiguity in 'incomplete' keeps it short of outright contradiction.",
+      "relation": "WEAKENS",
+      "severity": "MEDIUM",
+      "confidence": 0.55
+    },
+    {
+      "finding_id": "EXP-010",
+      "finding_type": "EVIDENCE_RELATION",
+      "target_type": "CLAIM",
+      "target_id": "C2",
+      "evidence_ids": ["E1"],
+      "content": "Sustained revenue growth supports an acceptable risk profile.",
+      "relation": "SUPPORTS",
+      "severity": "LOW",
+      "confidence": 0.55
+    },
+    {
+      "finding_id": "EXP-011",
+      "finding_type": "EVIDENCE_RELATION",
+      "target_type": "CLAIM",
+      "target_id": "C2",
+      "evidence_ids": ["E2"],
+      "content": "Customer concentration weakens an acceptable-risk-profile claim.",
+      "relation": "WEAKENS",
+      "severity": "MEDIUM",
+      "confidence": 0.5
+    },
+    {
+      "finding_id": "EXP-012",
+      "finding_type": "EVIDENCE_RELATION",
+      "target_type": "CLAIM",
+      "target_id": "C2",
+      "evidence_ids": ["E3"],
+      "content": "An unresolved security gap contradicts a claim of acceptable risk.",
+      "relation": "CONTRADICTS",
+      "severity": "HIGH",
+      "confidence": 0.7
+    }
+  ],
+  "summary": "Expansionist exploration reveals multiple plausible alternative interpretations: partial completion, strategic concentration, undocumented competence. Expands UNKNOWN space significantly.",
+  "uncertainties": [
+    "Definition of 'incomplete' in E3 - percentage, sections, criticality",
+    "Timeframe for 'current' penetration test in R4",
+    "Whether evidence collection was exhaustive or selective"
+  ]
+}

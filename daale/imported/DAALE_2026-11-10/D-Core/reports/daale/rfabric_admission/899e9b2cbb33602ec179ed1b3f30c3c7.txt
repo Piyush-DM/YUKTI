@@ -1,0 +1,28 @@
+execution:        899e9b2cbb33602ec179ed1b3f30c3c7
+choir_version:    CHOIR-CONTRACT-DRAFT-0.1
+candidate:        rfabric-candidate:run-8c928a031e0a4e68b58a424567dac0d6
+object:           rfabric-judgment:DD-001
+origin:           rfabric
+state:            committed
+insufficient_basis: False
+emits_judgment:   False
+
+gate checks:
+  passed    references-current-execution -- 899e9b2cbb33602ec179ed1b3f30c3c7
+  passed    inputs-exist-and-are-not-superseded -- 0 input(s) present
+  passed    structure-valid-under-choir -- contract satisfied
+  inactive  respects-active-execution-plan -- no execution planner in v0 Phase 2; requires Phase 3
+  passed    required-provenance-present -- derived from C1, C2, E3
+  passed    no-stale-write-or-race -- inputs unchanged since read
+  passed    terminal-state-assigned -- decided: validated
+
+trace:
+    0  execution-opened           899e9b2cbb33602ec179ed1b3f30c3c7 -- choir_version=CHOIR-CONTRACT-DRAFT-0.1 input_digest=45f2afec59468e8d
+    1  contract-validated         899e9b2cbb33602ec179ed1b3f30c3c7 -- 0 violations
+    2  arbitration-started        899e9b2cbb33602ec179ed1b3f30c3c7 -- 1 candidate(s) for object rfabric-judgment:DD-001
+    3  arbitration-check          899e9b2cbb33602ec179ed1b3f30c3c7 -- single-candidate: single candidate rfabric-candidate:run-8c928a031e0a4e68b58a424567dac0d6 selected by default
+    4  arbitration-selected       899e9b2cbb33602ec179ed1b3f30c3c7 -- selected rfabric-candidate:run-8c928a031e0a4e68b58a424567dac0d6 from 1 candidates
+    5  candidate-proposed         rfabric-candidate:run-8c928a031e0a4e68b58a424567dac0d6 -- from rfabric (post-arbitration)
+    6  candidate-validated        rfabric-candidate:run-8c928a031e0a4e68b58a424567dac0d6
+    7  candidate-committed        rfabric-candidate:run-8c928a031e0a4e68b58a424567dac0d6 -- rfabric-judgment:DD-001 v1
+    8  execution-closed           899e9b2cbb33602ec179ed1b3f30c3c7 -- committed=1 rejected=0 review=0

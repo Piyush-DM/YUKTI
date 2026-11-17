@@ -1,0 +1,110 @@
+{
+  "baseline_verdict": "REJECT",
+  "baseline_metrics": {
+    "high_adversarial_challenges": 0,
+    "high_unresolved_contradictions": 0,
+    "failed_critical_requirements": 2,
+    "failed_mandatory_requirements": 2,
+    "unknown_mandatory_requirements": 2,
+    "all_mandatory_requirements_satisfied": false,
+    "supporting_relations": 5,
+    "weakening_relations": 7,
+    "contradicting_relations": 10,
+    "always": true,
+    "details": {
+      "high_challenge_ids": [],
+      "high_contradiction_ids": [],
+      "failed_critical_requirement_ids": [
+        "R1",
+        "R2"
+      ],
+      "failed_mandatory_requirement_ids": [
+        "R1",
+        "R2"
+      ],
+      "unknown_mandatory_requirement_ids": [
+        "R3",
+        "R4"
+      ]
+    }
+  },
+  "kernel_impacts": {
+    "ANALYST": {
+      "verdict_changed": false,
+      "critical_failures_delta": 0,
+      "contradictions_delta": -2,
+      "supporting_delta": -1
+    },
+    "CONTRARIAN": {
+      "verdict_changed": false,
+      "critical_failures_delta": 0,
+      "contradictions_delta": -1,
+      "supporting_delta": -1
+    },
+    "FIRST_PRINCIPLES": {
+      "verdict_changed": false,
+      "critical_failures_delta": 0,
+      "contradictions_delta": -2,
+      "supporting_delta": -1
+    },
+    "EXPANSIONIST": {
+      "verdict_changed": false,
+      "critical_failures_delta": 0,
+      "contradictions_delta": -1,
+      "supporting_delta": -1
+    },
+    "OUTSIDER": {
+      "verdict_changed": false,
+      "critical_failures_delta": 0,
+      "contradictions_delta": -2,
+      "supporting_delta": 0
+    },
+    "HISTORIAN": {
+      "verdict_changed": false,
+      "critical_failures_delta": 0,
+      "contradictions_delta": -2,
+      "supporting_delta": -1
+    },
+    "ADVERSARY": {
+      "verdict_changed": false,
+      "critical_failures_delta": 0,
+      "contradictions_delta": 0,
+      "supporting_delta": 0
+    }
+  },
+  "ranked_importance": [
+    [
+      "ANALYST",
+      11
+    ],
+    [
+      "FIRST_PRINCIPLES",
+      11
+    ],
+    [
+      "HISTORIAN",
+      11
+    ],
+    [
+      "OUTSIDER",
+      10
+    ],
+    [
+      "CONTRARIAN",
+      6
+    ],
+    [
+      "EXPANSIONIST",
+      6
+    ],
+    [
+      "ADVERSARY",
+      0
+    ]
+  ],
+  "summary": {
+    "kernels_that_change_verdict": 0,
+    "total_kernels_tested": 0,
+    "most_critical_kernel": "ANALYST"
+  }
+}

@@ -1,0 +1,102 @@
+# Ruling — DECISION-005, Canonical Definition of DAALE (this working copy)
+
+**Status:** Accepted for this repository (`D:\DAALE`), 2026-08-29.
+**Does not amend:** the canonical `DECISION-005` ADR at
+`D:\YUKTI-1\docs\architecture\DECISION-005_canonical_definition_of_daale.md`,
+which remains open in that repository. This note records what was decided
+*here*, in a working copy that contains only `D-Core/` (a copy of
+`YUKTI-1/daale/`) and `R-Fabric/` (a copy of `D:\daale_v0_1`, an independently
+built LLM-backed reference pipeline). If this ruling should also govern the
+canonical repository, that is a separate, deliberate act for whoever owns
+`YUKTI-1` — this note does not perform it.
+
+## The question, restated from the original ADR
+
+What is DAALE, and what is its relationship to CHOIR, to `choir_prototype/`,
+and to any future reference implementation? Concretely, for this working
+copy: when D-Core admits a candidate, who produced the reasoning behind it?
+
+## Why this was not answerable by silent implication
+
+D-Core's own `execution/dcore.py` states the boundary directly: emitting a
+judgment requires deciding *who evaluates*, and the original ADR names only
+two options — **A**, DAALE evaluates for itself, or **B**, DAALE calls the
+frozen `choir_prototype` kernels. Wiring R-Fabric's output into the commit
+gate is neither: R-Fabric's evaluator does not live inside `daale/` (ruling out
+A), and it is not the frozen, offline, standard-library `choir_prototype`
+(ruling out B) — it calls models over the network and reaches its decision
+through its own deterministic policy engine. Treating that as a
+non-decision and wiring it up anyway would have been exactly the "un-freezing
+the engine by implication" the original ADR was written to prevent.
+
+## The ruling
+
+**R-Fabric evaluates. D-Core commits.** Stated as the operative rule for this
+working copy:
+
+- R-Fabric runs to completion entirely on its own — kernels, adversarial pass,
+  deterministic policy evaluation — and writes its own audit trace under
+  `R-Fabric/runs/`, independent of whatever D-Core does with the result.
+- D-Core never calls R-Fabric, never imports it, and never evaluates anything
+  itself. It reads R-Fabric's finished trace as plain JSON, translates it into
+  a CHOIR-shaped package and one candidate (`D-Core/rfabric.py`), and puts that
+  candidate through the same seven-check gate every other candidate goes
+  through.
+- The candidate's origin is `"rfabric"`. This was not a new grant of
+  authority: `DETERMINISTIC_ORIGINS` in `execution/commit.py` already named
+  `"rfabric"` before this ruling, and `tests/test_execution.py` already used
+  it as the default origin in its candidate fixture. This ruling is what
+  finally produces a real candidate carrying that origin — it did not change
+  the gate.
+- A candidate that clears the gate commits and versions under D-Core's
+  existing rules. One that does not — a stale read, a missing input, a
+  malformed translation — is rejected or escalated exactly as any other
+  candidate would be. R-Fabric's origin does not exempt it from any check.
+
+This is why the ruling is compatible with `DAALE_v0_CLOSURE.md`'s own framing:
+the closure note says a coherent v0 commit authority "never needs to evaluate
+anything" and only needs someone to "produce canonical reasoning candidates
+for a real CHOIR package." R-Fabric producing that candidate does not require
+reopening anything closed in v0 — it requires exactly what this ruling
+supplies.
+
+## What this ruling does not do
+
+- It does not touch `choir_prototype/` or claim it is superseded. Both
+  evaluators can exist; nothing here decides between them for any purpose
+  beyond this working copy's own pipeline.
+- It does not claim full CHOIR v0.1 compliance for anything R-Fabric
+  produces. The translated package carries R-Fabric's own contract version
+  (`CHOIR-CONTRACT-DRAFT-0.1`), not the canonical freeze's version string —
+  see `D-Core/rfabric.py`'s module docstring for why that distinction is
+  load-bearing, not cosmetic.
+- It does not resolve the review workflow gap `DECISION-007` leaves open. A
+  candidate that escalates (a non-`rfabric` origin, or a failed check) still
+  has no defined re-entry path back into the gate.
+- It does not add persistence. Each admission opens a fresh in-memory
+  `ReasoningStateStore`; repeated runs against the same case do not yet
+  version against each other, because nothing here survives between process
+  invocations.
+- It does not make R-Fabric's model calls deterministic. The policy engine's
+  *decision* is a deterministic function of validated findings, which is what
+  makes trusting the `"rfabric"` origin defensible — but two live runs can
+  still produce different findings and therefore different candidates for the
+  same case. Each is judged independently at the gate.
+
+## What would falsify or require revisiting this ruling
+
+- If R-Fabric's policy engine ever incorporated model self-reported
+  confidence, or any other non-reproducible signal, into the decision it
+  hands to the candidate, treating its origin as trustworthy the way
+  `"algorithm"` is would no longer be defensible.
+- If the canonical `YUKTI-1` repository rules on its own `DECISION-005` in a
+  way that conflicts with this — for instance, choosing option B and treating
+  `choir_prototype` as the only legitimate evaluator — this working copy's
+  ruling would need to be reconciled or explicitly marked as a divergent,
+  non-canonical branch.
+
+## Approval
+
+Accepted by direct instruction for this working copy, 2026-08-29 — see the
+session that produced `D-Core/rfabric.py`, `run_pipeline.py`, and
+`D-Core/tests/test_rfabric_bridge.py`.

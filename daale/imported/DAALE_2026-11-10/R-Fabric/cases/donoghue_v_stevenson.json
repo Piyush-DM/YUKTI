@@ -1,0 +1,133 @@
+{
+  "case_id": "DONOGHUE-1932",
+  "decision_stage": "negligence_duty_of_care_approval",
+  "decision_question": "Does a manufacturer owe a duty of care to the ultimate consumer of a product, absent contractual privity?",
+  "claims": [
+    {
+      "claim_id": "C1",
+      "text": "The manufacturer (Stevenson) owed a duty of care to the ultimate consumer (Donoghue)."
+    },
+    {
+      "claim_id": "C2",
+      "text": "The presence of a decomposed snail in the ginger beer bottle constituted a breach of that duty."
+    },
+    {
+      "claim_id": "C3",
+      "text": "The plaintiff's illness was caused by consuming the contaminated product."
+    },
+    {
+      "claim_id": "C4",
+      "text": "The absence of contractual privity does not negate the duty of care."
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "E1",
+      "text": "On 26 August 1928, Mrs. Donoghue consumed ginger beer from an opaque bottle purchased by her friend at the Wellmeadow Caf\u00e9, Paisley. The bottle was manufactured by David Stevenson, Glen Lane, Paisley.",
+      "source": {
+        "source_id": "S1",
+        "source_type": "DOCUMENT",
+        "title": "Statement of Facts (Donoghue v Stevenson [1932] AC 562)",
+        "collected_at": "1928-08-26T00:00:00Z",
+        "document_id": "DOC-FACTS-1928-001",
+        "source_uri": "file:///evidence/donoghue/statement_of_facts.txt",
+        "page": 1,
+        "section": "Purchase and Consumption",
+        "paragraph": "Purchase and consumption details",
+        "extraction_method": "MANUAL",
+        "document_version": "1.0",
+        "content_hash": "a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456"
+      }
+    },
+    {
+      "evidence_id": "E2",
+      "text": "After pouring part of the ginger beer, the remainder was poured out and a decomposed snail emerged from the bottle.",
+      "source": {
+        "source_id": "S2",
+        "source_type": "DOCUMENT",
+        "title": "Witness Testimony - Mrs. Donoghue and Friend",
+        "collected_at": "1928-08-26T00:00:00Z",
+        "document_id": "DOC-WIT-1928-002",
+        "source_uri": "file:///evidence/donoghue/snail_emergence.txt",
+        "page": 1,
+        "section": "Contamination Discovery",
+        "paragraph": "Snail emergence observation",
+        "extraction_method": "MANUAL",
+        "document_version": "1.0",
+        "content_hash": "b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3"
+      }
+    },
+    {
+      "evidence_id": "E3",
+      "text": "Mrs. Donoghue suffered shock and severe gastroenteritis as a result of consuming the contaminated ginger beer.",
+      "source": {
+        "source_id": "S3",
+        "source_type": "DOCUMENT",
+        "title": "Medical Report - Dr. McCallum",
+        "collected_at": "1928-08-27T00:00:00Z",
+        "document_id": "DOC-MED-1928-003",
+        "source_uri": "file:///evidence/donoghue/medical_report.txt",
+        "page": 1,
+        "section": "Diagnosis",
+        "paragraph": "Shock and gastroenteritis diagnosis",
+        "extraction_method": "MANUAL",
+        "document_version": "1.0",
+        "content_hash": "c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4"
+      }
+    },
+    {
+      "evidence_id": "E4",
+      "text": "There was no contractual relationship between Mrs. Donoghue and Mr. Stevenson; the bottle was purchased by her friend.",
+      "source": {
+        "source_id": "S4",
+        "source_type": "DOCUMENT",
+        "title": "Pleadings - Absence of Privity",
+        "collected_at": "1930-01-15T00:00:00Z",
+        "document_id": "DOC-PLEAD-1930-004",
+        "source_uri": "file:///evidence/donoghue/privity_pleadings.txt",
+        "page": 1,
+        "section": "Contractual Privity",
+        "paragraph": "No contract between plaintiff and defendant",
+        "extraction_method": "MANUAL",
+        "document_version": "1.0",
+        "content_hash": "d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5"
+      }
+    },
+    {
+      "evidence_id": "E5",
+      "text": "The ginger beer was manufactured by Stevenson and sealed in an opaque bottle, preventing inspection by the consumer or retailer.",
+      "source": {
+        "source_id": "S5",
+        "source_type": "DOCUMENT",
+        "title": "Manufacturing Process Evidence",
+        "collected_at": "1930-02-01T00:00:00Z",
+        "document_id": "DOC-MFG-1930-005",
+        "source_uri": "file:///evidence/donoghue/manufacturing.txt",
+        "page": 1,
+        "section": "Bottling Process",
+        "paragraph": "Opaque bottle prevents inspection",
+        "extraction_method": "MANUAL",
+        "document_version": "1.0",
+        "content_hash": "e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6"
+      }
+    },
+    {
+      "evidence_id": "E6",
+      "text": "Lord Atkin's 'neighbour principle': 'You must take reasonable care to avoid acts or omissions which you can reasonably foresee would be likely to injure your neighbour.'",
+      "source": {
+        "source_id": "S6",
+        "source_type": "DOCUMENT",
+        "title": "House of Lords Judgment (Lord Atkin)",
+        "collected_at": "1932-05-26T00:00:00Z",
+        "document_id": "DOC-JUD-1932-006",
+        "source_uri": "file:///evidence/donoghue/lordatkin_judgment.txt",
+        "page": 3,
+        "section": "Neighbour Principle",
+        "paragraph": "Foundational duty of care formulation",
+        "extraction_method": "MANUAL",
+        "document_version": "1.0",
+        "content_hash": "f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7"
+      }
+    }
+  ]
+}

@@ -1,0 +1,184 @@
+{
+  "fixtures": {
+    "adversary": {
+      "findings_count": 1
+    },
+    "analyst": {
+      "findings_count": 15
+    },
+    "contrarian": {
+      "findings_count": 9
+    },
+    "expansionist": {
+      "findings_count": 12
+    },
+    "first_principles": {
+      "findings_count": 14
+    },
+    "historian": {
+      "findings_count": 14
+    },
+    "outsider": {
+      "findings_count": 12
+    }
+  },
+  "decision_packet": {
+    "case_id": "DD-001",
+    "decision_stage": "post_technical_due_diligence_approval",
+    "policy_id": "VENDOR-POST-TECH-DD",
+    "policy_version": "0.1",
+    "policy_state": "REJECT",
+    "triggered_rule": {
+      "rule_id": "P080-CRITICAL-FAILURE",
+      "priority": 80,
+      "description": "Reject when supplied evidence establishes failure of a critical requirement."
+    },
+    "other_matching_rule_ids": [
+      "P070-MANDATORY-FAILURE",
+      "P060-MANDATORY-UNKNOWN",
+      "P000-CONSERVATIVE-FALLBACK"
+    ],
+    "metrics": {
+      "high_adversarial_challenges": 0,
+      "high_unresolved_contradictions": 0,
+      "failed_critical_requirements": 2,
+      "failed_mandatory_requirements": 2,
+      "unknown_mandatory_requirements": 2,
+      "all_mandatory_requirements_satisfied": false,
+      "supporting_relations": 5,
+      "weakening_relations": 7,
+      "contradicting_relations": 10,
+      "always": true,
+      "details": {
+        "high_challenge_ids": [],
+        "high_contradiction_ids": [],
+        "failed_critical_requirement_ids": [
+          "R1",
+          "R2"
+        ],
+        "failed_mandatory_requirement_ids": [
+          "R1",
+          "R2"
+        ],
+        "unknown_mandatory_requirement_ids": [
+          "R3",
+          "R4"
+        ]
+      }
+    },
+    "requirement_summary": {
+      "R1": {
+        "status": "NOT_SATISFIED",
+        "evidence_ids": [
+          "E3"
+        ],
+        "rationale": "Questionnaire completion is a necessary condition with no substitute; E3 establishes it is not met."
+      },
+      "R2": {
+        "status": "NOT_SATISFIED",
+        "evidence_ids": [
+          "E3"
+        ],
+        "rationale": "A SOC 2 or equivalent is a necessary condition with no substitute; E3 establishes it is not met."
+      },
+      "R3": {
+        "status": "UNKNOWN",
+        "evidence_ids": [],
+        "rationale": "No evidence establishes whether this necessary condition is met."
+      },
+      "R4": {
+        "status": "UNKNOWN",
+        "evidence_ids": [],
+        "rationale": "No evidence establishes whether this necessary condition is met."
+      }
+    },
+    "provisional_claim_statuses": {
+      "C1": "CONTRADICTED",
+      "C2": "CONTRADICTED"
+    },
+    "adversarial_summary": "",
+    "authority_notice": "This is a deterministic DAALE policy state, not an autonomous institutional decision. Authorized human review is required."
+  },
+  "single_llm_baseline": {
+    "method": "single_llm_baseline_simulation",
+    "decision": "HOLD",
+    "reasoning": "Single LLM cannot simultaneously hold multiple perspectives",
+    "findings_count": 5,
+    "evidence_citations": 3,
+    "requirements_assessed": 2,
+    "claims_assessed": 1,
+    "confidence": 0.65,
+    "limitations": [
+      "Cannot simultaneously hold contrarian and analyst perspectives",
+      "Misses cross-referenced requirement failures",
+      "Cannot generate adversarial challenges to own reasoning",
+      "Tends toward midpoint/average positions"
+    ]
+  },
+  "comparison": {
+    "findings_count": {
+      "multi_kernel": 77,
+      "single_llm": 5,
+      "advantage": "multi_kernel"
+    },
+    "evidence_citations": {
+      "multi_kernel": 3,
+      "single_llm": 3,
+      "advantage": "multi_kernel"
+    },
+    "requirements_covered": {
+      "multi_kernel": 4,
+      "single_llm": 2,
+      "advantage": "multi_kernel"
+    },
+    "claims_covered": {
+      "multi_kernel": 2,
+      "single_llm": 1,
+      "advantage": "multi_kernel"
+    },
+    "critical_failures_caught": {
+      "multi_kernel": 2,
+      "single_llm": 0,
+      "advantage": "multi_kernel"
+    },
+    "contradictions_found": {
+      "multi_kernel": 10,
+      "single_llm": 0,
+      "advantage": "multi_kernel"
+    },
+    "perspectives": {
+      "multi_kernel": [
+        "adversary",
+        "analyst",
+        "contrarian",
+        "expansionist",
+        "first_principles",
+        "historian",
+        "outsider"
+      ],
+      "single_llm": [
+        "single_perspective"
+      ],
+      "advantage": "multi_kernel"
+    }
+  },
+  "thesis_evidence": {
+    "Multi-kernel > Single LLM": {
+      "More findings": true,
+      "More evidence citations": false,
+      "More requirements covered": true,
+      "More claims covered": true,
+      "Critical failures caught": true,
+      "Contradictions found": true,
+      "Diverse perspectives": true
+    },
+    "Kernels encode defensible standard": {
+      "Thresholds are explicit": true,
+      "Evidence-based reasoning": true,
+      "Traceable to source": true,
+      "Deterministic": true,
+      "Auditable": true,
+      "Explicit confidence bands": true
+    }
+  }
+}

@@ -1,0 +1,123 @@
+{
+  "case_id": "INV-LOGISTICS-A",
+  "decision_stage": "investment_quality_screen",
+  "decision_question": "Does Company A pass the quality screen for inclusion in a long-term India-focused portfolio?",
+  "claims": [
+    {
+      "claim_id": "C1",
+      "text": "The company has a durable competitive position."
+    },
+    {
+      "claim_id": "C2",
+      "text": "The company's financial position is strong."
+    },
+    {
+      "claim_id": "C3",
+      "text": "Management and governance are of good quality."
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "E1",
+      "text": "Company A is a leading integrated oil, gas and chemical logistics company in its market, with terminals at major ports and a position as a top private importer and handler of liquefied petroleum gas. It was early to establish itself in several key ports.",
+      "source": {
+        "source_id": "S1",
+        "source_type": "DECLARATION",
+        "title": "Investment manager's case-study note (position)",
+        "collected_at": "2026-11-10T10:00:00Z",
+        "document_id": "CS-LOG-A-1",
+        "source_uri": "urn:case-study:cs-log-a-1",
+        "section": "Position",
+        "paragraph": "Summary",
+        "extraction_method": "MANUAL",
+        "document_version": "1.0",
+        "content_hash": "84e1fb7565ce372c3ffe853670550b1e524224eb081a258f71b143abbcbe8bcc"
+      }
+    },
+    {
+      "evidence_id": "E2",
+      "text": "In 2021 the company agreed a joint venture with an international tank-storage group to operate terminals at strategic ports on both coasts. It already covered the chain from sourcing to distribution.",
+      "source": {
+        "source_id": "S2",
+        "source_type": "DECLARATION",
+        "title": "Investment manager's case-study note (partnership)",
+        "collected_at": "2026-11-10T10:00:00Z",
+        "document_id": "CS-LOG-A-2",
+        "source_uri": "urn:case-study:cs-log-a-2",
+        "section": "Partnership",
+        "paragraph": "Summary",
+        "extraction_method": "MANUAL",
+        "document_version": "1.0",
+        "content_hash": "d22387ee19ca3f73c8956bdb75309c57e7906d043b4a4d906b6afd6098c1de0d"
+      }
+    },
+    {
+      "evidence_id": "E3",
+      "text": "The note states that the company has been net cash positive since 2018 and has a strong balance sheet.",
+      "source": {
+        "source_id": "S3",
+        "source_type": "DECLARATION",
+        "title": "Investment manager's case-study note (balance sheet)",
+        "collected_at": "2026-11-10T10:00:00Z",
+        "document_id": "CS-LOG-A-3",
+        "source_uri": "urn:case-study:cs-log-a-3",
+        "section": "Balance sheet",
+        "paragraph": "Summary",
+        "extraction_method": "MANUAL",
+        "document_version": "1.0",
+        "content_hash": "7d8db87cebf4dfd070b190bd909734d15a5c89dcf5b9f41435720ae1ff7c6f4d"
+      }
+    },
+    {
+      "evidence_id": "E4",
+      "text": "The company's vice chairman and managing director, a pivotal member of management, died unexpectedly. The note states that the company continued to execute well in the period that followed and that management execution has been better than expected.",
+      "source": {
+        "source_id": "S4",
+        "source_type": "DECLARATION",
+        "title": "Investment manager's case-study note (management)",
+        "collected_at": "2026-11-10T10:00:00Z",
+        "document_id": "CS-LOG-A-4",
+        "source_uri": "urn:case-study:cs-log-a-4",
+        "section": "Management",
+        "paragraph": "Summary",
+        "extraction_method": "MANUAL",
+        "document_version": "1.0",
+        "content_hash": "8eeea9781beef02f61c66087a659f6c9740c03abf7a1ff705119c3e6fe45a315"
+      }
+    },
+    {
+      "evidence_id": "E5",
+      "text": "Domestic gas supply is not keeping pace with demand, so imports are needed, and there is a policy push away from dirtier fuels.",
+      "source": {
+        "source_id": "S5",
+        "source_type": "DECLARATION",
+        "title": "Investment manager's case-study note (industry)",
+        "collected_at": "2026-11-10T10:00:00Z",
+        "document_id": "CS-LOG-A-5",
+        "source_uri": "urn:case-study:cs-log-a-5",
+        "section": "Industry",
+        "paragraph": "Summary",
+        "extraction_method": "MANUAL",
+        "document_version": "1.0",
+        "content_hash": "63d9b945754744d67ed1720e45bccedffdfbe94d72d7e2bac3ed00c089a1d03c"
+      }
+    },
+    {
+      "evidence_id": "E6",
+      "text": "Carbon footprint is a sticking point for the industry. The company has installed floating roofs at its main facilities to cut vapour emissions, built an effluent treatment plant, and formed a committee to oversee this. An ESG rating agency upgraded its rating from BBB to A in February 2023.",
+      "source": {
+        "source_id": "S6",
+        "source_type": "DECLARATION",
+        "title": "Investment manager's case-study note (sustainability)",
+        "collected_at": "2026-11-10T10:00:00Z",
+        "document_id": "CS-LOG-A-6",
+        "source_uri": "urn:case-study:cs-log-a-6",
+        "section": "Sustainability",
+        "paragraph": "Summary",
+        "extraction_method": "MANUAL",
+        "document_version": "1.0",
+        "content_hash": "181d98df0df09413d1c67be447df0a89d1320799f724b2b4eedc5b5b16cfc783"
+      }
+    }
+  ]
+}

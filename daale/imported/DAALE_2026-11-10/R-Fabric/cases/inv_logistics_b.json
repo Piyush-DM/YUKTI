@@ -1,0 +1,123 @@
+{
+  "case_id": "INV-LOGISTICS-B",
+  "decision_stage": "investment_quality_screen",
+  "decision_question": "Does Company B pass the quality screen for inclusion in a long-term India-focused portfolio?",
+  "claims": [
+    {
+      "claim_id": "C1",
+      "text": "The company has a durable competitive position."
+    },
+    {
+      "claim_id": "C2",
+      "text": "The company's financial position is strong."
+    },
+    {
+      "claim_id": "C3",
+      "text": "Management and governance are of good quality."
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "E1",
+      "text": "Company B is a leading integrated oil, gas and chemical logistics company in its market, with terminals at major ports and a position as a top private importer and handler of liquefied petroleum gas. It was early to establish itself in several key ports.",
+      "source": {
+        "source_id": "S1",
+        "source_type": "DECLARATION",
+        "title": "Investment manager's case-study note (position)",
+        "collected_at": "2026-11-10T10:00:00Z",
+        "document_id": "CS-LOG-B-1",
+        "source_uri": "urn:case-study:cs-log-b-1",
+        "section": "Position",
+        "paragraph": "Summary",
+        "extraction_method": "MANUAL",
+        "document_version": "1.0",
+        "content_hash": "a456bb21da16009f29ee8b19099f9132f621d9f1b17abc0ced02fb1d207ff4ff"
+      }
+    },
+    {
+      "evidence_id": "E2",
+      "text": "In 2021 the company agreed a joint venture with an international tank-storage group to operate terminals at strategic ports on both coasts. It already covered the chain from sourcing to distribution.",
+      "source": {
+        "source_id": "S2",
+        "source_type": "DECLARATION",
+        "title": "Investment manager's case-study note (partnership)",
+        "collected_at": "2026-11-10T10:00:00Z",
+        "document_id": "CS-LOG-B-2",
+        "source_uri": "urn:case-study:cs-log-b-2",
+        "section": "Partnership",
+        "paragraph": "Summary",
+        "extraction_method": "MANUAL",
+        "document_version": "1.0",
+        "content_hash": "d22387ee19ca3f73c8956bdb75309c57e7906d043b4a4d906b6afd6098c1de0d"
+      }
+    },
+    {
+      "evidence_id": "E3",
+      "text": "The note states that the company has been net cash positive since 2018 and has a strong balance sheet.",
+      "source": {
+        "source_id": "S3",
+        "source_type": "DECLARATION",
+        "title": "Investment manager's case-study note (balance sheet)",
+        "collected_at": "2026-11-10T10:00:00Z",
+        "document_id": "CS-LOG-B-3",
+        "source_uri": "urn:case-study:cs-log-b-3",
+        "section": "Balance sheet",
+        "paragraph": "Summary",
+        "extraction_method": "MANUAL",
+        "document_version": "1.0",
+        "content_hash": "7d8db87cebf4dfd070b190bd909734d15a5c89dcf5b9f41435720ae1ff7c6f4d"
+      }
+    },
+    {
+      "evidence_id": "E4",
+      "text": "The company's managing director resigned abruptly last quarter, and two other senior executives left in the same period. No successor has been named.",
+      "source": {
+        "source_id": "S4",
+        "source_type": "DECLARATION",
+        "title": "Investment manager's case-study note (management)",
+        "collected_at": "2026-11-10T10:00:00Z",
+        "document_id": "CS-LOG-B-4",
+        "source_uri": "urn:case-study:cs-log-b-4",
+        "section": "Management",
+        "paragraph": "Summary",
+        "extraction_method": "MANUAL",
+        "document_version": "1.0",
+        "content_hash": "e1506f74827b3e2cd9c7c2fe4350c1905c20f80ae6d87b24cb7f8cf7dec970fd"
+      }
+    },
+    {
+      "evidence_id": "E5",
+      "text": "The statutory auditor reported a material weakness in internal financial controls. Management has not yet remediated it.",
+      "source": {
+        "source_id": "S5",
+        "source_type": "DECLARATION",
+        "title": "Investment manager's case-study note (controls)",
+        "collected_at": "2026-11-10T10:00:00Z",
+        "document_id": "CS-LOG-B-5",
+        "source_uri": "urn:case-study:cs-log-b-5",
+        "section": "Controls",
+        "paragraph": "Summary",
+        "extraction_method": "MANUAL",
+        "document_version": "1.0",
+        "content_hash": "76577ab5668712b591d4f1cc858b4b38a7fde235fd4d0f63b2075b88135d0ad3"
+      }
+    },
+    {
+      "evidence_id": "E6",
+      "text": "Carbon footprint is a sticking point for the industry. The company has installed floating roofs at its main facilities to cut vapour emissions, built an effluent treatment plant, and formed a committee to oversee this. An ESG rating agency upgraded its rating from BBB to A in February 2023.",
+      "source": {
+        "source_id": "S6",
+        "source_type": "DECLARATION",
+        "title": "Investment manager's case-study note (sustainability)",
+        "collected_at": "2026-11-10T10:00:00Z",
+        "document_id": "CS-LOG-B-6",
+        "source_uri": "urn:case-study:cs-log-b-6",
+        "section": "Sustainability",
+        "paragraph": "Summary",
+        "extraction_method": "MANUAL",
+        "document_version": "1.0",
+        "content_hash": "181d98df0df09413d1c67be447df0a89d1320799f724b2b4eedc5b5b16cfc783"
+      }
+    }
+  ]
+}

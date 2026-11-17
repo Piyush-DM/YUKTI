@@ -1,0 +1,15 @@
+{
+  "case_file": "cases/vendor_beta.json",
+  "policy": "VENDOR-POST-TECH-DD",
+  "expected_policy_state": "ADVANCE",
+  "expected_rule": "P050-ALL-MANDATORY-SATISFIED",
+  "expected_requirements": {
+    "R1": "SATISFIED",
+    "R2": "SATISFIED",
+    "R3": "SATISFIED",
+    "R4": "SATISFIED"
+  },
+  "reasoning": "Each of the four mandatory requirements is met by a document the evidence says was supplied; nothing in the evidence contradicts any claim.",
+  "registered_at": "2026-11-10T09:43:51.807634+00:00",
+  "note": "Written before the case was run. The engine is never given this file."
+}

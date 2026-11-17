@@ -1,0 +1,123 @@
+{
+  "case_id": "INV-BANK-B2",
+  "decision_stage": "investment_quality_screen",
+  "decision_question": "Does Bank B pass the quality screen for inclusion in a long-term India-focused portfolio?",
+  "claims": [
+    {
+      "claim_id": "C1",
+      "text": "The company has a durable competitive position."
+    },
+    {
+      "claim_id": "C2",
+      "text": "The company's financial position is strong."
+    },
+    {
+      "claim_id": "C3",
+      "text": "Management and governance are of good quality."
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "E1",
+      "text": "Bank B is the largest private-sector bank in its market by assets. It has more than 7,500 branches and serves tens of millions of retail, small-business and corporate customers.",
+      "source": {
+        "source_id": "S1",
+        "source_type": "DECLARATION",
+        "title": "Investment manager's case-study note (franchise)",
+        "collected_at": "2026-11-10T10:00:00Z",
+        "document_id": "CS-BANK-B2-1",
+        "source_uri": "urn:case-study:cs-bank-b2-1",
+        "section": "Franchise",
+        "paragraph": "Summary",
+        "extraction_method": "MANUAL",
+        "document_version": "1.0",
+        "content_hash": "0bc2c11312073419026f67d1c784a3e92e0cfea80772269f1267d4de650e5611"
+      }
+    },
+    {
+      "evidence_id": "E2",
+      "text": "Net income fell from 301 billion rupees two years ago to 187 billion rupees in the latest year. The five-year average return on equity is 6 percent.",
+      "source": {
+        "source_id": "S2",
+        "source_type": "DECLARATION",
+        "title": "Investment manager's case-study note (earnings)",
+        "collected_at": "2026-11-10T10:00:00Z",
+        "document_id": "CS-BANK-B2-2",
+        "source_uri": "urn:case-study:cs-bank-b2-2",
+        "section": "Earnings",
+        "paragraph": "Summary",
+        "extraction_method": "MANUAL",
+        "document_version": "1.0",
+        "content_hash": "69d2a0b53c649c24249ae2676e65dd81bd58d97192e8fb0d8e4713864f47243c"
+      }
+    },
+    {
+      "evidence_id": "E3",
+      "text": "As at the end of the latest quarter the capital adequacy ratio is 10.4 percent against a regulatory minimum of 12 percent, gross non-performing assets are 7.8 percent of total assets, and the liquidity coverage ratio is about 85 percent.",
+      "source": {
+        "source_id": "S3",
+        "source_type": "DECLARATION",
+        "title": "Investment manager's case-study note (balance sheet)",
+        "collected_at": "2026-11-10T10:00:00Z",
+        "document_id": "CS-BANK-B2-3",
+        "source_uri": "urn:case-study:cs-bank-b2-3",
+        "section": "Balance sheet",
+        "paragraph": "Summary",
+        "extraction_method": "MANUAL",
+        "document_version": "1.0",
+        "content_hash": "d3328a4e6b291fc06c0038d5a8c72675fdc2f98ef7ead8ace9b9c9c3c0ba5354"
+      }
+    },
+    {
+      "evidence_id": "E4",
+      "text": "The chief executive, in post since 2018, has had his term extended to October 2028. Under him the bank worked through elevated non-performing assets and earlier governance concerns and refocused on growth calibrated for risk.",
+      "source": {
+        "source_id": "S4",
+        "source_type": "DECLARATION",
+        "title": "Investment manager's case-study note (management)",
+        "collected_at": "2026-11-10T10:00:00Z",
+        "document_id": "CS-BANK-B2-4",
+        "source_uri": "urn:case-study:cs-bank-b2-4",
+        "section": "Management",
+        "paragraph": "Summary",
+        "extraction_method": "MANUAL",
+        "document_version": "1.0",
+        "content_hash": "00c18ca6c4b4563c023de84f552916b55b13b2eff2378e01156c7bcb8f387126"
+      }
+    },
+    {
+      "evidence_id": "E5",
+      "text": "The loan book is growing about 16 percent a year. 39 percent of deposits come from low-cost retail current and savings accounts.",
+      "source": {
+        "source_id": "S5",
+        "source_type": "DECLARATION",
+        "title": "Investment manager's case-study note (funding and growth)",
+        "collected_at": "2026-11-10T10:00:00Z",
+        "document_id": "CS-BANK-B2-5",
+        "source_uri": "urn:case-study:cs-bank-b2-5",
+        "section": "Growth",
+        "paragraph": "Summary",
+        "extraction_method": "MANUAL",
+        "document_version": "1.0",
+        "content_hash": "2749865d476a209abc18c0015c57ea652647d79906a52d545049d46443e3f074"
+      }
+    },
+    {
+      "evidence_id": "E6",
+      "text": "The bank has committed to net-zero emissions by 2070 and uses an internal carbon price to guide investment decisions. It has directed significant lending to renewable energy and green infrastructure.",
+      "source": {
+        "source_id": "S6",
+        "source_type": "DECLARATION",
+        "title": "Investment manager's case-study note (sustainability)",
+        "collected_at": "2026-11-10T10:00:00Z",
+        "document_id": "CS-BANK-B2-6",
+        "source_uri": "urn:case-study:cs-bank-b2-6",
+        "section": "Sustainability",
+        "paragraph": "Summary",
+        "extraction_method": "MANUAL",
+        "document_version": "1.0",
+        "content_hash": "70d50270117b1d62625646cac491ecdfbbb42f13be85daf49458fba03e606250"
+      }
+    }
+  ]
+}

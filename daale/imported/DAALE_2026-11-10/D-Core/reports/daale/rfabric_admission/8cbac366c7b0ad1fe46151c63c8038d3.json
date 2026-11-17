@@ -1,0 +1,187 @@
+{
+  "execution_id": "8cbac366c7b0ad1fe46151c63c8038d3",
+  "choir_version": "CHOIR-CONTRACT-DRAFT-0.1",
+  "input_digest": "1e73c6746ac712e5963d1b0324ab9f8cb88a8ba3826694a11caa4aa456ef7592",
+  "candidate_id": "rfabric-candidate:run-59370bc6c49042d8a0fb00795cb71305",
+  "object_id": "rfabric-judgment:DD-001",
+  "origin": "rfabric",
+  "state": "committed",
+  "committed": [
+    "rfabric-judgment:DD-001"
+  ],
+  "rejected": [],
+  "review_required": [],
+  "insufficient_basis": false,
+  "emits_judgment": false,
+  "judgment_unavailable_because": "no evaluator: whether DAALE calls the frozen kernels or evaluates for itself is options B and A of DECISION-005, which is open",
+  "gate_checks": [
+    {
+      "name": "references-current-execution",
+      "status": "passed",
+      "detail": "8cbac366c7b0ad1fe46151c63c8038d3"
+    },
+    {
+      "name": "inputs-exist-and-are-not-superseded",
+      "status": "passed",
+      "detail": "0 input(s) present"
+    },
+    {
+      "name": "structure-valid-under-choir",
+      "status": "passed",
+      "detail": "contract satisfied"
+    },
+    {
+      "name": "respects-active-execution-plan",
+      "status": "inactive",
+      "detail": "no execution planner in v0 Phase 2; requires Phase 3"
+    },
+    {
+      "name": "required-provenance-present",
+      "status": "passed",
+      "detail": "derived from C1, C2, E3"
+    },
+    {
+      "name": "no-stale-write-or-race",
+      "status": "passed",
+      "detail": "inputs unchanged since read"
+    },
+    {
+      "name": "terminal-state-assigned",
+      "status": "passed",
+      "detail": "decided: validated"
+    }
+  ],
+  "trace": [
+    {
+      "sequence": 0,
+      "kind": "execution-opened",
+      "subject": "8cbac366c7b0ad1fe46151c63c8038d3",
+      "detail": "choir_version=CHOIR-CONTRACT-DRAFT-0.1 input_digest=1e73c6746ac712e5"
+    },
+    {
+      "sequence": 1,
+      "kind": "contract-validated",
+      "subject": "8cbac366c7b0ad1fe46151c63c8038d3",
+      "detail": "0 violations"
+    },
+    {
+      "sequence": 2,
+      "kind": "arbitration-started",
+      "subject": "8cbac366c7b0ad1fe46151c63c8038d3",
+      "detail": "1 candidate(s) for object rfabric-judgment:DD-001"
+    },
+    {
+      "sequence": 3,
+      "kind": "arbitration-check",
+      "subject": "8cbac366c7b0ad1fe46151c63c8038d3",
+      "detail": "single-candidate: single candidate rfabric-candidate:run-59370bc6c49042d8a0fb00795cb71305 selected by default"
+    },
+    {
+      "sequence": 4,
+      "kind": "arbitration-selected",
+      "subject": "8cbac366c7b0ad1fe46151c63c8038d3",
+      "detail": "selected rfabric-candidate:run-59370bc6c49042d8a0fb00795cb71305 from 1 candidates"
+    },
+    {
+      "sequence": 5,
+      "kind": "candidate-proposed",
+      "subject": "rfabric-candidate:run-59370bc6c49042d8a0fb00795cb71305",
+      "detail": "from rfabric (post-arbitration)"
+    },
+    {
+      "sequence": 6,
+      "kind": "candidate-validated",
+      "subject": "rfabric-candidate:run-59370bc6c49042d8a0fb00795cb71305",
+      "detail": ""
+    },
+    {
+      "sequence": 7,
+      "kind": "candidate-committed",
+      "subject": "rfabric-candidate:run-59370bc6c49042d8a0fb00795cb71305",
+      "detail": "rfabric-judgment:DD-001 v1"
+    },
+    {
+      "sequence": 8,
+      "kind": "execution-closed",
+      "subject": "8cbac366c7b0ad1fe46151c63c8038d3",
+      "detail": "committed=1 rejected=0 review=0"
+    }
+  ],
+  "payload": {
+    "case_id": "DD-001",
+    "decision_stage": "post_technical_due_diligence_approval",
+    "policy_id": "VENDOR-POST-TECH-DD",
+    "policy_version": "0.1",
+    "policy_state": "REJECT",
+    "triggered_rule": {
+      "rule_id": "P080-CRITICAL-FAILURE",
+      "priority": 80,
+      "description": "Reject when supplied evidence establishes failure of a critical requirement."
+    },
+    "other_matching_rule_ids": [
+      "P070-MANDATORY-FAILURE",
+      "P060-MANDATORY-UNKNOWN",
+      "P000-CONSERVATIVE-FALLBACK"
+    ],
+    "metrics": {
+      "high_adversarial_challenges": 0,
+      "high_unresolved_contradictions": 0,
+      "failed_critical_requirements": 2,
+      "failed_mandatory_requirements": 2,
+      "unknown_mandatory_requirements": 2,
+      "all_mandatory_requirements_satisfied": false,
+      "supporting_relations": 5,
+      "weakening_relations": 7,
+      "contradicting_relations": 10,
+      "always": true,
+      "details": {
+        "high_challenge_ids": [],
+        "high_contradiction_ids": [],
+        "failed_critical_requirement_ids": [
+          "R1",
+          "R2"
+        ],
+        "failed_mandatory_requirement_ids": [
+          "R1",
+          "R2"
+        ],
+        "unknown_mandatory_requirement_ids": [
+          "R3",
+          "R4"
+        ]
+      }
+    },
+    "requirement_summary": {
+      "R1": {
+        "status": "NOT_SATISFIED",
+        "evidence_ids": [
+          "E3"
+        ],
+        "rationale": "E3 establishes the questionnaire is incomplete, matching the pattern of NOT_SATISFIED in precedent cases with identical evidence."
+      },
+      "R2": {
+        "status": "NOT_SATISFIED",
+        "evidence_ids": [
+          "E3"
+        ],
+        "rationale": "E3 establishes no SOC 2 report was supplied, matching the pattern of NOT_SATISFIED in precedent cases with identical evidence."
+      },
+      "R3": {
+        "status": "UNKNOWN",
+        "evidence_ids": [],
+        "rationale": "No evidence addresses this requirement in either direction."
+      },
+      "R4": {
+        "status": "UNKNOWN",
+        "evidence_ids": [],
+        "rationale": "No evidence addresses this requirement in either direction."
+      }
+    },
+    "provisional_claim_statuses": {
+      "C1": "CONTRADICTED",
+      "C2": "CONTRADICTED"
+    },
+    "adversarial_summary": "",
+    "authority_notice": "This is a deterministic DAALE policy state, not an autonomous institutional decision. Authorized human review is required."
+  }
+}

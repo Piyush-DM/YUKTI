@@ -1,0 +1,5 @@
+"""DAALE v0.1 reference implementation."""
+
+DAALE_VERSION = "0.1.0"
+CHOIR_CONTRACT_VERSION = "CHOIR-CONTRACT-DRAFT-0.1"
+

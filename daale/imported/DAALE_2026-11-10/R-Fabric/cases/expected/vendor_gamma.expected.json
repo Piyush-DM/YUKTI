@@ -1,0 +1,20 @@
+{
+  "case_file": "cases/vendor_gamma.json",
+  "policy": "VENDOR-POST-TECH-DD",
+  "expected_policy_state": "ADVANCE",
+  "expected_rule": "P050-ALL-MANDATORY-SATISFIED",
+  "expected_requirements": {
+    "R1": "SATISFIED",
+    "R2": "SATISFIED",
+    "R3": "SATISFIED",
+    "R4": "SATISFIED"
+  },
+  "expected_claims": {
+    "C1": "SUPPORTED",
+    "C2": "SUPPORTED"
+  },
+  "reasoning": "Each mandatory requirement is met by a document the evidence says was supplied, and each claim, including the one about an acceptable risk profile, has direct evidence (the risk committee's recorded acceptance).",
+  "scoring": "ADVANCE is a match. Any other decision is a miss and is analysed afterwards; the case and this file are not edited after the run.",
+  "disclosure": "Written AFTER the DD-002 run (ESCALATE on a HIGH challenge to claim C2, which had no direct evidence). This case adds that evidence on purpose, so it tests the ADVANCE path, not whether the engine would have escalated DD-002 anyway. The evidence was written by the same person who knows the policy; it is not independent.",
+  "registered_at": "2026-11-10T11:16:26.159128+00:00"
+}

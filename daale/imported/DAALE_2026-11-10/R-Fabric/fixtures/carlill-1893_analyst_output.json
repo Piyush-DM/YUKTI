@@ -1,0 +1,196 @@
+{
+  "case_id": "CARLILL-1893",
+  "kernel_id": "ANALYST",
+  "findings": [
+    {
+      "finding_id": "ANL-001",
+      "finding_type": "CLAIM_ASSESSMENT",
+      "target_type": "CLAIM",
+      "target_id": "C1",
+      "evidence_ids": [
+        "E1",
+        "E2",
+        "E3",
+        "E4"
+      ],
+      "content": "The advertisement constitutes a binding unilateral offer: E1 contains clear terms, E3 shows \u00a31000 deposit demonstrating intention to be bound, E2 shows performance was possible.",
+      "status": "SUPPORTED",
+      "severity": "HIGH",
+      "confidence": 0.95
+    },
+    {
+      "finding_id": "ANL-002",
+      "finding_type": "CLAIM_ASSESSMENT",
+      "target_type": "CLAIM",
+      "target_id": "C2",
+      "evidence_ids": [
+        "E2"
+      ],
+      "content": "Mrs. Carlill performed the conditions exactly as specified in the advertisement (E2).",
+      "status": "SUPPORTED",
+      "severity": "HIGH",
+      "confidence": 0.9
+    },
+    {
+      "finding_id": "ANL-003",
+      "finding_type": "CLAIM_ASSESSMENT",
+      "target_type": "CLAIM",
+      "target_id": "C3",
+      "evidence_ids": [
+        "E3"
+      ],
+      "content": "The \u00a31000 deposit at Alliance Bank (E3) demonstrates intention to be bound, not mere puffery.",
+      "status": "SUPPORTED",
+      "severity": "HIGH",
+      "confidence": 0.95
+    },
+    {
+      "finding_id": "ANL-004",
+      "finding_type": "CLAIM_ASSESSMENT",
+      "target_type": "CLAIM",
+      "target_id": "C4",
+      "evidence_ids": [
+        "E1",
+        "E4"
+      ],
+      "content": "The advertisement specifies performance as the mode of acceptance (using the ball); no notification required per unilateral offer principles (E1). Defendant's pleading (E4) incorrectly asserts notification required.",
+      "status": "SUPPORTED",
+      "severity": "HIGH",
+      "confidence": 0.9
+    },
+    {
+      "finding_id": "ANL-005",
+      "finding_type": "EVIDENCE_RELATION",
+      "target_type": "CLAIM",
+      "target_id": "C1",
+      "evidence_ids": [
+        "E1"
+      ],
+      "content": "Advertisement text (E1) directly contains all elements of a binding offer: promise, conditions, and reward.",
+      "relation": "SUPPORTS",
+      "severity": "HIGH",
+      "confidence": 0.95
+    },
+    {
+      "finding_id": "ANL-006",
+      "finding_type": "EVIDENCE_RELATION",
+      "target_type": "CLAIM",
+      "target_id": "C1",
+      "evidence_ids": [
+        "E3"
+      ],
+      "content": "The \u00a31000 deposit (E3) demonstrates serious intention to be bound, contradicting puffery defence.",
+      "relation": "SUPPORTS",
+      "severity": "HIGH",
+      "confidence": 0.95
+    },
+    {
+      "finding_id": "ANL-008",
+      "finding_type": "EVIDENCE_RELATION",
+      "target_type": "CLAIM",
+      "target_id": "C2",
+      "evidence_ids": [
+        "E2"
+      ],
+      "content": "Mrs. Carlill's usage (E2) exactly matches the conditions specified in the offer (E1).",
+      "relation": "SUPPORTS",
+      "severity": "HIGH",
+      "confidence": 0.9
+    },
+    {
+      "finding_id": "ANL-009",
+      "finding_type": "EVIDENCE_RELATION",
+      "target_type": "CLAIM",
+      "target_id": "C3",
+      "evidence_ids": [
+        "E3"
+      ],
+      "content": "Bank deposit record (E3) independently corroborates advertisement's claim of \u00a31000 deposit.",
+      "relation": "SUPPORTS",
+      "severity": "HIGH",
+      "confidence": 0.95
+    },
+    {
+      "finding_id": "ANL-010",
+      "finding_type": "EVIDENCE_RELATION",
+      "target_type": "CLAIM",
+      "target_id": "C4",
+      "evidence_ids": [
+        "E1"
+      ],
+      "content": "Advertisement specifies performance as acceptance mode; no notification clause present (E1).",
+      "relation": "SUPPORTS",
+      "severity": "HIGH",
+      "confidence": 0.9
+    },
+    {
+      "finding_id": "ANL-010",
+      "finding_type": "CHALLENGE",
+      "target_type": "CLAIM",
+      "target_id": "C1",
+      "evidence_ids": [
+        "E4"
+      ],
+      "content": "Defendant's puffery argument (E4) contradicted by \u00a31000 deposit showing serious intent.",
+      "status": "MISCLASSIFIED",
+      "severity": "HIGH",
+      "confidence": 0.85
+    },
+    {
+      "finding_id": "ANL-011",
+      "finding_type": "CHALLENGE",
+      "target_type": "CLAIM",
+      "target_id": "C4",
+      "evidence_ids": [
+        "E4"
+      ],
+      "content": "Defendant's notification requirement (E4) has no basis in offer terms; unilateral offer accepted by performance.",
+      "status": "UNSUPPORTED",
+      "severity": "MEDIUM",
+      "confidence": 0.8
+    },
+    {
+      "finding_id": "ANL-012",
+      "finding_type": "EVIDENCE_RELATION",
+      "target_type": "CLAIM",
+      "target_id": "C3",
+      "evidence_ids": [
+        "E3"
+      ],
+      "content": "Bank deposit (E3) objectively demonstrates intention to be bound, not mere puffery.",
+      "relation": "CONTRADICTS",
+      "severity": "HIGH",
+      "confidence": 0.95
+    },
+    {
+      "finding_id": "ANL-013",
+      "finding_type": "EVIDENCE_RELATION",
+      "target_type": "CLAIM",
+      "target_id": "C1",
+      "evidence_ids": [
+        "E1"
+      ],
+      "content": "Advertisement language is specific, measurable, and actionable - not vague puffery.",
+      "relation": "SUPPORTS",
+      "severity": "HIGH",
+      "confidence": 0.9
+    },
+    {
+      "finding_id": "ANL-014",
+      "finding_type": "EVIDENCE_RELATION",
+      "target_type": "CLAIM",
+      "target_id": "C1",
+      "evidence_ids": [
+        "E4"
+      ],
+      "content": "Defendant's puffery claim (E4) is inconsistent with the specific, measurable terms in the advertisement.",
+      "relation": "CONTRADICTS",
+      "severity": "HIGH",
+      "confidence": 0.85
+    }
+  ],
+  "summary": "All four claims are SUPPORTED: the advertisement constitutes a binding unilateral offer (C1), Mrs. Carlill accepted by performance (C2), the \u00a31000 deposit proves intention to be bound (C3), and no notification was required beyond performance (C4). The puffery defence is contradicted by the \u00a31000 deposit.",
+  "uncertainties": [
+    "Whether the Court of Appeal's reasoning would extend to modern digital advertisements"
+  ]
+}

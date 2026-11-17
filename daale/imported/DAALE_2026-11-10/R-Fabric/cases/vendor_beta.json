@@ -1,0 +1,107 @@
+{
+  "case_id": "DD-002",
+  "decision_stage": "post_technical_due_diligence_approval",
+  "decision_question": "Has Vendor Beta passed technical due diligence and is it ready for final approval?",
+  "claims": [
+    {
+      "claim_id": "C1",
+      "text": "Vendor Beta has completed the required security and technical due-diligence controls."
+    },
+    {
+      "claim_id": "C2",
+      "text": "Vendor Beta's documented risk profile is acceptable for final approval."
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "E1",
+      "text": "The security questionnaire was returned fully completed, with all 142 questions answered and signed by the vendor's security officer on 3 October 2026.",
+      "source": {
+        "source_id": "S1",
+        "source_type": "SYSTEM_RECORD",
+        "title": "Due-diligence evidence register",
+        "collected_at": "2026-11-02T10:00:00Z",
+        "document_id": "REG-2026-002",
+        "source_uri": "file:///evidence/REG-2026-002.pdf",
+        "page": 1,
+        "section": "Questionnaire status",
+        "paragraph": "Summary",
+        "extraction_method": "MANUAL",
+        "document_version": "1.0",
+        "content_hash": "d976f91ed02784e100739fb8472075194b209ca3b5df3df3b3f2d4e888600226"
+      }
+    },
+    {
+      "evidence_id": "E2",
+      "text": "Vendor Beta supplied a SOC 2 Type II report covering 1 October 2025 to 30 September 2026, issued by an independent auditor with an unqualified opinion.",
+      "source": {
+        "source_id": "S2",
+        "source_type": "DOCUMENT",
+        "title": "Vendor Beta SOC 2 Type II report",
+        "collected_at": "2026-11-02T10:00:00Z",
+        "document_id": "DOC-SOC2-2026-002",
+        "source_uri": "file:///evidence/DOC-SOC2-2026-002.pdf",
+        "page": 1,
+        "section": "Auditor's opinion",
+        "paragraph": "Summary",
+        "extraction_method": "MANUAL",
+        "document_version": "1.0",
+        "content_hash": "6bc13733a1832b063f9140f0371ff973f3398a010758f8bc8f8c1bf7a4dc296a"
+      }
+    },
+    {
+      "evidence_id": "E3",
+      "text": "Vendor Beta supplied technical architecture documentation: system context, data-flow and hosting diagrams, version 3.2, dated 21 September 2026.",
+      "source": {
+        "source_id": "S3",
+        "source_type": "DOCUMENT",
+        "title": "Vendor Beta architecture pack",
+        "collected_at": "2026-11-02T10:00:00Z",
+        "document_id": "DOC-ARCH-2026-002",
+        "source_uri": "file:///evidence/DOC-ARCH-2026-002.pdf",
+        "page": 1,
+        "section": "Contents",
+        "paragraph": "Summary",
+        "extraction_method": "MANUAL",
+        "document_version": "1.0",
+        "content_hash": "2f95adbf3d4017e344b0ed10739c6f545769db17093571bcacefc8758b951f3a"
+      }
+    },
+    {
+      "evidence_id": "E4",
+      "text": "An independent penetration test completed on 14 September 2026 reported no critical or high findings; the two medium findings were remediated and retested.",
+      "source": {
+        "source_id": "S4",
+        "source_type": "DOCUMENT",
+        "title": "Vendor Beta penetration-test report",
+        "collected_at": "2026-11-02T10:00:00Z",
+        "document_id": "DOC-PEN-2026-002",
+        "source_uri": "file:///evidence/DOC-PEN-2026-002.pdf",
+        "page": 1,
+        "section": "Findings summary",
+        "paragraph": "Summary",
+        "extraction_method": "MANUAL",
+        "document_version": "1.0",
+        "content_hash": "3f989c6e430579cee028b215e90cb1ec54661e0de3343273e34cead1f6c182e5"
+      }
+    },
+    {
+      "evidence_id": "E5",
+      "text": "Audited revenue grew by 12 percent year over year; the largest customer represents 18 percent of revenue.",
+      "source": {
+        "source_id": "S5",
+        "source_type": "DOCUMENT",
+        "title": "Vendor Beta audited financial statement",
+        "collected_at": "2026-11-02T10:00:00Z",
+        "document_id": "DOC-FIN-2026-002",
+        "source_uri": "file:///evidence/DOC-FIN-2026-002.pdf",
+        "page": 1,
+        "section": "Revenue analysis",
+        "paragraph": "Summary",
+        "extraction_method": "MANUAL",
+        "document_version": "1.0",
+        "content_hash": "0f8fe7a94d9befd0c0d08182ac69220736ee26182036e1ae6f8003fe546842e9"
+      }
+    }
+  ]
+}

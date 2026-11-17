@@ -1,0 +1,133 @@
+{
+  "case_id": "HADLEY-1854",
+  "decision_stage": "contract_damages_remoteness_approval",
+  "decision_question": "Are damages for lost profits recoverable when the carrier did not know the mill was stopped and the special circumstances were not communicated?",
+  "claims": [
+    {
+      "claim_id": "C1",
+      "text": "The carrier (Baxendale) breached the contract by delaying delivery of the crankshaft."
+    },
+    {
+      "claim_id": "C2",
+      "text": "The mill owners (Hadley) lost profits due to the mill being stopped during the delay."
+    },
+    {
+      "claim_id": "C3",
+      "text": "The lost profits are recoverable as damages for breach of contract."
+    },
+    {
+      "claim_id": "C4",
+      "text": "The carrier knew or should have known that delay would cause lost profits."
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "E1",
+      "text": "The plaintiff's mill at Gloucester stopped work because the crankshaft of the steam engine broke. The broken crankshaft was sent to the defendant (Baxendale) at Pickford & Co. on 14 May 1853 for delivery to the engineers at Greenwich.",
+      "source": {
+        "source_id": "S1",
+        "source_type": "DOCUMENT",
+        "title": "Statement of Facts (Hadley v Baxendale (1854) 9 Ex 341)",
+        "collected_at": "1853-05-14T00:00:00Z",
+        "document_id": "DOC-FACTS-1853-001",
+        "source_uri": "file:///evidence/hadley/statement_of_facts.txt",
+        "page": 1,
+        "section": "Background and Shipment",
+        "paragraph": "Crankshaft shipment details",
+        "extraction_method": "MANUAL",
+        "document_version": "1.0",
+        "content_hash": "a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456"
+      }
+    },
+    {
+      "evidence_id": "E2",
+      "text": "The defendant's clerk was told the crankshaft must be sent immediately. The plaintiff's clerk said the mill was stopped and the shaft must be sent directly. The defendant's clerk replied 'I will send it directly.'",
+      "source": {
+        "source_id": "S2",
+        "source_type": "DOCUMENT",
+        "title": "Trial Testimony - Plaintiff's Clerk",
+        "collected_at": "1854-02-15T00:00:00Z",
+        "document_id": "DOC-WIT-1854-002",
+        "source_uri": "file:///evidence/hadley/clerk_testimony.txt",
+        "page": 1,
+        "section": "Communication at Pickford",
+        "paragraph": "Urgency communicated but not special circumstances",
+        "extraction_method": "MANUAL",
+        "document_version": "1.0",
+        "content_hash": "b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3"
+      }
+    },
+    {
+      "evidence_id": "E3",
+      "text": "The defendant did not know the mill was stopped; they believed the plaintiff had other engines or could work around the delay. The shaft was not delivered until 19 May (5 days late).",
+      "source": {
+        "source_id": "S3",
+        "source_type": "DOCUMENT",
+        "title": "Defendant's Evidence - Pickford & Co. Internal Records",
+        "collected_at": "1853-05-19T00:00:00Z",
+        "document_id": "DOC-DEF-1853-003",
+        "source_uri": "file:///evidence/hadley/delivery_records.txt",
+        "page": 1,
+        "section": "Delivery Timeline",
+        "paragraph": "Late delivery, no knowledge of mill stoppage",
+        "extraction_method": "MANUAL",
+        "document_version": "1.0",
+        "content_hash": "c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4"
+      }
+    },
+    {
+      "evidence_id": "E4",
+      "text": "The mill remained stopped from 14 May to 19 May (5 days). The plaintiff claimed lost profits of \u00a3300 for the 5-day stoppage.",
+      "source": {
+        "source_id": "S4",
+        "source_type": "DOCUMENT",
+        "title": "Plaintiff's Claim for Lost Profits",
+        "collected_at": "1854-03-01T00:00:00Z",
+        "document_id": "DOC-CLAIM-1854-004",
+        "source_uri": "file:///evidence/hadley/lost_profits_claim.txt",
+        "page": 1,
+        "section": "Damages Calculation",
+        "paragraph": "\u00a3300 lost profits over 5 days",
+        "extraction_method": "MANUAL",
+        "document_version": "1.0",
+        "content_hash": "d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5"
+      }
+    },
+    {
+      "evidence_id": "E5",
+      "text": "The jury awarded \u00a325 damages (reflecting only direct costs). The Court of Exchequer Chamber reversed and held that damages must be such as may fairly and reasonably be considered either arising naturally from the breach, or such as may reasonably be supposed to have been in the contemplation of both parties at the time they made the contract.",
+      "source": {
+        "source_id": "S5",
+        "source_type": "DOCUMENT",
+        "title": "Judgment - Court of Exchequer Chamber (Alderson B.)",
+        "collected_at": "1854-07-15T00:00:00Z",
+        "document_id": "DOC-JUD-1854-005",
+        "source_uri": "file:///evidence/hadley/judgment.txt",
+        "page": 2,
+        "section": "Remoteness Rule Formulation",
+        "paragraph": "Hadley rule: arising naturally or in contemplation of parties",
+        "extraction_method": "MANUAL",
+        "document_version": "1.0",
+        "content_hash": "e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6"
+      }
+    },
+    {
+      "evidence_id": "E6",
+      "text": "The special circumstances (mill stopped, no other shaft) were not communicated to the carrier. The carrier only knew a shaft was needed for a mill.",
+      "source": {
+        "source_id": "S6",
+        "source_type": "DOCUMENT",
+        "title": "Appellate Findings - Communication of Special Circumstances",
+        "collected_at": "1854-07-15T00:00:00Z",
+        "document_id": "DOC-APP-1854-006",
+        "source_uri": "file:///evidence/hadley/special_circumstances.txt",
+        "page": 1,
+        "section": "Knowledge of Special Circumstances",
+        "paragraph": "Carrier unaware mill was stopped",
+        "extraction_method": "MANUAL",
+        "document_version": "1.0",
+        "content_hash": "f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7"
+      }
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "policy": "INVESTMENT-QUALITY-SCREEN",
+  "scoring": "The decision must match. For the REJECT cases the named requirement must be the one that fails. Any other result is a miss, analysed afterwards; the case and this file are not edited after the run.",
+  "disclosure": "Written by the person who wrote the policy and who knows how each case was built. The 'as published' cases rest on a fund manager's marketing write-up of a holding, which is a curated, one-sided source and not a decision record: 'the trust holds it' is a weak label, not proof the investment was right. The 'reversed' cases are synthetic: one requirement's evidence is replaced with invented adverse facts about an anonymised company that is not the published one.",
+  "registered_at": "2026-11-10T11:23:11.580711+00:00",
+  "case_file": "cases/inv_logistics_a.json",
+  "expected_policy_state": "ADVANCE",
+  "expected_rule": "IQS050-ALL-MANDATORY-SATISFIED",
+  "expected_requirements": {
+    "R1": "SATISFIED",
+    "R2": "SATISFIED",
+    "R3": "SATISFIED"
+  },
+  "kind": "as published",
+  "derived_from": "https://www.aberdeeninvestments.com/en-gb/anii/about-us/investment-case-studies/aegis-logistics (facts paraphrased, company and country not named)",
+  "reasoning": "Every critical requirement has direct supporting evidence; the sustainability risk is identified and addressed."
+}

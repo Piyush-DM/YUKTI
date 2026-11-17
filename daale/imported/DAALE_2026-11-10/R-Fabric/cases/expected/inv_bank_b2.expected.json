@@ -1,0 +1,15 @@
+{
+  "case_file": "cases/inv_bank_b2.json",
+  "policy": "INVESTMENT-QUALITY-SCREEN",
+  "expected_policy_state": "REJECT",
+  "expected_rule": "IQS100-CRITICAL-FAILURE",
+  "expected_failed_requirement": "R2",
+  "kind": "one requirement's evidence reversed (synthetic), version 2",
+  "derived_from": "inv_bank_a with only the earnings and balance-sheet evidence replaced by invented adverse figures",
+  "reasoning": "Capital and asset quality are shown breaching their limits, so the financial-strength requirement fails; a strong franchise and a stable chief executive do not offset it.",
+  "not_asserted": "R3 (management and governance). The management evidence is restored to the as-published wording, which says nothing about how management handled this deterioration, so either verdict is defensible and a result for R3 is not scored.",
+  "scoring": "REJECT with R2 NOT_SATISFIED is a match. Any other decision is a miss, analysed afterwards; the case and this file are not edited after the run.",
+  "supersedes": "inv_bank_b (version 1), which also removed the sentence about how management handled earlier stress. That made R3's evidence thinner than 'one requirement reversed' and all five kernels rated R3 NOT_SATISFIED as well. The flaw was mine, found after the first run; this version fixes it before a new run.",
+  "disclosure": "Written by the person who wrote the policy and knows how the case was built, and after seeing version 1's result. The reversed figures are invented about an anonymised company.",
+  "registered_at": "2026-11-11T11:46:55.754073+00:00"
+}

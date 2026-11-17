@@ -1,0 +1,139 @@
+{
+  "case_id": "DD-001",
+  "kernel_id": "OUTSIDER",
+  "findings": [
+    {
+      "finding_id": "OUT-001",
+      "finding_type": "RISK",
+      "target_type": "REQUIREMENT",
+      "target_id": "R1",
+      "evidence_ids": ["E3"],
+      "content": "Regulator would view incomplete security questionnaire as prima facie non-compliance; no mitigating evidence presented.",
+      "severity": "HIGH",
+      "confidence": 0.85
+    },
+    {
+      "finding_id": "OUT-002",
+      "finding_type": "RISK",
+      "target_type": "REQUIREMENT",
+      "target_id": "R2",
+      "evidence_ids": ["E3"],
+      "content": "Auditor would require SOC 2 or equivalent; absence is a material control deficiency regardless of business metrics.",
+      "severity": "HIGH",
+      "confidence": 0.9
+    },
+    {
+      "finding_id": "OUT-003",
+      "finding_type": "RISK",
+      "target_type": "REQUIREMENT",
+      "target_id": "R3",
+      "evidence_ids": [],
+      "content": "Acquirer technical due diligence would flag missing architecture docs as deal risk; cannot assess scalability or maintainability.",
+      "severity": "MEDIUM",
+      "confidence": 0.75
+    },
+    {
+      "finding_id": "OUT-004",
+      "finding_type": "RISK",
+      "target_type": "REQUIREMENT",
+      "target_id": "R4",
+      "evidence_ids": [],
+      "content": "Insurer would require current pen test for cyber policy; absence increases liability exposure post-acquisition.",
+      "severity": "MEDIUM",
+      "confidence": 0.7
+    },
+    {
+      "finding_id": "OUT-005",
+      "finding_type": "CHALLENGE",
+      "target_type": "CLAIM",
+      "target_id": "C2",
+      "evidence_ids": ["E1", "E2", "E3"],
+      "content": "From customer perspective: revenue growth (E1) irrelevant if service fails due to security gaps (E3); concentration (E2) increases switching cost if vendor fails.",
+      "status": "UNSUPPORTED",
+      "severity": "HIGH",
+      "confidence": 0.8
+    },
+    {
+      "finding_id": "OUT-006",
+      "finding_type": "GAP",
+      "target_type": "POLICY",
+      "target_id": "R4",
+      "evidence_ids": [],
+      "content": "Policy does not define 'current' for pen test; regulator would expect <12 months. Gap in policy precision.",
+      "severity": "MEDIUM",
+      "confidence": 0.7
+    },
+    {
+      "finding_id": "OUT-007",
+      "finding_type": "EVIDENCE_RELATION",
+      "target_type": "CLAIM",
+      "target_id": "C1",
+      "evidence_ids": ["E1"],
+      "content": "Revenue growth has no bearing on completion of security or technical due-diligence controls.",
+      "relation": "IRRELEVANT",
+      "severity": "LOW",
+      "confidence": 0.8
+    },
+    {
+      "finding_id": "OUT-008",
+      "finding_type": "EVIDENCE_RELATION",
+      "target_type": "CLAIM",
+      "target_id": "C1",
+      "evidence_ids": ["E2"],
+      "content": "Customer concentration has no bearing on completion of security or technical due-diligence controls.",
+      "relation": "IRRELEVANT",
+      "severity": "LOW",
+      "confidence": 0.8
+    },
+    {
+      "finding_id": "OUT-009",
+      "finding_type": "EVIDENCE_RELATION",
+      "target_type": "CLAIM",
+      "target_id": "C1",
+      "evidence_ids": ["E3"],
+      "content": "An incomplete questionnaire and missing SOC 2 report contradict completion of the required controls, and no external reviewer would accept otherwise.",
+      "relation": "CONTRADICTS",
+      "severity": "HIGH",
+      "confidence": 0.9
+    },
+    {
+      "finding_id": "OUT-010",
+      "finding_type": "EVIDENCE_RELATION",
+      "target_type": "CLAIM",
+      "target_id": "C2",
+      "evidence_ids": ["E1"],
+      "content": "Revenue growth is favorable context for a customer but does not resolve the security-driven risk profile.",
+      "relation": "CONTEXTUAL",
+      "severity": "LOW",
+      "confidence": 0.6
+    },
+    {
+      "finding_id": "OUT-011",
+      "finding_type": "EVIDENCE_RELATION",
+      "target_type": "CLAIM",
+      "target_id": "C2",
+      "evidence_ids": ["E2"],
+      "content": "Concentration increases a customer's switching cost, weakening an acceptable-risk-profile claim.",
+      "relation": "WEAKENS",
+      "severity": "MEDIUM",
+      "confidence": 0.75
+    },
+    {
+      "finding_id": "OUT-012",
+      "finding_type": "EVIDENCE_RELATION",
+      "target_type": "CLAIM",
+      "target_id": "C2",
+      "evidence_ids": ["E3"],
+      "content": "An unresolved security gap contradicts a claim of acceptable risk from every external stakeholder's perspective.",
+      "relation": "CONTRADICTS",
+      "severity": "HIGH",
+      "confidence": 0.85
+    }
+  ],
+  "summary": "External stakeholder lenses (regulator, auditor, acquirer, insurer, customer) uniformly treat missing security evidence as material risks. Business metrics (E1, E2) do not mitigate technical assurance gaps.",
+  "uncertainties": [
+    "Regulatory jurisdiction and applicable standards not specified",
+    "Customer contract terms (SLAs, penalties) not in evidence",
+    "Acquirer risk tolerance threshold unknown"
+  ]
+}

@@ -1,0 +1,123 @@
+{
+  "policy_id": "CONTRACT-DAMAGES-REMOTENESS",
+  "policy_version": "0.1",
+  "decision_stage": "contract_damages_remoteness_approval",
+  "decision_states": [
+    "ADVANCE",
+    "HOLD",
+    "REJECT",
+    "ESCALATE"
+  ],
+  "human_authority_required": true,
+  "requirements": [
+    {
+      "requirement_id": "R1",
+      "description": "Breach of contract must be established.",
+      "mandatory": true,
+      "critical": true
+    },
+    {
+      "requirement_id": "R2",
+      "description": "Damages must arise naturally from the breach (first limb of Hadley rule).",
+      "mandatory": true,
+      "critical": true
+    },
+    {
+      "requirement_id": "R3",
+      "description": "Special damages require communication of special circumstances (second limb of Hadley rule).",
+      "mandatory": true,
+      "critical": true
+    },
+    {
+      "requirement_id": "R4",
+      "description": "The defendant must have had knowledge of special circumstances at contract formation.",
+      "mandatory": true,
+      "critical": true
+    },
+    {
+      "requirement_id": "R5",
+      "description": "Damages must be reasonably foreseeable at the time of contract formation.",
+      "mandatory": true,
+      "critical": true
+    }
+  ],
+  "rules": [
+    {
+      "rule_id": "HD100-NO-BREACH",
+      "priority": 100,
+      "description": "Reject if no breach of contract established.",
+      "condition": {
+        "metric": "failed_critical_requirements",
+        "operator": "gte",
+        "value": 1
+      },
+      "outcome": "REJECT"
+    },
+    {
+      "rule_id": "HD090-NATURAL-DAMAGES-ONLY",
+      "priority": 90,
+      "description": "Reject if only natural damages claimed but not proven.",
+      "condition": {
+        "metric": "failed_critical_requirements",
+        "operator": "gte",
+        "value": 1
+      },
+      "outcome": "REJECT"
+    },
+    {
+      "rule_id": "HD080-SPECIAL-CIRCUMSTANCES-UNCOMMUNICATED",
+      "priority": 80,
+      "description": "Reject if special damages claimed but special circumstances not communicated.",
+      "condition": {
+        "metric": "failed_critical_requirements",
+        "operator": "gte",
+        "value": 1
+      },
+      "outcome": "REJECT"
+    },
+    {
+      "rule_id": "HD070-DEFENDANT-UNAWARE",
+      "priority": 70,
+      "description": "Reject if defendant unaware of special circumstances at contract formation.",
+      "condition": {
+        "metric": "failed_critical_requirements",
+        "operator": "gte",
+        "value": 1
+      },
+      "outcome": "REJECT"
+    },
+    {
+      "rule_id": "HD060-UNFORESEEABLE-DAMAGES",
+      "priority": 60,
+      "description": "Hold if damages not reasonably foreseeable at contract formation.",
+      "condition": {
+        "metric": "unknown_mandatory_requirements",
+        "operator": "gte",
+        "value": 1
+      },
+      "outcome": "HOLD"
+    },
+    {
+      "rule_id": "HD050-HADLEY-RULE-SATISFIED",
+      "priority": 50,
+      "description": "Advance if Hadley rule satisfied for all claimed damages.",
+      "condition": {
+        "metric": "failed_critical_requirements",
+        "operator": "eq",
+        "value": 0
+      },
+      "outcome": "ADVANCE"
+    },
+    {
+      "rule_id": "HD000-CONSERVATIVE-FALLBACK",
+      "priority": 0,
+      "description": "Escalate any valid state not covered by a more specific rule.",
+      "condition": {
+        "metric": "always",
+        "operator": "eq",
+        "value": true
+      },
+      "outcome": "ESCALATE"
+    }
+  ]
+}

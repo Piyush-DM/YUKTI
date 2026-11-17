@@ -1,0 +1,13 @@
+{
+  "policy": "INVESTMENT-QUALITY-SCREEN",
+  "scoring": "The decision must match. For the REJECT cases the named requirement must be the one that fails. Any other result is a miss, analysed afterwards; the case and this file are not edited after the run.",
+  "disclosure": "Written by the person who wrote the policy and who knows how each case was built. The 'as published' cases rest on a fund manager's marketing write-up of a holding, which is a curated, one-sided source and not a decision record: 'the trust holds it' is a weak label, not proof the investment was right. The 'reversed' cases are synthetic: one requirement's evidence is replaced with invented adverse facts about an anonymised company that is not the published one.",
+  "registered_at": "2026-11-10T11:23:11.580711+00:00",
+  "case_file": "cases/inv_logistics_b.json",
+  "expected_policy_state": "REJECT",
+  "expected_rule": "IQS100-CRITICAL-FAILURE",
+  "expected_failed_requirement": "R3",
+  "kind": "one requirement's evidence reversed (synthetic)",
+  "derived_from": "inv_logistics_a with the management and governance evidence replaced by invented adverse facts",
+  "reasoning": "An unresolved material control weakness and unplanned leadership departures fail the management and governance requirement even though the business and balance sheet look sound."
+}

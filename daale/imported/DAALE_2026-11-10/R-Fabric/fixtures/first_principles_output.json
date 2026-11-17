@@ -1,0 +1,161 @@
+{
+  "case_id": "DD-001",
+  "kernel_id": "FIRST_PRINCIPLES",
+  "findings": [
+    {
+      "finding_id": "FP-001",
+      "finding_type": "REQUIREMENT_ASSESSMENT",
+      "target_type": "REQUIREMENT",
+      "target_id": "R1",
+      "evidence_ids": ["E3"],
+      "content": "Questionnaire completion is a necessary condition with no substitute; E3 establishes it is not met.",
+      "status": "NOT_SATISFIED",
+      "severity": "HIGH",
+      "confidence": 0.95
+    },
+    {
+      "finding_id": "FP-002",
+      "finding_type": "REQUIREMENT_ASSESSMENT",
+      "target_type": "REQUIREMENT",
+      "target_id": "R2",
+      "evidence_ids": ["E3"],
+      "content": "A SOC 2 or equivalent is a necessary condition with no substitute; E3 establishes it is not met.",
+      "status": "NOT_SATISFIED",
+      "severity": "HIGH",
+      "confidence": 0.95
+    },
+    {
+      "finding_id": "FP-003",
+      "finding_type": "REQUIREMENT_ASSESSMENT",
+      "target_type": "REQUIREMENT",
+      "target_id": "R3",
+      "evidence_ids": [],
+      "content": "No evidence establishes whether this necessary condition is met.",
+      "status": "UNKNOWN",
+      "severity": "MEDIUM",
+      "confidence": 0.8
+    },
+    {
+      "finding_id": "FP-004",
+      "finding_type": "REQUIREMENT_ASSESSMENT",
+      "target_type": "REQUIREMENT",
+      "target_id": "R4",
+      "evidence_ids": [],
+      "content": "No evidence establishes whether this necessary condition is met.",
+      "status": "UNKNOWN",
+      "severity": "MEDIUM",
+      "confidence": 0.8
+    },
+    {
+      "finding_id": "FP-005",
+      "finding_type": "ASSUMPTION",
+      "target_type": "POLICY",
+      "target_id": "R1",
+      "evidence_ids": ["E3"],
+      "content": "Security questionnaire completion is a necessary condition for technical due diligence; no alternative evidence substitutes for direct completion evidence.",
+      "severity": "HIGH",
+      "confidence": 0.9
+    },
+    {
+      "finding_id": "FP-006",
+      "finding_type": "ASSUMPTION",
+      "target_type": "POLICY",
+      "target_id": "R2",
+      "evidence_ids": ["E3"],
+      "content": "SOC 2 or equivalent is a necessary condition; revenue growth (E1) does not substitute for security assurance.",
+      "severity": "HIGH",
+      "confidence": 0.9
+    },
+    {
+      "finding_id": "FP-007",
+      "finding_type": "GAP",
+      "target_type": "REQUIREMENT",
+      "target_id": "R3",
+      "evidence_ids": [],
+      "content": "No evidence addresses technical architecture; this is a necessary condition gap for technical due diligence.",
+      "severity": "MEDIUM",
+      "confidence": 0.85
+    },
+    {
+      "finding_id": "FP-008",
+      "finding_type": "GAP",
+      "target_type": "REQUIREMENT",
+      "target_id": "R4",
+      "evidence_ids": [],
+      "content": "No evidence addresses penetration testing; this is a necessary condition gap for security due diligence.",
+      "severity": "MEDIUM",
+      "confidence": 0.85
+    },
+    {
+      "finding_id": "FP-009",
+      "finding_type": "EVIDENCE_RELATION",
+      "target_type": "CLAIM",
+      "target_id": "C1",
+      "evidence_ids": ["E1"],
+      "content": "Revenue growth is not a necessary or sufficient condition for control completion.",
+      "relation": "IRRELEVANT",
+      "severity": "LOW",
+      "confidence": 0.9
+    },
+    {
+      "finding_id": "FP-010",
+      "finding_type": "EVIDENCE_RELATION",
+      "target_type": "CLAIM",
+      "target_id": "C1",
+      "evidence_ids": ["E2"],
+      "content": "Customer concentration is not a necessary or sufficient condition for control completion.",
+      "relation": "IRRELEVANT",
+      "severity": "LOW",
+      "confidence": 0.9
+    },
+    {
+      "finding_id": "FP-011",
+      "finding_type": "EVIDENCE_RELATION",
+      "target_type": "CLAIM",
+      "target_id": "C1",
+      "evidence_ids": ["E3"],
+      "content": "Failure of a necessary condition (questionnaire completion) directly contradicts the completed-controls claim.",
+      "relation": "CONTRADICTS",
+      "severity": "HIGH",
+      "confidence": 0.95
+    },
+    {
+      "finding_id": "FP-012",
+      "finding_type": "EVIDENCE_RELATION",
+      "target_type": "CLAIM",
+      "target_id": "C2",
+      "evidence_ids": ["E1"],
+      "content": "Sustained revenue growth supports an acceptable risk profile.",
+      "relation": "SUPPORTS",
+      "severity": "LOW",
+      "confidence": 0.7
+    },
+    {
+      "finding_id": "FP-013",
+      "finding_type": "EVIDENCE_RELATION",
+      "target_type": "CLAIM",
+      "target_id": "C2",
+      "evidence_ids": ["E2"],
+      "content": "Customer concentration weakens an acceptable-risk-profile claim.",
+      "relation": "WEAKENS",
+      "severity": "MEDIUM",
+      "confidence": 0.8
+    },
+    {
+      "finding_id": "FP-014",
+      "finding_type": "EVIDENCE_RELATION",
+      "target_type": "CLAIM",
+      "target_id": "C2",
+      "evidence_ids": ["E3"],
+      "content": "Failure of a necessary security condition contradicts a claim of acceptable risk.",
+      "relation": "CONTRADICTS",
+      "severity": "HIGH",
+      "confidence": 0.9
+    }
+  ],
+  "summary": "First-principles analysis confirms R1 and R2 are NOT_SATISFIED as necessary conditions with no substitutes. R3 and R4 remain UNKNOWN with identified necessary-condition gaps.",
+  "uncertainties": [
+    "Whether the policy's 'mandatory' requirements map to necessary conditions or sufficient conditions",
+    "Whether compensating controls could satisfy R3/R4 without direct evidence"
+  ]
+}

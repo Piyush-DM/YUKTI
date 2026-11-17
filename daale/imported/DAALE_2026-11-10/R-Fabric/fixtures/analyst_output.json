@@ -1,0 +1,174 @@
+{
+  "case_id": "DD-001",
+  "kernel_id": "ANALYST",
+  "findings": [
+    {
+      "finding_id": "ANL-001",
+      "finding_type": "CLAIM_ASSESSMENT",
+      "target_type": "CLAIM",
+      "target_id": "C1",
+      "evidence_ids": ["E1", "E2", "E3"],
+      "content": "The security-and-technical-diligence claim is contradicted: E3 establishes an incomplete questionnaire and no SOC 2 report, and E1/E2 are irrelevant to it.",
+      "status": "CONTRADICTED",
+      "severity": "HIGH",
+      "confidence": 0.85
+    },
+    {
+      "finding_id": "ANL-002",
+      "finding_type": "EVIDENCE_RELATION",
+      "target_type": "CLAIM",
+      "target_id": "C1",
+      "evidence_ids": ["E1"],
+      "content": "Revenue growth has no bearing on completion of security or technical due-diligence controls.",
+      "relation": "IRRELEVANT",
+      "severity": "LOW",
+      "confidence": 0.9
+    },
+    {
+      "finding_id": "ANL-003",
+      "finding_type": "EVIDENCE_RELATION",
+      "target_type": "CLAIM",
+      "target_id": "C1",
+      "evidence_ids": ["E2"],
+      "content": "Customer concentration has no bearing on completion of security or technical due-diligence controls.",
+      "relation": "IRRELEVANT",
+      "severity": "LOW",
+      "confidence": 0.9
+    },
+    {
+      "finding_id": "ANL-004",
+      "finding_type": "EVIDENCE_RELATION",
+      "target_type": "CLAIM",
+      "target_id": "C1",
+      "evidence_ids": ["E3"],
+      "content": "An incomplete questionnaire and missing SOC 2 report directly contradict completion of the required controls.",
+      "relation": "CONTRADICTS",
+      "severity": "HIGH",
+      "confidence": 0.95
+    },
+    {
+      "finding_id": "ANL-005",
+      "finding_type": "CLAIM_ASSESSMENT",
+      "target_type": "CLAIM",
+      "target_id": "C2",
+      "evidence_ids": ["E1", "E2", "E3"],
+      "content": "The acceptable-risk-profile claim is contradicted: the unresolved security gap in E3 outweighs the favorable signal in E1, and E2 raises independent concentration risk.",
+      "status": "CONTRADICTED",
+      "severity": "HIGH",
+      "confidence": 0.8
+    },
+    {
+      "finding_id": "ANL-006",
+      "finding_type": "EVIDENCE_RELATION",
+      "target_type": "CLAIM",
+      "target_id": "C2",
+      "evidence_ids": ["E1"],
+      "content": "Sustained revenue growth is a favorable signal for an acceptable risk profile.",
+      "relation": "SUPPORTS",
+      "severity": "LOW",
+      "confidence": 0.7
+    },
+    {
+      "finding_id": "ANL-007",
+      "finding_type": "EVIDENCE_RELATION",
+      "target_type": "CLAIM",
+      "target_id": "C2",
+      "evidence_ids": ["E2"],
+      "content": "42 percent customer concentration is an unmitigated risk factor that weakens the risk-profile claim.",
+      "relation": "WEAKENS",
+      "severity": "MEDIUM",
+      "confidence": 0.8
+    },
+    {
+      "finding_id": "ANL-008",
+      "finding_type": "EVIDENCE_RELATION",
+      "target_type": "CLAIM",
+      "target_id": "C2",
+      "evidence_ids": ["E3"],
+      "content": "An unresolved security gap directly contradicts a claim of acceptable risk.",
+      "relation": "CONTRADICTS",
+      "severity": "HIGH",
+      "confidence": 0.9
+    },
+    {
+      "finding_id": "ANL-009",
+      "finding_type": "REQUIREMENT_ASSESSMENT",
+      "target_type": "REQUIREMENT",
+      "target_id": "R1",
+      "evidence_ids": ["E3"],
+      "content": "E3 explicitly states the security questionnaire is incomplete, which directly establishes non-completion.",
+      "status": "NOT_SATISFIED",
+      "severity": "HIGH",
+      "confidence": 0.95
+    },
+    {
+      "finding_id": "ANL-010",
+      "finding_type": "REQUIREMENT_ASSESSMENT",
+      "target_type": "REQUIREMENT",
+      "target_id": "R2",
+      "evidence_ids": ["E3"],
+      "content": "E3 states no SOC 2 report was supplied and does not mention an accepted equivalent assurance.",
+      "status": "NOT_SATISFIED",
+      "severity": "HIGH",
+      "confidence": 0.95
+    },
+    {
+      "finding_id": "ANL-011",
+      "finding_type": "REQUIREMENT_ASSESSMENT",
+      "target_type": "REQUIREMENT",
+      "target_id": "R3",
+      "evidence_ids": [],
+      "content": "No supplied evidence addresses technical architecture documentation in either direction.",
+      "status": "UNKNOWN",
+      "severity": "MEDIUM",
+      "confidence": 0.8
+    },
+    {
+      "finding_id": "ANL-012",
+      "finding_type": "REQUIREMENT_ASSESSMENT",
+      "target_type": "REQUIREMENT",
+      "target_id": "R4",
+      "evidence_ids": [],
+      "content": "No supplied evidence addresses a penetration-test report in either direction.",
+      "status": "UNKNOWN",
+      "severity": "MEDIUM",
+      "confidence": 0.8
+    },
+    {
+      "finding_id": "ANL-013",
+      "finding_type": "UNCERTAINTY",
+      "target_type": "GENERAL",
+      "target_id": "C1",
+      "evidence_ids": [],
+      "content": "No evidence addresses technical architecture documentation.",
+      "severity": "MEDIUM",
+      "confidence": 0.7
+    },
+    {
+      "finding_id": "ANL-014",
+      "finding_type": "UNCERTAINTY",
+      "target_type": "GENERAL",
+      "target_id": "C1",
+      "evidence_ids": [],
+      "content": "No evidence addresses penetration testing.",
+      "severity": "MEDIUM",
+      "confidence": 0.7
+    },
+    {
+      "finding_id": "ANL-015",
+      "finding_type": "UNCERTAINTY",
+      "target_type": "GENERAL",
+      "target_id": "C2",
+      "evidence_ids": [],
+      "content": "The case contains no declared tolerance threshold for customer concentration.",
+      "severity": "MEDIUM",
+      "confidence": 0.7
+    }
+  ],
+  "summary": "Critical security requirements R1 and R2 are NOT_SATISFIED per E3. R3 and R4 are UNKNOWN with no evidence. Both claims are CONTRADICTED by security gaps.",
+  "uncertainties": [
+    "No evidence addresses technical architecture documentation.",
+    "No evidence addresses penetration testing.",
+    "The case contains no declared tolerance threshold for customer concentration."
+  ]
+}

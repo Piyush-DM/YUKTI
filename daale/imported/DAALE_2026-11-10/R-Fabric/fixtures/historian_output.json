@@ -1,0 +1,163 @@
+{
+  "case_id": "DD-001",
+  "kernel_id": "HISTORIAN",
+  "findings": [
+    {
+      "finding_id": "HIST-001",
+      "finding_type": "CLAIM_ASSESSMENT",
+      "target_type": "CLAIM",
+      "target_id": "C1",
+      "evidence_ids": ["E3"],
+      "content": "Precedent aligns with the analyst: an unresolved security gap contradicts a completed-controls claim.",
+      "status": "CONTRADICTED",
+      "severity": "HIGH",
+      "confidence": 0.85
+    },
+    {
+      "finding_id": "HIST-002",
+      "finding_type": "CLAIM_ASSESSMENT",
+      "target_type": "CLAIM",
+      "target_id": "C2",
+      "evidence_ids": ["E1", "E2", "E3"],
+      "content": "Historical pattern: unresolved security gaps combined with customer concentration have contradicted acceptable-risk claims in comparable cases.",
+      "status": "CONTRADICTED",
+      "severity": "HIGH",
+      "confidence": 0.8
+    },
+    {
+      "finding_id": "HIST-003",
+      "finding_type": "REQUIREMENT_ASSESSMENT",
+      "target_type": "REQUIREMENT",
+      "target_id": "R1",
+      "evidence_ids": ["E3"],
+      "content": "E3 establishes the questionnaire is incomplete, matching the pattern of NOT_SATISFIED in precedent cases with identical evidence.",
+      "status": "NOT_SATISFIED",
+      "severity": "HIGH",
+      "confidence": 0.9
+    },
+    {
+      "finding_id": "HIST-004",
+      "finding_type": "REQUIREMENT_ASSESSMENT",
+      "target_type": "REQUIREMENT",
+      "target_id": "R2",
+      "evidence_ids": ["E3"],
+      "content": "E3 establishes no SOC 2 report was supplied, matching the pattern of NOT_SATISFIED in precedent cases with identical evidence.",
+      "status": "NOT_SATISFIED",
+      "severity": "HIGH",
+      "confidence": 0.9
+    },
+    {
+      "finding_id": "HIST-005",
+      "finding_type": "REQUIREMENT_ASSESSMENT",
+      "target_type": "REQUIREMENT",
+      "target_id": "R3",
+      "evidence_ids": [],
+      "content": "No evidence addresses this requirement in either direction.",
+      "status": "UNKNOWN",
+      "severity": "MEDIUM",
+      "confidence": 0.7
+    },
+    {
+      "finding_id": "HIST-006",
+      "finding_type": "REQUIREMENT_ASSESSMENT",
+      "target_type": "REQUIREMENT",
+      "target_id": "R4",
+      "evidence_ids": [],
+      "content": "No evidence addresses this requirement in either direction.",
+      "status": "UNKNOWN",
+      "severity": "MEDIUM",
+      "confidence": 0.7
+    },
+    {
+      "finding_id": "HIST-007",
+      "finding_type": "RISK",
+      "target_type": "GENERAL",
+      "target_id": "GENERAL",
+      "evidence_ids": ["E3"],
+      "content": "Historical pattern: vendors with incomplete security questionnaires at DD stage typically fail remediation within 6 months post-approval.",
+      "severity": "HIGH",
+      "confidence": 0.65
+    },
+    {
+      "finding_id": "HIST-008",
+      "finding_type": "RISK",
+      "target_type": "GENERAL",
+      "target_id": "GENERAL",
+      "evidence_ids": ["E2"],
+      "content": "Customer concentration >40% correlates with post-acquisition revenue shock in 68% of historical cases when vendor has security gaps.",
+      "severity": "MEDIUM",
+      "confidence": 0.55
+    },
+    {
+      "finding_id": "HIST-009",
+      "finding_type": "EVIDENCE_RELATION",
+      "target_type": "CLAIM",
+      "target_id": "C1",
+      "evidence_ids": ["E1"],
+      "content": "Revenue growth has no bearing on completion of security or technical due-diligence controls.",
+      "relation": "IRRELEVANT",
+      "severity": "LOW",
+      "confidence": 0.8
+    },
+    {
+      "finding_id": "HIST-010",
+      "finding_type": "EVIDENCE_RELATION",
+      "target_type": "CLAIM",
+      "target_id": "C1",
+      "evidence_ids": ["E2"],
+      "content": "Customer concentration has no bearing on completion of security or technical due-diligence controls.",
+      "relation": "IRRELEVANT",
+      "severity": "LOW",
+      "confidence": 0.8
+    },
+    {
+      "finding_id": "HIST-011",
+      "finding_type": "EVIDENCE_RELATION",
+      "target_type": "CLAIM",
+      "target_id": "C1",
+      "evidence_ids": ["E3"],
+      "content": "An incomplete questionnaire and missing SOC 2 report contradict completion of the required controls.",
+      "relation": "CONTRADICTS",
+      "severity": "HIGH",
+      "confidence": 0.9
+    },
+    {
+      "finding_id": "HIST-012",
+      "finding_type": "EVIDENCE_RELATION",
+      "target_type": "CLAIM",
+      "target_id": "C2",
+      "evidence_ids": ["E1"],
+      "content": "Sustained revenue growth supports an acceptable risk profile.",
+      "relation": "SUPPORTS",
+      "severity": "LOW",
+      "confidence": 0.7
+    },
+    {
+      "finding_id": "HIST-013",
+      "finding_type": "EVIDENCE_RELATION",
+      "target_type": "CLAIM",
+      "target_id": "C2",
+      "evidence_ids": ["E2"],
+      "content": "Customer concentration weakens an acceptable-risk-profile claim.",
+      "relation": "WEAKENS",
+      "severity": "MEDIUM",
+      "confidence": 0.75
+    },
+    {
+      "finding_id": "HIST-014",
+      "finding_type": "EVIDENCE_RELATION",
+      "target_type": "CLAIM",
+      "target_id": "C2",
+      "evidence_ids": ["E3"],
+      "content": "An unresolved security gap contradicts a claim of acceptable risk.",
+      "relation": "CONTRADICTS",
+      "severity": "HIGH",
+      "confidence": 0.85
+    }
+  ],
+  "summary": "Historical pattern analysis aligns with analyst: R1/R2 NOT_SATISFIED, R3/R4 UNKNOWN. Precedent suggests security gaps at this stage persist post-approval. Concentration risk compounds technical risk.",
+  "uncertainties": [
+    "Whether current vendor differs from historical cohort in remediation capacity",
+    "Whether institutional policy has changed since precedent cases"
+  ]
+}
