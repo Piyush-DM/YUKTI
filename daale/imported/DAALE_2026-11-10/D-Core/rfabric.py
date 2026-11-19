@@ -49,6 +49,13 @@ object back knows which contract actually produced it, rather than a version
 string quietly overclaiming compliance with the canonical freeze -- the thing
 the project's own rules name as something not to do.
 
+For arbitration only, the bridge also derives a versioned
+``rfabric-arbitration/1.0`` sidecar from recorded claim assessments and the
+decision packet's requirement summary. The sidecar is SHA-256-bound to the
+unchanged decision packet and carries the evidence IDs needed by the existing
+same-evidence contradiction check. It is not a second decision or a rewrite
+of the packet committed by the gate.
+
 What is still not solved by any of this
 -----------------------------------------
 
@@ -80,6 +87,13 @@ from daale.execution import (
     ExecutionSummary,
     GateOutcome,
     ReasoningStateStore,
+)
+from daale.execution.arbitration_packet import (
+    ARBITRATION_PACKET_SCHEMA,
+    ArbitrationPacketError,
+    EvidenceBoundStatus,
+    RFabricArbitrationPacket,
+    decision_packet_digest,
 )
 
 # R-Fabric's decision packet is deterministic policy output, not model
@@ -311,6 +325,103 @@ def build_candidate(
         needs_review=bool(
             decision_packet.get("execution_integrity", {}).get("requires_human_review", False)
         ),
+        arbitration_packet=build_arbitration_packet(trace),
+    )
+
+
+def _claim_evidence_ids(trace: Mapping[str, Any], claim_id: str, status: str) -> tuple[str, ...]:
+    """Extract evidence cited by findings that support the final claim status.
+
+    Current traces use unified findings. The legacy ``claim_analyses`` branch
+    supports saved pre-unification traces; it remains evidence-bound and only
+    treats explicit CONTRADICTS relations as support for a CONTRADICTED status.
+    """
+    evidence_ids: set[str] = set()
+    for kernel_data in trace.get("provisional_findings", {}).values():
+        for finding in kernel_data.get("findings", []):
+            if finding.get("finding_type") == "CLAIM_ASSESSMENT" and finding.get("target_id") == claim_id:
+                if finding.get("status") == status:
+                    evidence_ids.update(finding.get("evidence_ids", []))
+            elif (
+                finding.get("finding_type") == "EVIDENCE_RELATION"
+                and finding.get("target_type") == "CLAIM"
+                and finding.get("target_id") == claim_id
+                and (
+                    (status == "CONTRADICTED" and finding.get("relation") == "CONTRADICTS")
+                    or (status == "SUPPORTED" and finding.get("relation") == "SUPPORTS")
+                )
+            ):
+                evidence_ids.update(finding.get("evidence_ids", []))
+
+        # Historical R-Fabric traces used this shape before the unified findings schema.
+        for analysis in kernel_data.get("claim_analyses", []):
+            if analysis.get("claim_id") != claim_id or analysis.get("provisional_status") != status:
+                continue
+            wanted_relation = "CONTRADICTS" if status == "CONTRADICTED" else "SUPPORTS"
+            evidence_ids.update(
+                relation["evidence_id"]
+                for relation in analysis.get("evidence_relations", [])
+                if relation.get("relation") == wanted_relation
+                and isinstance(relation.get("evidence_id"), str)
+            )
+    return tuple(sorted(evidence_ids))
+
+
+def build_arbitration_packet(trace: Mapping[str, Any]) -> RFabricArbitrationPacket:
+    """Translate a persisted R-Fabric trace into the versioned D-Core arbitration schema.
+
+    The decision packet stays untouched. Claim evidence comes from the recorded
+    kernel findings; requirement evidence comes from the deterministic summary.
+    """
+    decision_packet = trace.get("decision_packet")
+    if not isinstance(decision_packet, Mapping):
+        raise ArbitrationPacketError("R-Fabric trace has no decision_packet object")
+
+    statuses = decision_packet.get("provisional_claim_statuses")
+    requirements = decision_packet.get("requirement_summary")
+    if not isinstance(statuses, Mapping) or not isinstance(requirements, Mapping):
+        raise ArbitrationPacketError(
+            "R-Fabric decision packet needs provisional_claim_statuses and requirement_summary objects"
+        )
+
+    declared_claims = {
+        item.get("claim_id") for item in trace.get("case", {}).get("claims", [])
+        if isinstance(item, Mapping) and isinstance(item.get("claim_id"), str)
+    }
+    unknown_claims = set(statuses) - declared_claims
+    if unknown_claims:
+        raise ArbitrationPacketError(
+            "decision packet contains undeclared claim IDs: " + ", ".join(sorted(unknown_claims))
+        )
+
+    claim_entries = tuple(
+        EvidenceBoundStatus(
+            object_id=claim_id,
+            status=status,
+            evidence_ids=_claim_evidence_ids(trace, claim_id, status),
+        )
+        for claim_id, status in sorted(statuses.items())
+    )
+    requirement_entries = []
+    for requirement_id, summary in sorted(requirements.items()):
+        if not isinstance(summary, Mapping):
+            raise ArbitrationPacketError(f"requirement {requirement_id}: summary must be an object")
+        evidence_ids = summary.get("evidence_ids", [])
+        if not isinstance(evidence_ids, (list, tuple)):
+            raise ArbitrationPacketError(f"requirement {requirement_id}: evidence_ids must be a list")
+        requirement_entries.append(
+            EvidenceBoundStatus(
+                object_id=requirement_id,
+                status=summary.get("status"),
+                evidence_ids=tuple(sorted(set(evidence_ids))),
+            )
+        )
+
+    return RFabricArbitrationPacket(
+        schema_version=ARBITRATION_PACKET_SCHEMA,
+        decision_packet_sha256=decision_packet_digest(decision_packet),
+        claims=claim_entries,
+        requirements=tuple(requirement_entries),
     )
 
 

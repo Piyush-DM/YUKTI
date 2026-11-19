@@ -67,6 +67,15 @@ candidate carrying `origin="rfabric"`, which was already in
 still does not evaluate and `test_the_d_core_has_no_evaluator` still guards
 exactly the same set of forbidden methods.
 
+The bridge also derives a typed `rfabric-arbitration/1.0` sidecar for the
+existing internal contradiction check. It binds claim statuses and their
+recorded evidence IDs, plus requirement statuses and evidence IDs, to the
+SHA-256 of the original R-Fabric decision packet. The gate keeps the original
+decision packet as its candidate payload; the sidecar supplies only the
+evidence context the check already requires. A contradicted claim without
+that context fails closed. The contract is defined in
+`execution/arbitration_packet.py`.
+
 Run it from the repository directory:
 
 ```powershell

@@ -26,6 +26,7 @@ from enum import Enum
 from typing import Any, Mapping
 
 from daale.execution.commit import Candidate, CandidateState, GateCheck, CheckStatus
+from daale.execution.arbitration_packet import decision_packet_digest
 
 
 class ArbitrationOutcome(Enum):
@@ -111,23 +112,41 @@ def _has_internal_contradiction(candidate: Candidate) -> tuple[bool, str]:
     Returns (has_contradiction, detail).
     """
     payload = candidate.payload
-    provisional = payload.get("provisional_claim_statuses", {})
-    requirement_summary = payload.get("requirement_summary", {})
+    arbitration_packet = candidate.arbitration_packet
+    if arbitration_packet is None:
+        # A flat R-Fabric status map cannot establish whether the contradictory claim
+        # and satisfied requirement relied on the same source. Fail closed instead of
+        # quietly turning the evidence-sensitive check into a no-op.
+        provisional = payload.get("provisional_claim_statuses", {})
+        if isinstance(provisional, Mapping) and any(
+            status == "CONTRADICTED" for status in provisional.values()
+        ):
+            return True, (
+                "R-Fabric arbitration packet is required to verify claim/requirement "
+                "evidence overlap"
+            )
+        return False, ""
 
-    # Check: claim status CONTRADICTED but requirement SATISFIED on same evidence
-    for claim_id, status in provisional.items():
-        if status == "CONTRADICTED":
-            for req_id, req_data in requirement_summary.items():
-                if req_data.get("status") == "SATISFIED":
-                    shared_evidence = set(provisional.get(claim_id, {}).get("evidence_ids", [])) & set(req_data.get("evidence_ids", []))
-                    if shared_evidence:
-                        return True, f"Claim {claim_id} contradicted but requirement {req_id} satisfied on shared evidence {shared_evidence}"
+    if arbitration_packet.decision_packet_sha256 != decision_packet_digest(payload):
+        return True, "R-Fabric arbitration packet digest does not match candidate decision packet"
 
-    # Check: multiple conflicting claim statuses for same claim (shouldn't happen in valid payload)
-    if len(provisional) != len(set(provisional.keys())):
-        return True, "Duplicate claim IDs in provisional_claim_statuses"
+    # Check: claim status CONTRADICTED but requirement SATISFIED on same evidence.
+    for claim in arbitration_packet.claims:
+        if claim.status != "CONTRADICTED":
+            continue
+        claim_evidence = set(claim.evidence_ids)
+        for requirement in arbitration_packet.requirements:
+            if requirement.status != "SATISFIED":
+                continue
+            shared_evidence = claim_evidence & set(requirement.evidence_ids)
+            if shared_evidence:
+                rendered = ", ".join(sorted(shared_evidence))
+                return True, (
+                    f"Claim {claim.object_id} contradicted but requirement "
+                    f"{requirement.object_id} satisfied on shared evidence [{rendered}]"
+                )
 
-    return False, ""
+    return False, f"No same-evidence contradiction (schema {arbitration_packet.schema_version})"
 
 
 def _compare_candidates(a: Candidate, b: Candidate) -> int:

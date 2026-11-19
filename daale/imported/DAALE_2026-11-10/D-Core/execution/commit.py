@@ -55,6 +55,7 @@ from enum import Enum
 from typing import Any, Mapping
 
 from daale.execution.contract import ContractResult
+from daale.execution.arbitration_packet import RFabricArbitrationPacket
 from daale.execution.state import (
     ExecutionLease,
     ReasoningStateStore,
@@ -117,6 +118,10 @@ class Candidate:
     # The proposer's own flag that a human must look at this before it may become
     # canonical, whatever its origin. It can only escalate (see ``run_gate``).
     needs_review: bool = False
+    # Additional, versioned source evidence needed for R-Fabric/D-Core arbitration.
+    # It is kept out of ``payload`` so the committed decision packet stays byte-for-byte
+    # the R-Fabric packet and historical replay remains unchanged.
+    arbitration_packet: RFabricArbitrationPacket | None = None
 
 
 @dataclass(frozen=True)
