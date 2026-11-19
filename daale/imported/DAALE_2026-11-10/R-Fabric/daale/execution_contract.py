@@ -54,6 +54,14 @@ class FailureMode(Enum):
     # same limit would be cut off at the same place.
     OUTPUT_TRUNCATED = "output-truncated"
 
+    # The provider answered, and said this request cannot succeed as sent. Added 2026-11-17 after a
+    # live run in which an HTTP 404 ("no longer available to new users") was filed under
+    # KERNEL_CRASH: retried on the same dead model, and the configured fallback was never tried.
+    # None of these is retried on the same model (it would fail identically).
+    MODEL_NOT_AVAILABLE = "model-not-available"        # 404, 410: this model is gone or not open to this key
+    AUTHENTICATION_FAILED = "authentication-failed"    # 401, 403: the key or its permissions, not the model
+    REQUEST_REJECTED = "request-rejected"              # 400, 413, 422: the model refused this request as written
+
     # Structural failures
     DUPLICATE_RUN_DETECTED = "duplicate-run-detected"
     INVALID_CONFIGURATION = "invalid-configuration"
@@ -217,6 +225,30 @@ FAILURE_RULES: tuple[FailureRule, ...] = (
         degradation_mode=DegradationMode.DEGRADE,
     ),
 
+    # Permanent for this model: one attempt, then the pipeline decides whether a fallback is tried.
+    # They need an operator (a model to replace, a key to fix, a request to shrink), so a human is told.
+    FailureRule(
+        failure_mode=FailureMode.MODEL_NOT_AVAILABLE,
+        applicable_roles=(KernelRole.BASE, KernelRole.ADVERSARY),
+        retry_policy=None,
+        degradation_mode=DegradationMode.DEGRADE,
+        requires_human_review=True,
+    ),
+    FailureRule(
+        failure_mode=FailureMode.AUTHENTICATION_FAILED,
+        applicable_roles=(KernelRole.BASE, KernelRole.ADVERSARY),
+        retry_policy=None,
+        degradation_mode=DegradationMode.DEGRADE,
+        requires_human_review=True,
+    ),
+    FailureRule(
+        failure_mode=FailureMode.REQUEST_REJECTED,
+        applicable_roles=(KernelRole.BASE, KernelRole.ADVERSARY),
+        retry_policy=None,
+        degradation_mode=DegradationMode.DEGRADE,
+        requires_human_review=True,
+    ),
+
     # Daily request budget spent - no retry (it would only wait for midnight)
     FailureRule(
         failure_mode=FailureMode.QUOTA_EXHAUSTED,
@@ -320,7 +352,20 @@ def classify_failure(exception: Exception, http_status: Optional[int] = None) ->
     # HTTP status based classification
     if http_status is not None:
         if http_status == 429:
+            # A per-day limit will not lift in a retry window. The wording is checked, not assumed:
+            # no 429 body has been captured in the saved traces, so this match is unverified against
+            # Google's real payload (it is believed to name a "...PerDay..." quota).
+            if "perday" in error_msg.replace("_", "").replace(" ", "").replace("-", ""):
+                return FailureMode.QUOTA_EXHAUSTED
             return FailureMode.PROVIDER_RATE_LIMIT
+        if http_status == 408:
+            return FailureMode.MODEL_TIMEOUT
+        if http_status in (404, 410):
+            return FailureMode.MODEL_NOT_AVAILABLE
+        if http_status in (401, 403):
+            return FailureMode.AUTHENTICATION_FAILED
+        if http_status in (400, 413, 422):
+            return FailureMode.REQUEST_REJECTED
         if http_status >= 500:
             if http_status in (502, 503, 504):
                 return FailureMode.TRANSIENT_PROVIDER_ERROR

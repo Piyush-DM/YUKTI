@@ -25,8 +25,8 @@ from .execution_contract import (
     worse_degradation,
 )
 from .policy_engine import apply_policy
-from .prompts import build_adversary_messages, build_kernel_messages
-from .schemas import KERNEL_OUTPUT_SCHEMA
+from .prompts import build_adversary_messages, build_kernel_messages, wants_quotes
+from .schemas import kernel_output_schema
 from .trace import hash_value, new_run_identity
 from .validation import (
     DaaleValidationError,
@@ -125,6 +125,11 @@ _FALLBACK_MODES = {
     FailureMode.OUTPUT_TRUNCATED,
     FailureMode.MALFORMED_JSON,
     FailureMode.SCHEMA_VALIDATION_FAILED,
+    # The model is gone, or refused this request as written; another model may not share that.
+    FailureMode.MODEL_NOT_AVAILABLE,
+    FailureMode.REQUEST_REJECTED,
+    # Not AUTHENTICATION_FAILED: the key is shared by every model on the endpoint, so a fallback
+    # would fail the same way and spend a request doing it.
 }
 
 
@@ -468,6 +473,7 @@ class DaalePipeline:
             attempt += 1
             started = time.monotonic()
             record = None
+            ceiling_used = None  # the completion-token ceiling this attempt ran under, for the audit record
             logger.info("%s: calling %s (attempt %d)", kernel_id, model, attempt)
             try:
                 if role is KernelRole.ADVERSARY:
@@ -488,16 +494,21 @@ class DaalePipeline:
                 if repair:
                     messages = messages + repair
                 extra = {}
+                ceiling_used = None
+                max_tokens_for = getattr(self.client, "max_tokens_for", None)
+                if max_tokens_for is not None:
+                    ceiling_used = max_tokens_for(kernel_id.lower())
                 if boost_tokens and escalate is not None:
                     ceiling = escalate(kernel_id.lower())
                     if ceiling > self.client.max_tokens_for(kernel_id.lower()):
                         extra["max_tokens"] = ceiling
+                        ceiling_used = ceiling
                         logger.info("%s: ceiling raised to %d tokens for this attempt", kernel_id, ceiling)
                 record = self.client.complete_json(
                     purpose=kernel_id.lower(),
                     model=model,
                     messages=messages,
-                    schema=KERNEL_OUTPUT_SCHEMA,
+                    schema=kernel_output_schema(wants_quotes(policy)),
                     **extra,
                 )
                 if role is KernelRole.ADVERSARY:
@@ -548,7 +559,7 @@ class DaalePipeline:
                     "kernel-failed", case["case_id"], kernel_id,
                     f"{kernel_id} attempt {attempt} failed: {failure_mode.value}: {error}",
                     {"attempt": attempt, "failure_mode": failure_mode.value,
-                     "error": str(error), "model": model},
+                     "error": str(error), "model": model, "max_tokens": ceiling_used},
                 ))
 
                 allowed = rule.retry_policy.max_attempts if rule and rule.retry_policy else 1
@@ -602,7 +613,7 @@ class DaalePipeline:
             events.append(make_audit_event(
                 "kernel-succeeded", case["case_id"], kernel_id,
                 f"{kernel_id} succeeded on attempt {attempt}",
-                {"attempt": attempt, "model": model},
+                {"attempt": attempt, "model": model, "max_tokens": ceiling_used},
             ))
             return _KernelRun(
                 result=KernelExecutionResult(

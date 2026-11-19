@@ -5,6 +5,7 @@ import json
 from .schemas import (
     ANALYST_OUTPUT_SCHEMA,
     KERNEL_OUTPUT_SCHEMA,
+    kernel_output_schema,
 )
 
 
@@ -60,10 +61,18 @@ _MANDATORY_RELATION_MATRIX_INSTRUCTION = (
 # showed OUTSIDER writing NOT_SATISFIED there, which validation rejects. These two
 # prompts used to carry the Adversary's wording instead, which also told them to
 # return an empty findings array and so contradicted the mandatory relation matrix.
-_QUOTES_NOTE = (
-    "The quotes are checked mechanically against the evidence text; a contradiction "
-    "without verbatim quotes from two items is not counted as high severity."
+# Added only when the policy asks for grounded contradictions (contradiction_grounding "quoted"), so a
+# policy that does not ask sends exactly the prompt and schema it sent before the quotes field existed.
+_QUOTES_INSTRUCTION = (
+    "A CONTRADICTION finding must also carry a 'quotes' array holding, for each of at least two of the "
+    "evidence items it cites, the exact words copied from that item that conflict. The quotes are "
+    "checked mechanically against the evidence text; a contradiction without verbatim quotes from "
+    "two items is not counted as high severity."
 )
+
+
+def wants_quotes(policy):
+    return (policy or {}).get("contradiction_grounding") == "quoted"
 
 _CHALLENGE_INSTRUCTION = (
     "A CHALLENGE finding targets an existing claim or requirement; its 'status' "
@@ -73,9 +82,7 @@ _CHALLENGE_INSTRUCTION = (
     "status: to say a requirement is not met, write a REQUIREMENT_ASSESSMENT "
     "finding instead, and keep your reasoning in 'content'. A CONTRADICTION "
     "finding targets a claim and cites at least two evidence items that "
-    "materially conflict; its description goes in 'content', and its 'quotes' "
-    "array holds, for each of at least two cited items, the exact words copied "
-    "from that item that conflict. " + _QUOTES_NOTE + " Use HIGH severity "
+    "materially conflict; its description goes in 'content'. Use HIGH severity "
     "only when the challenged finding cannot safely support deterministic policy "
     "evaluation without human review. Add no more than six such findings in "
     "total, the most material ones: a long answer is cut off and fails."
@@ -169,9 +176,7 @@ KERNEL_SYSTEM_PROMPTS = {
         "verdict goes in 'status' (UNSUPPORTED, MISCLASSIFIED, AMBIGUOUS, "
         "OMITTED_EVIDENCE, POLICY_MISMATCH). A CONTRADICTION finding targets "
         "a claim and cites at least two evidence items that materially "
-        "conflict; its description goes in 'content', and its 'quotes' array holds, "
-        "for each of at least two cited items, the exact words copied from that "
-        "item that conflict. " + _QUOTES_NOTE + " "
+        "conflict; its description goes in 'content'. "
         f"{_ADVERSARY_SEVERITY_INSTRUCTION} Return empty findings array when no "
         "challenge or contradiction exists. Output findings using the shared "
         "kernel schema."
@@ -276,9 +281,12 @@ KERNEL_SYSTEM_PROMPTS = {
 
 
 def build_kernel_messages(kernel_id, case, policy, prior_outputs, native_schema):
-    schema_instruction = _schema_instruction(KERNEL_OUTPUT_SCHEMA, native_schema)
+    grounded = wants_quotes(policy)
+    schema_instruction = _schema_instruction(kernel_output_schema(grounded), native_schema)
 
     system = KERNEL_SYSTEM_PROMPTS[kernel_id]
+    if grounded and kernel_id in ("CONTRARIAN", "OUTSIDER"):
+        system = f"{system} {_QUOTES_INSTRUCTION}"
 
     prior_context = ""
     if prior_outputs:
@@ -312,8 +320,11 @@ def build_adversary_messages(case, policy, base_outputs, native_schema):
 
     The adversary sees all base kernel outputs as prior_outputs.
     """
-    schema_instruction = _schema_instruction(KERNEL_OUTPUT_SCHEMA, native_schema)
+    grounded = wants_quotes(policy)
+    schema_instruction = _schema_instruction(kernel_output_schema(grounded), native_schema)
     system = KERNEL_SYSTEM_PROMPTS["ADVERSARY"]
+    if grounded:
+        system = f"{system} {_QUOTES_INSTRUCTION}"
 
     prior_context = ""
     if base_outputs:

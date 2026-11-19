@@ -1,5 +1,7 @@
 """JSON Schemas for the DAALE v0.1 boundary contracts."""
 
+import copy
+
 EVIDENCE_RELATIONS = [
     "SUPPORTS",
     "WEAKENS",
@@ -26,6 +28,7 @@ SEVERITIES = ["LOW", "MEDIUM", "HIGH"]
 REQUIREMENT_AGGREGATIONS = ["unanimous", "unanimous_definite"]
 CONTRADICTION_SOURCES = ["adversary", "any_kernel"]
 CONTRADICTION_GROUNDINGS = ["none", "quoted"]
+EVIDENCE_SCREENINGS = ["none", "flag"]
 
 POLICY_METRICS = [
     "high_adversarial_challenges",
@@ -39,6 +42,8 @@ POLICY_METRICS = [
     "contradicting_relations",
     "always",
     "ungrounded_high_contradictions",
+    "flagged_evidence_items",
+    "adopted_injected_verdicts",
 ]
 
 KERNEL_IDS = [
@@ -168,6 +173,10 @@ POLICY_SCHEMA = {
         # at least two of the evidence items it cites (checked against the case). Absent or "none"
         # means every HIGH contradiction counts, as before 2026-11-17.
         "contradiction_grounding": {"type": "string", "enum": CONTRADICTION_GROUNDINGS},
+        # Optional. "flag": the engine screens evidence for text that tries to command the reviewer and checks
+        # whether a kernel recorded the verdict such text dictated, and reports both as metrics (a policy rule
+        # may use them). Absent or "none": no screening, no extra metrics. See daale/evidence_integrity.py.
+        "evidence_screening": {"type": "string", "enum": EVIDENCE_SCREENINGS},
         "requirements": {
             "type": "array",
             "minItems": 1,
@@ -235,6 +244,26 @@ POLICY_SCHEMA = {
     ],
     "additionalProperties": False,
 }
+
+_QUOTES_PATH = ("properties", "findings", "items", "properties")
+
+
+def kernel_output_schema(with_quotes=False):
+    """The kernel output schema as shown to a model: without the ``quotes`` property unless asked.
+
+    ``KERNEL_OUTPUT_SCHEMA`` (with the optional property) is what validation checks replies against, so a
+    reply that carries quotes is accepted either way. What a model is *shown* is a different matter: a
+    policy that does not ask for grounded contradictions gets the schema it always had.
+    """
+    if with_quotes:
+        return KERNEL_OUTPUT_SCHEMA
+    stripped = copy.deepcopy(KERNEL_OUTPUT_SCHEMA)
+    node = stripped
+    for key in _QUOTES_PATH:
+        node = node[key]
+    node.pop("quotes", None)
+    return stripped
+
 
 ANALYST_OUTPUT_SCHEMA = {
     "$schema": "https://json-schema.org/draft/2020-12/schema",

@@ -2,6 +2,7 @@
 
 from collections import defaultdict
 
+from .evidence_integrity import adopted_injected_verdicts, screen_evidence
 from .validation import DaaleValidationError
 
 
@@ -315,21 +316,26 @@ def _high_base_kernel_contradictions(base_outputs, already_counted):
     same contradiction (the same claim and the same evidence items) count once. Ids are prefixed
     with the kernel that raised them.
     """
-    seen = set()
+    by_key = {}
     found = []
     for kernel_id in sorted(base_outputs, key=_kernel_rank):
         for finding in base_outputs[kernel_id]["output"].get("findings", []):
             if finding["finding_type"] != "CONTRADICTION" or finding["severity"] != "HIGH":
                 continue
             key = (finding["target_id"], tuple(sorted(finding["evidence_ids"])))
-            if key in seen:
+            if key in by_key:
+                # The same contradiction from a second kernel: keep the first id, but pool the quotes, so
+                # that grounding (contradiction_grounding) is judged on what any kernel quoted. Without
+                # this, a duplicate raised first without quotes would hide the same one raised with them.
+                by_key[key]["quotes"] = by_key[key]["quotes"] + (finding.get("quotes") or [])
                 continue
-            seen.add(key)
-            found.append({
+            entry = {
                 "contradiction_id": f"{kernel_id}:{finding['finding_id']}",
                 "evidence_ids": finding["evidence_ids"],
-                "quotes": finding.get("quotes") or [],
-            })
+                "quotes": list(finding.get("quotes") or []),
+            }
+            by_key[key] = entry
+            found.append(entry)
     return found
 
 
@@ -424,6 +430,15 @@ def compute_metrics(case, policy, all_outputs):
     if ungrounded_contradictions is not None:
         metrics["ungrounded_high_contradictions"] = len(ungrounded_contradictions)
         metrics["details"]["ungrounded_contradiction_ids"] = ungrounded_contradictions
+    if policy.get("evidence_screening", "none") == "flag":
+        flagged = screen_evidence(case)
+        adopted = adopted_injected_verdicts(flagged, base_outputs)
+        metrics["flagged_evidence_items"] = len(flagged)
+        metrics["adopted_injected_verdicts"] = len(adopted)
+        metrics["details"]["flagged_evidence"] = [
+            {"evidence_id": item["evidence_id"], "flags": item["flags"]} for item in flagged
+        ]
+        metrics["details"]["adopted_injected_verdicts"] = adopted
     return metrics
 
 

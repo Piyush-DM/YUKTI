@@ -120,6 +120,33 @@ class PolicyTests(unittest.TestCase):
         self.assertEqual(metrics["high_unresolved_contradictions"], 1)
         self.assertEqual(metrics["ungrounded_high_contradictions"], 0)
 
+    def policy_with_both(self):
+        policy = self.quoted_policy()
+        policy["contradiction_sources"] = "any_kernel"
+        return policy
+
+    def test_a_base_kernel_contradiction_without_quotes_is_set_aside_under_both_fields(self):
+        self.outputs["ADVERSARY"]["output"]["findings"] = []
+        self.outputs["CONTRARIAN"]["output"]["findings"].append(self.contradiction(None))
+        metrics = apply_policy(self.case, self.policy_with_both(), self.outputs)["metrics"]
+        self.assertEqual(metrics["high_unresolved_contradictions"], 0)
+        self.assertEqual(metrics["ungrounded_high_contradictions"], 1)
+
+    def test_a_quoted_base_kernel_contradiction_counts_under_both_fields(self):
+        self.outputs["ADVERSARY"]["output"]["findings"] = []
+        self.outputs["CONTRARIAN"]["output"]["findings"].append(self.contradiction(self.grounded_quotes()))
+        metrics = apply_policy(self.case, self.policy_with_both(), self.outputs)["metrics"]
+        self.assertEqual(metrics["high_unresolved_contradictions"], 1)
+
+    def test_the_same_contradiction_raised_first_without_quotes_is_still_grounded_by_a_later_quoted_one(self):
+        # CONTRARIAN sorts before OUTSIDER: the unquoted duplicate comes first and must not hide the quoted one.
+        self.outputs["ADVERSARY"]["output"]["findings"] = []
+        self.outputs["CONTRARIAN"]["output"]["findings"].append(self.contradiction(None))
+        self.outputs["OUTSIDER"]["output"]["findings"].append(self.contradiction(self.grounded_quotes()))
+        metrics = apply_policy(self.case, self.policy_with_both(), self.outputs)["metrics"]
+        self.assertEqual(metrics["high_unresolved_contradictions"], 1)
+        self.assertEqual(metrics["ungrounded_high_contradictions"], 0)
+
     def test_the_field_validates_and_an_unknown_value_is_refused(self):
         validate_case_and_policy(self.case, self.quoted_policy())
         bad = copy.deepcopy(self.policy)
