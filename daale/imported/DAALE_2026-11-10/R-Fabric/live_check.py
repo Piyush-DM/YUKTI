@@ -187,6 +187,7 @@ def check(base_only=False, client=None, native_json_schema=None, model_by_kernel
     pipeline = DaalePipeline(
         client=client, model_by_kernel=model_by_kernel, native_json_schema=bool(native_json_schema),
         fallback_by_kernel=fallback_by_kernel_from_env(os.environ),
+        isolate_evidence=env_bool(os.environ, "DAALE_EVIDENCE_SEPARATION"),
     )
     if base_only:
         outputs, state = pipeline._run_base_kernels(case, policy)

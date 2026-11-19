@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 
 from daale.pipeline import BASE_KERNELS
-from daale.prompts import KERNEL_SYSTEM_PROMPTS, build_kernel_messages
+from daale.prompts import KERNEL_SYSTEM_PROMPTS, _json, build_adversary_messages, build_kernel_messages
 from daale.schemas import CHALLENGE_TYPES, CLAIM_STATUSES, KERNEL_OUTPUT_SCHEMA, REQUIREMENT_STATES
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -97,6 +97,64 @@ class PromptedSchemaTests(unittest.TestCase):
 
         Draft202012Validator.check_schema(KERNEL_OUTPUT_SCHEMA)
         Draft202012Validator(KERNEL_OUTPUT_SCHEMA).validate(load("fixtures/analyst_output.json"))
+
+
+class EvidenceSeparationTests(unittest.TestCase):
+    def setUp(self):
+        self.case = load("cases/vendor_alpha.json")
+        self.policy = load("policies/vendor_post_technical_dd_v0_1.json")
+
+    def test_disabled_mode_keeps_the_existing_prompt_layout(self):
+        default = build_kernel_messages("ANALYST", self.case, self.policy, None, False)
+        explicit_off = build_kernel_messages(
+            "ANALYST", self.case, self.policy, None, False, isolate_evidence=False
+        )
+        self.assertEqual(default, explicit_off)
+        self.assertTrue(default[1]["content"].startswith(f"CASE:\n{_json(self.case)}\n\n"))
+
+    def test_enabled_mode_preserves_evidence_and_repeats_task_after_boundary(self):
+        messages = build_kernel_messages(
+            "ANALYST", self.case, self.policy, None, False, isolate_evidence=True
+        )
+        user = messages[1]["content"]
+        start = user.index("<<<YUKTI_EVIDENCE_")
+        line_end = user.index("\n", start)
+        token = user[start:line_end]
+        end = user.index(token, line_end + 1)
+        evidence_text = user[line_end + 1:end].strip()
+        self.assertEqual(json.loads(evidence_text), self.case["evidence"])
+        self.assertIn("UNTRUSTED EVIDENCE DATA BLOCK", user)
+        task_marker = "AUTHORITATIVE TASK INSTRUCTIONS (repeated after the evidence block):"
+        self.assertGreater(user.index(task_marker), end)
+        self.assertIn(messages[0]["content"], user[user.index(task_marker):])
+
+    def test_boundary_is_deterministic_and_changes_with_case_content(self):
+        first = build_kernel_messages(
+            "ANALYST", self.case, self.policy, None, False, isolate_evidence=True
+        )[1]["content"]
+        repeated = build_kernel_messages(
+            "ANALYST", self.case, self.policy, None, False, isolate_evidence=True
+        )[1]["content"]
+        changed_case = json.loads(json.dumps(self.case))
+        changed_case["evidence"][0]["text"] += " amended"
+        changed = build_kernel_messages(
+            "ANALYST", changed_case, self.policy, None, False, isolate_evidence=True
+        )[1]["content"]
+        self.assertEqual(first, repeated)
+        first_token = first[first.index("<<<YUKTI_EVIDENCE_"):].splitlines()[0]
+        changed_token = changed[changed.index("<<<YUKTI_EVIDENCE_"):].splitlines()[0]
+        self.assertNotEqual(first_token, changed_token)
+
+    def test_adversary_uses_the_same_opt_in_evidence_boundary(self):
+        messages = build_adversary_messages(
+            self.case, self.policy, {"analyst": {"findings": []}}, False,
+            isolate_evidence=True,
+        )
+        user = messages[1]["content"]
+        self.assertIn("UNTRUSTED EVIDENCE DATA BLOCK", user)
+        self.assertIn("PRIOR KERNEL OUTPUTS:", user)
+        task_marker = "AUTHORITATIVE TASK INSTRUCTIONS (repeated after the evidence block):"
+        self.assertGreater(user.index(task_marker), user.index("<<<YUKTI_EVIDENCE_"))
 
 
 if __name__ == "__main__":

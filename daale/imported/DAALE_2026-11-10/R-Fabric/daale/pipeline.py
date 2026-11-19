@@ -195,12 +195,14 @@ class DaalePipeline:
         native_json_schema=False,
         fallback_by_kernel=None,
         provider_id=None,
+        isolate_evidence=False,
     ):
         self.client = client
         self.model_by_kernel = model_by_kernel or {}
         self.native_json_schema = native_json_schema
         self.fallback_by_kernel = fallback_by_kernel or {}
         self.provider_id = provider_id or getattr(client, "provider_id", "unknown")
+        self.isolate_evidence = bool(isolate_evidence)
         self.model_chains = {}
         self.model_health = RunModelHealth()
 
@@ -607,6 +609,7 @@ class DaalePipeline:
                         policy,
                         {k: v["output"] for k, v in base_outputs.items()},
                         native_schema=self.native_json_schema,
+                        isolate_evidence=self.isolate_evidence,
                     )
                 else:
                     messages = build_kernel_messages(
@@ -615,6 +618,7 @@ class DaalePipeline:
                         policy,
                         prior_outputs=None,
                         native_schema=self.native_json_schema,
+                        isolate_evidence=self.isolate_evidence,
                     )
                 if repair:
                     messages = messages + repair

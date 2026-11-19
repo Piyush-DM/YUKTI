@@ -139,6 +139,7 @@ def main():
             model_by_kernel=model_by_kernel,
             native_json_schema=native_json_schema,
             fallback_by_kernel=fallback_by_kernel_from_env(os.environ) if args.live else None,
+            isolate_evidence=env_bool("DAALE_EVIDENCE_SEPARATION"),
         )
         result = pipeline.resume(prior_trace) if prior_trace is not None else pipeline.run(case, policy)
         trace_path = write_trace(result.trace, args.runs_dir)

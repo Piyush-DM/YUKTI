@@ -26,6 +26,7 @@ from daale.intake import IntakeError, build_case
 from daale.pipeline import DaalePipeline, budget_shortfall
 from daale.providers import (
     build_live_client,
+    env_bool,
     fallback_by_kernel_from_env,
     model_by_kernel_from_env,
     provider_name,
@@ -72,6 +73,7 @@ def create_app(
     policies,
     native_json_schema=False,
     fallback_by_kernel=None,
+    isolate_evidence=False,
     provider="unknown",
     cors_origins=(),
     max_concurrent=1,
@@ -149,6 +151,7 @@ def create_app(
                 model_by_kernel=model_by_kernel,
                 native_json_schema=native_json_schema,
                 fallback_by_kernel=fallback_by_kernel,
+                isolate_evidence=isolate_evidence,
             )
             result = pipeline.run(case, policy)
             calls, tokens = _token_totals(result.trace)
@@ -269,6 +272,7 @@ def create_app_from_env():
         policies=load_policies(ROOT / "policies"),
         native_json_schema=native,
         fallback_by_kernel=fallback_by_kernel_from_env(env),
+        isolate_evidence=env_bool(env, "DAALE_EVIDENCE_SEPARATION"),
         provider=provider_name(env),
         cors_origins=origins,
         max_concurrent=int(env.get("YUKTI_MAX_CONCURRENT_JUDGMENTS", "1")),
