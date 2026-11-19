@@ -129,10 +129,12 @@ class ResilienceTests(unittest.TestCase):
         self.assertEqual(client.count("contrarian", BACKUP), 1)
         integrity = result.decision_packet["execution_integrity"]
         self.assertEqual(integrity["base_kernels_failed"], [])
+        fallback = integrity["fallbacks_used"][0]
         self.assertEqual(
-            integrity["fallbacks_used"],
-            [{"kernel": "CONTRARIAN", "from": PRIMARY, "to": BACKUP, "reason": "output-truncated"}],
+            {key: fallback[key] for key in ("kernel", "from", "to", "reason")},
+            {"kernel": "CONTRARIAN", "from": PRIMARY, "to": BACKUP, "reason": "output-truncated"},
         )
+        self.assertEqual(fallback["models_attempted"], [PRIMARY, BACKUP])
         self.assertEqual(result.trace["model_calls"]["contrarian"]["requested_model"], BACKUP)
         self.assertEqual(result.trace["model_calls"]["analyst"]["requested_model"], PRIMARY)
 
@@ -177,8 +179,9 @@ class ResilienceTests(unittest.TestCase):
     def test_a_fallback_equal_to_the_primary_is_ignored(self):
         client = ModelClient({("outsider", PRIMARY): lambda n: unavailable()})
         pipeline = DaalePipeline(client, {"default": PRIMARY}, fallback_by_kernel={"default": PRIMARY})
-        pipeline.run(self.case, self.policy)
-        self.assertEqual(client.count("outsider", PRIMARY), 4)  # the full retry series, nothing more
+        with self.assertRaisesRegex(ValueError, "cannot repeat"):
+            pipeline.run(self.case, self.policy)
+        self.assertEqual(client.count("outsider", PRIMARY), 0)
 
     # -- the budget knows about fallbacks ----------------------------------------------
 
@@ -209,9 +212,18 @@ class ResilienceTests(unittest.TestCase):
     # -- configuration ----------------------------------------------------------------
 
     def test_fallbacks_come_from_the_environment(self):
-        env = {"DAALE_FALLBACK_MODEL": "a", "DAALE_ADVERSARY_FALLBACK_MODEL": "b"}
-        self.assertEqual(fallback_by_kernel_from_env(env), {"default": "a", "ADVERSARY": "b"})
+        env = {
+            "DAALE_FALLBACK_MODEL": "a,b",
+            "DAALE_ADVERSARY_FALLBACK_MODEL": "c,d",
+        }
+        self.assertEqual(fallback_by_kernel_from_env(env), {"default": ["a", "b"], "ADVERSARY": ["c", "d"]})
         self.assertEqual(fallback_by_kernel_from_env({}), {})
+
+    def test_fallback_chain_configuration_rejects_empty_and_overlong_lists(self):
+        with self.assertRaisesRegex(ValueError, "empty model"):
+            fallback_by_kernel_from_env({"DAALE_FALLBACK_MODEL": "backup,,last"})
+        with self.assertRaisesRegex(ValueError, "at most three fallbacks"):
+            fallback_by_kernel_from_env({"DAALE_FALLBACK_MODEL": "a,b,c,d"})
 
 
 class EscalatingClient(ModelClient):

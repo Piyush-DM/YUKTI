@@ -153,9 +153,17 @@ class DaaleModelError(RuntimeError):
     one, so the pipeline can classify it without parsing message text.
     """
 
-    def __init__(self, message, status_code=None):
+    def __init__(
+        self, message, status_code=None, *, retry_after_seconds=None,
+        request_id=None, usage=None, provider=None, attempts=None,
+    ):
         super().__init__(message)
         self.status_code = status_code
+        self.retry_after_seconds = retry_after_seconds
+        self.request_id = request_id
+        self.usage = usage or {}
+        self.provider = provider
+        self.attempts = attempts
 
 
 def _schema_rejection(error, output):
@@ -178,6 +186,7 @@ class CompletionRecord:
     served_model: str
     request_id: str
     usage: dict
+    attempts: int = 1
 
 
 _REASONING_BLOCK = re.compile(r"<(thought|think)>.*?</\1>", re.DOTALL | re.IGNORECASE)
@@ -474,6 +483,7 @@ class OpenRouterClient:
                 "usage",
                 {}
             ),
+            attempts=getattr(response, "_daale_attempts", 1),
         )
 
     def _post_with_retry(
@@ -498,6 +508,7 @@ class OpenRouterClient:
             timeout_seconds=self.timeout_seconds,
             max_attempts=self.max_attempts,
             service_name="OpenRouter",
+            provider_id=getattr(self, "provider_id", "openrouter"),
         )
 
 
@@ -592,6 +603,7 @@ class NvidiaClient:
             served_model=body.get("model", "unknown"),
             request_id=body.get("id", "unknown"),
             usage=body.get("usage", {}),
+            attempts=getattr(response, "_daale_attempts", 1),
         )
 
     def _post_with_retry(self, payload):
@@ -606,6 +618,7 @@ class NvidiaClient:
             timeout_seconds=self.timeout_seconds,
             max_attempts=self.max_attempts,
             service_name="NVIDIA",
+            provider_id=getattr(self, "provider_id", "nvidia"),
         )
 
 
@@ -693,6 +706,7 @@ class AimlApiClient:
             served_model=body.get("model", "unknown"),
             request_id=body.get("id", "unknown"),
             usage=body.get("usage", {}),
+            attempts=getattr(response, "_daale_attempts", 1),
         )
 
     def _post_with_retry(self, payload):
@@ -707,6 +721,7 @@ class AimlApiClient:
             timeout_seconds=self.timeout_seconds,
             max_attempts=self.max_attempts,
             service_name="AIML API",
+            provider_id=getattr(self, "provider_id", "aimlapi"),
         )
         return _post_json_with_retry(
             url=self.BASE_URL,
@@ -715,6 +730,7 @@ class AimlApiClient:
             timeout_seconds=self.timeout_seconds,
             max_attempts=self.max_attempts,
             service_name="NVIDIA",
+            provider_id=getattr(self, "provider_id", "nvidia"),
         )
 
 
@@ -837,32 +853,48 @@ class GenericApiClient:
             timeout_seconds=self.timeout_seconds,
             max_attempts=self.max_attempts,
             service_name="OpenAI-compatible endpoint",
+            provider_id=getattr(self, "provider_id", "generic"),
             pacer=self.pacers.for_model(model) if self.pacers is not None else None,
         )
 
         try:
             body = response.json()
             message = body["choices"][0]["message"]
-        except (ValueError, KeyError, IndexError, TypeError) as error:
-            raise DaaleModelError(
-                f"Malformed response for {purpose}: {response.text[:1200]}"
-            ) from error
+            if body["choices"][0].get("finish_reason") == "length":
+                truncated = DaaleModelError(
+                    f"{purpose} reply was cut off at the completion token limit "
+                    f"({payload['max_tokens']}, which includes any reasoning). Raise LLM_MAX_TOKENS"
+                    f" (or LLM_MAX_TOKENS_{purpose.upper()} for this kernel only)."
+                )
+                truncated.truncated = True
+                raise truncated
 
-        if body["choices"][0].get("finish_reason") == "length":
-            truncated = DaaleModelError(
-                f"{purpose} reply was cut off at the completion token limit "
-                f"({payload['max_tokens']}, which includes any reasoning). Raise LLM_MAX_TOKENS"
-                f" (or LLM_MAX_TOKENS_{purpose.upper()} for this kernel only)."
-            )
-            truncated.truncated = True  # the same prompt will be cut off again; do not retry
-            raise truncated
-
-        output = _parse_json_content(message.get("content"), purpose)
-
-        try:
-            validate_schema(output, schema, f"{purpose} model output")
-        except DaaleValidationError as error:
-            raise _schema_rejection(error, output) from error
+            output = _parse_json_content(message.get("content"), purpose)
+            try:
+                validate_schema(output, schema, f"{purpose} model output")
+            except DaaleValidationError as error:
+                raise _schema_rejection(error, output) from error
+        except Exception as error:  # provider reply exists; attach its provenance to every failure
+            if not hasattr(error, "provider") or error.provider is None:
+                error.provider = getattr(self, "provider_id", "generic")
+            error.attempts = getattr(response, "_daale_attempts", 1)
+            error.served_model = body.get("model", "unknown") if "body" in locals() else "unknown"
+            error.request_id = body.get("id") if "body" in locals() else None
+            error.usage = body.get("usage", {}) if "body" in locals() else {}
+            error.max_tokens = payload["max_tokens"]
+            if getattr(error, "retry_after_seconds", None) is None:
+                error.retry_after_seconds = _server_retry_delay(response)
+            if isinstance(error, (ValueError, KeyError, IndexError, TypeError)):
+                wrapped = DaaleModelError(
+                    f"Malformed response for {purpose}: {response.text[:1200]}"
+                )
+                for name in (
+                    "provider", "attempts", "served_model", "request_id", "usage",
+                    "max_tokens", "retry_after_seconds",
+                ):
+                    setattr(wrapped, name, getattr(error, name, None))
+                raise wrapped from error
+            raise
 
         return CompletionRecord(
             purpose=purpose,
@@ -871,6 +903,7 @@ class GenericApiClient:
             served_model=body.get("model", "unknown"),
             request_id=body.get("id", "unknown"),
             usage=body.get("usage", {}),
+            attempts=getattr(response, "_daale_attempts", 1),
         )
 
 
@@ -913,6 +946,7 @@ def _post_json_with_retry(
     max_attempts,
     service_name,
     pacer=None,
+    provider_id=None,
 ):
     """Shared retry loop for any OpenAI-compatible chat-completions endpoint.
 
@@ -943,13 +977,19 @@ def _post_json_with_retry(
                     "%s request timed out after %ss; not retrying at this layer",
                     service_name, timeout_seconds,
                 )
-                raise DaaleModelError(f"{service_name} request failed: {error}") from error
+                raise DaaleModelError(
+                    f"{service_name} request failed: {error}",
+                    provider=provider_id or service_name,
+                    attempts=attempt,
+                ) from error
             if attempt == max_attempts:
                 logger.warning(
                     "%s request failed (%s), no attempts left", service_name, type(error).__name__
                 )
                 raise DaaleModelError(
-                    f"{service_name} request failed: {error}"
+                    f"{service_name} request failed: {error}",
+                    provider=provider_id or service_name,
+                    attempts=attempt,
                 ) from error
             wait = min(2 ** attempt, 8)
             logger.warning(
@@ -971,6 +1011,8 @@ def _post_json_with_retry(
         if response.ok and embedded_error is None:
             if pacer is not None and isinstance(response_body, dict):
                 pacer.settle(handle, (response_body.get("usage") or {}).get("total_tokens"))
+            response._daale_attempts = attempt
+            response._daale_provider = provider_id or service_name
             return response
 
         error_code = response.status_code
@@ -1008,14 +1050,27 @@ def _post_json_with_retry(
             "%s error %s after %d attempt(s): %s",
             service_name, error_code, attempt, error_message[:300].replace("\n", " "),
         )
+        headers = getattr(response, "headers", {}) or {}
+        request_id = (
+            headers.get("x-request-id")
+            or headers.get("request-id")
+            or headers.get("x-goog-request-id")
+        )
         raise DaaleModelError(
             f"{service_name} error {error_code} after {attempt} attempt(s): "
             f"{error_message}",
             status_code=error_code,
+            retry_after_seconds=_server_retry_delay(response),
+            request_id=request_id,
+            usage=(response_body.get("usage") if isinstance(response_body, dict) else None),
+            provider=provider_id or service_name,
+            attempts=attempt,
         )
 
     raise DaaleModelError(
-        f"{service_name} request exhausted all retry attempts"
+        f"{service_name} request exhausted all retry attempts",
+        provider=provider_id or service_name,
+        attempts=max_attempts,
     )
 
 

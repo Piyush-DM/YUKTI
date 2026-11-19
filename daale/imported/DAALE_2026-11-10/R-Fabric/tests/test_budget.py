@@ -136,6 +136,7 @@ class PipelineBudgetTests(unittest.TestCase):
         def __init__(self, remaining, fail=None):
             self.remaining = remaining
             self.calls = 0
+            self.purposes = []
             self.fail = fail
 
         def requests_remaining(self, model=None):
@@ -143,6 +144,7 @@ class PipelineBudgetTests(unittest.TestCase):
 
         def complete_json(self, purpose, model, messages, schema):
             self.calls += 1
+            self.purposes.append(purpose)
             if self.fail:
                 raise self.fail
             return CompletionRecord(purpose, load_json(f"fixtures/{purpose}_output.json"), model, model, "r", {})
@@ -167,7 +169,11 @@ class PipelineBudgetTests(unittest.TestCase):
         with mock.patch("daale.pipeline.time.sleep") as sleep:
             result = DaalePipeline(client=client, model_by_kernel={"default": "m"}).run(self.case, self.policy)
         sleep.assert_not_called()
-        self.assertEqual(client.calls, 6)  # one attempt per base kernel, no retries
+        # The first daily-quota failure cools the model for this run; parallel
+        # kernels already in flight may have called, but later phases skip it.
+        self.assertGreaterEqual(client.calls, 1)
+        self.assertLessEqual(client.calls, 6)
+        self.assertNotIn("adversary", client.purposes)
         self.assertEqual(result.decision_packet["policy_state"], "ESCALATE")
 
 

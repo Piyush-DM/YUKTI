@@ -26,6 +26,7 @@ from .execution_contract import (
 )
 from .policy_engine import apply_policy
 from .prompts import build_adversary_messages, build_kernel_messages, wants_quotes
+from .model_routing import RunModelHealth, parse_model_chain
 from .schemas import kernel_output_schema
 from .trace import hash_value, new_run_identity
 from .validation import (
@@ -68,24 +69,30 @@ def budget_shortfall(client, model_by_kernel, kernels=None, fallback_by_kernel=N
     if remaining_for is None:
         return None
     fallbacks = fallback_by_kernel or {}
-    assigned = {}
+    chains = {}
+    active = []
     for kernel_id in (ALL_KERNELS if kernels is None else kernels):
-        model = model_by_kernel.get(kernel_id) or model_by_kernel.get("default")
-        assigned.setdefault(model, []).append(kernel_id)
-    spill = {}
-    for model, kernel_ids in assigned.items():
-        remaining = remaining_for(model)
-        if remaining is None or remaining >= len(kernel_ids):
-            continue
-        for kernel_id in kernel_ids[remaining:]:
-            fallback = fallbacks.get(kernel_id) or fallbacks.get("default")
-            if not fallback or fallback == model:
-                return model, remaining, len(kernel_ids)
-            spill[fallback] = spill.get(fallback, 0) + 1
-    for model, count in spill.items():
-        remaining = remaining_for(model)
-        if remaining is not None and remaining < count:
-            return model, remaining, count
+        primary = model_by_kernel.get(kernel_id) or model_by_kernel.get("default")
+        fallback = fallbacks.get(kernel_id) or fallbacks.get("default")
+        chains[kernel_id] = parse_model_chain(primary, fallback)
+        active.append((kernel_id, 0))
+
+    reserved = {}
+    while active:
+        groups = {}
+        for kernel_id, index in active:
+            model = chains[kernel_id][index]
+            groups.setdefault(model, []).append((kernel_id, index))
+        next_active = []
+        for model, entries in groups.items():
+            remaining = remaining_for(model)
+            available = len(entries) if remaining is None else max(0, remaining - reserved.get(model, 0))
+            reserved[model] = reserved.get(model, 0) + min(available, len(entries))
+            for kernel_id, index in entries[available:]:
+                if index + 1 >= len(chains[kernel_id]):
+                    return model, remaining or 0, len(entries)
+                next_active.append((kernel_id, index + 1))
+        active = next_active
     return None
 
 
@@ -176,6 +183,8 @@ class _KernelRun:
     events: list = field(default_factory=list)
     degradation: DegradationMode = DegradationMode.NONE
     requires_human_review: bool = False
+    provider: str = "unknown"
+    max_tokens: Optional[int] = None
 
 
 class DaalePipeline:
@@ -185,11 +194,15 @@ class DaalePipeline:
         model_by_kernel=None,
         native_json_schema=False,
         fallback_by_kernel=None,
+        provider_id=None,
     ):
         self.client = client
         self.model_by_kernel = model_by_kernel or {}
         self.native_json_schema = native_json_schema
         self.fallback_by_kernel = fallback_by_kernel or {}
+        self.provider_id = provider_id or getattr(client, "provider_id", "unknown")
+        self.model_chains = {}
+        self.model_health = RunModelHealth()
 
     def _get_model(self, kernel_id):
         model = self.model_by_kernel.get(kernel_id) or self.model_by_kernel.get("default")
@@ -200,19 +213,18 @@ class DaalePipeline:
             )
         return model
 
-    def _get_fallback(self, kernel_id):
-        """The fallback model for a kernel, or None (none configured, or the same as the primary)."""
+    def _get_model_chain(self, kernel_id):
+        """Return the explicitly configured, validated chain for one kernel."""
         fallback = self.fallback_by_kernel.get(kernel_id) or self.fallback_by_kernel.get("default")
-        if not fallback or not str(fallback).strip() or fallback == self._get_model(kernel_id):
-            return None
-        return fallback
+        return parse_model_chain(self._get_model(kernel_id), fallback)
 
     def run(self, case, policy):
         validate_case_and_policy(case, policy)
+        self.model_health = RunModelHealth()
 
         # Configuration is checked before any model call is spent.
         for kernel_id in ALL_KERNELS:
-            self._get_model(kernel_id)
+            self.model_chains[kernel_id] = self._get_model_chain(kernel_id)
 
         # A judgment needs one request per kernel at the very least. Starting
         # one the daily budget cannot finish spends requests and yields nothing.
@@ -282,6 +294,8 @@ class DaalePipeline:
                 "output": adversary_run.record.output,
                 "record": adversary_run.record,
                 "messages": adversary_run.messages,
+                "provider": adversary_run.provider,
+                "max_tokens": adversary_run.max_tokens,
             }
 
         # A decision that went unchallenged because the adversary failed is
@@ -336,8 +350,15 @@ class DaalePipeline:
             served_model=call["served_model"],
             request_id=call["request_id"],
             usage=call["usage"],
+            attempts=call.get("http_attempts", 1),
         )
-        return {"output": output, "record": record, "messages": call["messages"]}
+        return {
+            "output": output,
+            "record": record,
+            "messages": call["messages"],
+            "provider": call.get("provider", "unknown"),
+            "max_tokens": call.get("max_tokens"),
+        }
 
     def resume(self, prior_trace):
         """Finish a run that ended incomplete, running again only what it needs.
@@ -363,6 +384,7 @@ class DaalePipeline:
                 "altered. Nothing was sent."
             )
         validate_case_and_policy(case, policy)
+        self.model_health = RunModelHealth()
 
         reused = {}
         for kernel_id in BASE_KERNELS:
@@ -379,7 +401,7 @@ class DaalePipeline:
 
         to_run = rerun_base + [ADVERSARIAL_KERNEL]
         for kernel_id in to_run:
-            self._get_model(kernel_id)
+            self.model_chains[kernel_id] = self._get_model_chain(kernel_id)
         shortfall = budget_shortfall(
             self.client, self.model_by_kernel, kernels=to_run, fallback_by_kernel=self.fallback_by_kernel
         )
@@ -423,42 +445,145 @@ class DaalePipeline:
     # ------------------------------------------------------------------
 
     def _execute_kernel(self, kernel_id, role, case, policy, base_outputs=None):
-        """Run one kernel to a validated result or a classified failure, on its fallback model if needed.
+        """Try the configured model chain once per distinct ID, respecting run health."""
+        chain = self.model_chains.get(kernel_id) or self._get_model_chain(kernel_id)
+        events = []
+        attempted = []
+        skipped = []
+        last_run = None
+        last_failure = None
+        last_error = ""
 
-        The primary model gets its own attempts. If it still fails in a way another model might not
-        share, the fallback model (when configured) gets one series of attempts of its own. Both are
-        recorded: the audit events keep every attempt, and the packet lists any fallback used.
-        """
-        primary = self._get_model(kernel_id)
-        fallback = self._get_fallback(kernel_id)
-        first = self._execute_on_model(kernel_id, role, case, policy, base_outputs, primary, bool(fallback))
-        mode = first.result.failure_mode
-        if first.result.success or fallback is None or mode not in _FALLBACK_MODES:
-            return first
+        for index, model in enumerate(chain):
+            health = self.model_health.status(model, self.provider_id)
+            if health.state != "HEALTHY":
+                detail = f"{model} skipped: {health.state} ({health.reason})"
+                logger.warning("%s: %s", kernel_id, detail)
+                events.append(make_audit_event(
+                    "kernel-model-skipped", case["case_id"], kernel_id, detail,
+                    {
+                        "model": model,
+                        "provider": self.provider_id,
+                        "health_state": health.state,
+                        "reason": health.reason,
+                        "seconds_remaining": self.model_health.seconds_remaining(
+                            model, self.provider_id
+                        ),
+                    },
+                ))
+                skipped.append({"model": model, "state": health.state, "reason": health.reason})
+                if last_failure is None:
+                    last_failure = (
+                        FailureMode.AUTHENTICATION_FAILED
+                        if health.reason == FailureMode.AUTHENTICATION_FAILED.value
+                        else FailureMode.QUOTA_EXHAUSTED
+                        if health.reason == FailureMode.QUOTA_EXHAUSTED.value
+                        else FailureMode.PROVIDER_RATE_LIMIT
+                        if health.reason == FailureMode.PROVIDER_RATE_LIMIT.value
+                        else FailureMode.MODEL_NOT_AVAILABLE
+                    )
+                    last_error = detail
+                continue
 
-        logger.warning(
-            "%s: %s failed on %s (%s); trying fallback model %s", kernel_id, role.value, primary, mode.value, fallback
+            attempted.append(model)
+            has_alternative = index < len(chain) - 1
+            current = self._execute_on_model(
+                kernel_id, role, case, policy, base_outputs, model, has_alternative,
+                boost_tokens=last_failure is FailureMode.OUTPUT_TRUNCATED,
+            )
+            events.extend(current.events)
+            if current.result.success:
+                if index > 0 or skipped:
+                    reason = last_failure.value if last_failure is not None else "model-cooling"
+                    events.append(make_audit_event(
+                        "kernel-fallback-used", case["case_id"], kernel_id,
+                        f"{kernel_id} was served by {model} after earlier chain entries failed or were skipped",
+                        {
+                            "from": chain[0],
+                            "to": model,
+                            "reason": reason,
+                            "models_attempted": attempted,
+                            "models_skipped": skipped,
+                            "provider": current.provider,
+                        },
+                    ))
+                current.events = events
+                return current
+
+            last_run = current
+            last_failure = current.result.failure_mode
+            last_error = current.result.error_detail
+            daily_reset = None
+            if last_failure is FailureMode.QUOTA_EXHAUSTED:
+                reset = getattr(self.client, "budget_reset_seconds", None)
+                if reset is not None:
+                    daily_reset = reset(model)
+            self.model_health.mark_failure(
+                model,
+                self.provider_id,
+                last_failure,
+                retry_after=current.result.retry_after_seconds,
+                daily_reset_seconds=daily_reset,
+            )
+            if last_failure is FailureMode.AUTHENTICATION_FAILED or last_failure not in _FALLBACK_MODES:
+                break
+
+        if last_run is not None:
+            if len(chain) > 1 and len(attempted) == len(chain):
+                events.append(make_audit_event(
+                    "kernel-fallback-failed", case["case_id"], kernel_id,
+                    f"{kernel_id} exhausted its configured model chain",
+                    {
+                        "requested_model": chain[0],
+                        "models_attempted": attempted,
+                        "models_skipped": skipped,
+                        "failure_mode": last_failure.value if last_failure else None,
+                        "provider": self.provider_id,
+                    },
+                ))
+            elif len(chain) > 1 and last_failure is FailureMode.AUTHENTICATION_FAILED:
+                events.append(make_audit_event(
+                    "kernel-model-chain-stopped", case["case_id"], kernel_id,
+                    f"{kernel_id} stopped after a provider authentication failure; the shared credential "
+                    "would fail for every model in the chain",
+                    {
+                        "requested_model": chain[0],
+                        "models_attempted": attempted,
+                        "models_not_attempted": list(chain[len(attempted):]),
+                        "failure_mode": last_failure.value,
+                        "provider": self.provider_id,
+                    },
+                ))
+            last_run.events = events
+            return last_run
+
+        # Every configured model was already DEAD or COOLING before this kernel
+        # could call one. Fail explicitly; never manufacture a kernel output.
+        failure = last_failure or FailureMode.MODEL_UNAVAILABLE
+        events.append(make_audit_event(
+            "kernel-model-chain-exhausted", case["case_id"], kernel_id,
+            f"{kernel_id} had no usable model in its configured chain",
+            {
+                "requested_model": chain[0],
+                "models_skipped": skipped,
+                "failure_mode": failure.value,
+                "provider": self.provider_id,
+            },
+        ))
+        return _KernelRun(
+            result=KernelExecutionResult(
+                kernel_id=kernel_id,
+                role=role,
+                attempt=0,
+                success=False,
+                failure_mode=failure,
+                error_detail=last_error or "No configured model is currently usable",
+            ),
+            events=events,
+            degradation=DegradationMode.DEGRADE,
+            requires_human_review=True,
+            provider=self.provider_id,
         )
-        # A kernel cut off at the usual ceiling has shown that this prompt needs a longer reply, so the
-        # fallback model starts with the escalated ceiling instead of meeting the same wall.
-        second = self._execute_on_model(
-            kernel_id, role, case, policy, base_outputs, fallback, False,
-            boost_tokens=mode is FailureMode.OUTPUT_TRUNCATED,
-        )
-        events = first.events + second.events
-        note = {"from": primary, "to": fallback, "reason": mode.value}
-        if second.result.success:
-            events.append(make_audit_event(
-                "kernel-fallback-used", case["case_id"], kernel_id,
-                f"{kernel_id} ran on fallback model {fallback} after {primary} failed: {mode.value}", note,
-            ))
-        else:
-            events.append(make_audit_event(
-                "kernel-fallback-failed", case["case_id"], kernel_id,
-                f"{kernel_id} also failed on fallback model {fallback}", note,
-            ))
-        second.events = events
-        return second
 
     def _execute_on_model(self, kernel_id, role, case, policy, base_outputs, model, has_fallback, boost_tokens=False):
         """One model's series of attempts at a kernel."""
@@ -548,6 +673,11 @@ class DaalePipeline:
                     repair = [{"role": "user", "content": TRUNCATION_NUDGE}]
                     boost_tokens = True  # the next attempt on this model gets a longer ceiling too
                 rule = get_failure_rule(failure_mode, role)
+                retry_after = getattr(error, "retry_after_seconds", None)
+                error_provider = getattr(error, "provider", None) or self.provider_id
+                http_attempts = getattr(error, "attempts", None)
+                request_id = getattr(error, "request_id", None)
+                usage = getattr(error, "usage", None) or {}
 
                 logger.warning(
                     "%s: attempt %d failed after %.1fs: %s (HTTP %s): %s",
@@ -559,7 +689,12 @@ class DaalePipeline:
                     "kernel-failed", case["case_id"], kernel_id,
                     f"{kernel_id} attempt {attempt} failed: {failure_mode.value}: {error}",
                     {"attempt": attempt, "failure_mode": failure_mode.value,
-                     "error": str(error), "model": model, "max_tokens": ceiling_used},
+                     "http_attempts": http_attempts,
+                     "error": str(error), "model": model, "requested_model": model,
+                     "served_model": getattr(error, "served_model", None),
+                     "request_id": request_id, "usage": usage,
+                     "provider": error_provider, "max_tokens": ceiling_used,
+                     "retry_after_seconds": retry_after},
                 ))
 
                 allowed = rule.retry_policy.max_attempts if rule and rule.retry_policy else 1
@@ -584,15 +719,17 @@ class DaalePipeline:
                             success=False,
                             failure_mode=failure_mode,
                             error_detail=str(error),
+                            retry_after_seconds=retry_after,
                         ),
                         events=events,
                         degradation=mode,
                         requires_human_review=human,
+                        provider=error_provider,
+                        max_tokens=ceiling_used,
                     )
 
-                retry_after = None
                 response = getattr(error, "response", None)
-                if response is not None:
+                if retry_after is None and response is not None:
                     try:
                         retry_after = float(response.headers.get("Retry-After"))
                     except (TypeError, ValueError):
@@ -613,7 +750,17 @@ class DaalePipeline:
             events.append(make_audit_event(
                 "kernel-succeeded", case["case_id"], kernel_id,
                 f"{kernel_id} succeeded on attempt {attempt}",
-                {"attempt": attempt, "model": model, "max_tokens": ceiling_used},
+                {
+                    "attempt": attempt,
+                    "http_attempts": getattr(record, "attempts", 1),
+                    "model": model,
+                    "requested_model": getattr(record, "requested_model", model),
+                    "served_model": getattr(record, "served_model", "unknown"),
+                    "provider": getattr(record, "provider", None) or self.provider_id,
+                    "request_id": getattr(record, "request_id", None),
+                    "usage": usage,
+                    "max_tokens": ceiling_used,
+                },
             ))
             return _KernelRun(
                 result=KernelExecutionResult(
@@ -626,6 +773,8 @@ class DaalePipeline:
                 record=record,
                 messages=messages,
                 events=events,
+                provider=getattr(record, "provider", None) or self.provider_id,
+                max_tokens=ceiling_used,
             )
 
     def _run_base_kernels(self, case, policy, only=None, reused=None, carried_events=(), prior_run_id=None):
@@ -675,6 +824,8 @@ class DaalePipeline:
                     "output": run.record.output,
                     "record": run.record,
                     "messages": run.messages,
+                    "provider": run.provider,
+                    "max_tokens": run.max_tokens,
                 }
             else:
                 failed.append(kernel_id)
@@ -877,7 +1028,11 @@ class DaalePipeline:
             key = kernel_id.lower()
             hashes[f"{key}_prompt_sha256"] = hash_value(data["messages"])
             hashes[f"{key}_output_sha256"] = hash_value(output)
-            model_calls[key] = _record_to_trace(data["record"], data["messages"])
+            model_calls[key] = _record_to_trace(
+                data["record"], data["messages"],
+                provider=data.get("provider", self.provider_id),
+                max_tokens=data.get("max_tokens"),
+            )
             if resumed_from and kernel_id in resumed_from["reused_kernels"]:
                 # Spent in an earlier run; marked so usage is not counted twice.
                 model_calls[key]["reused_from_run"] = resumed_from["run_id"]
@@ -904,6 +1059,10 @@ class DaalePipeline:
                 "requires_human_review": state.requires_human_review,
                 "adversary": adversary_status,
                 "audit_events": list(state.audit_events),
+                "model_chains": {
+                    kernel: list(chain) for kernel, chain in sorted(self.model_chains.items())
+                },
+                "model_health": self.model_health.snapshot(),
             },
         }
         if resumed_from is not None:
@@ -1087,7 +1246,7 @@ def _detect_gaps(case, policy, all_outputs, decision_packet):
     return gaps
 
 
-def _record_to_trace(record, messages):
+def _record_to_trace(record, messages, provider="unknown", max_tokens=None):
     if record is None:
         return {
             "purpose": "adversary-skipped",
@@ -1095,6 +1254,9 @@ def _record_to_trace(record, messages):
             "served_model": "none",
             "request_id": "none",
             "usage": {},
+            "provider": provider,
+            "max_tokens": max_tokens,
+            "http_attempts": 0,
             "messages": messages or [],
         }
     return {
@@ -1103,5 +1265,8 @@ def _record_to_trace(record, messages):
         "served_model": record.served_model,
         "request_id": record.request_id,
         "usage": record.usage,
+        "provider": provider,
+        "max_tokens": max_tokens,
+        "http_attempts": getattr(record, "attempts", 1),
         "messages": messages,
     }

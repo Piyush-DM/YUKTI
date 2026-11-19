@@ -6,6 +6,7 @@ the same variables the same way. Nothing here is OpenRouter-specific except the
 """
 
 import os
+from urllib.parse import urlparse
 
 from .client import (
     AimlApiClient,
@@ -92,18 +93,31 @@ def model_by_kernel_from_env(env=None, live=True):
 
 
 def fallback_by_kernel_from_env(env=None):
-    """Fallback model per kernel: DAALE_FALLBACK_MODEL for all, DAALE_<KERNEL>_FALLBACK_MODEL to override.
+    """Ordered fallback chain per kernel (comma-separated; up to three alternatives).
 
-    A fallback is tried once, only after the primary model has failed in a way another model might not
-    (provider errors, timeouts, an exhausted quota, truncation, unusable output).
+    DAALE_FALLBACK_MODEL supplies the default chain;
+    DAALE_<KERNEL>_FALLBACK_MODEL overrides it for that kernel. Only explicitly
+    configured IDs are returned; no model catalog or paid default is consulted.
     """
     env = os.environ if env is None else env
     fallbacks = {}
-    default = env.get("DAALE_FALLBACK_MODEL", "").strip()
+
+    def parse(name):
+        raw = env.get(name, "").strip()
+        if not raw:
+            return None
+        models = [item.strip() for item in raw.split(",")]
+        if any(not model for model in models):
+            raise ValueError(f"{name} has an empty model in its comma-separated chain")
+        if len(models) > 3:
+            raise ValueError(f"{name} may contain at most three fallbacks; four models total per kernel")
+        return models
+
+    default = parse("DAALE_FALLBACK_MODEL")
     if default:
         fallbacks["default"] = default
     for kernel in ALL_KERNELS:
-        override = env.get(f"DAALE_{kernel}_FALLBACK_MODEL", "").strip()
+        override = parse(f"DAALE_{kernel}_FALLBACK_MODEL")
         if override:
             fallbacks[kernel] = override
     return fallbacks
@@ -128,6 +142,7 @@ def build_live_client(env=None):
             timeout_seconds=int(env.get("NVIDIA_TIMEOUT_SECONDS", "180")),
             max_attempts=int(env.get("NVIDIA_MAX_ATTEMPTS", "6")),
         )
+        client.provider_id = "nvidia"
         return client, False
 
     if provider == "openrouter":
@@ -144,6 +159,7 @@ def build_live_client(env=None):
             timeout_seconds=int(env.get("OPENROUTER_TIMEOUT_SECONDS", "180")),
             max_tokens=int(env.get("OPENROUTER_MAX_TOKENS", "4000")),
         )
+        client.provider_id = "openrouter"
         return client, native
 
     if provider == "generic":
@@ -164,6 +180,8 @@ def build_live_client(env=None):
             max_tokens_limit=int(env.get("LLM_MAX_TOKENS_LIMIT", "32000")),
             pacers=pacers_from_env(env),
         )
+        host = urlparse(env.get("LLM_BASE_URL", "")).hostname or "unknown"
+        client.provider_id = f"generic:{host}"
         return client, native
 
     if provider == "aimlapi":
@@ -174,6 +192,7 @@ def build_live_client(env=None):
             timeout_seconds=int(env.get("AIMLAPI_TIMEOUT_SECONDS", "180")),
             max_attempts=int(env.get("AIMLAPI_MAX_ATTEMPTS", "6")),
         )
+        client.provider_id = "aimlapi"
         return client, native
 
     raise ValueError(
