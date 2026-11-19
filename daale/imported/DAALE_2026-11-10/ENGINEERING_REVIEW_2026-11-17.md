@@ -1,5 +1,9 @@
 # DAALE engineering review, 2026-11-17 (post-session, no model inference)
 
+> **Phase C status:** This review remains the engineering baseline dated 17 November. Its original findings are a
+> snapshot of that date; the Phase C addendum at the end records implementation and validation completed on 19 November
+> and supersedes status statements that it explicitly updates.
+
 Scope: the mandate of 2026-11-17 ("Engineering Continuation Mandate"). **No model was called in this phase**: the
 Gemini counters read 18 of 20 (3 Flash) and 19 of 20 (2.5 Flash) before and after; the 21 saved traces, the registered
 expectations (`cases/expected/`), the cases and the canonical policy v0.1 are byte-identical to `HEAD`. Everything below was
@@ -331,10 +335,133 @@ Never treat a single run as proof; record every run, including failures, in the 
 
 ## 13. Pending decisions
 
-1. **T10:** is a flagged item a metric only, or should a policy ESCALATE on it? Should L1 separation be built behind a flag?
-2. **T12 and unanimity:** adopt Option 2 now? Design Option 4 (quarantine as an integrity failure)? Keep ADVANCE unanimous?
+1. **T10:** L1 evidence separation is now implemented behind a default-off flag. Whether a screening flag or adoption metric should cause a policy ESCALATE remains unresolved.
+2. **T12 and unanimity:** the additive alleged-critical-failure metric is implemented and unused by policy rules. Option 2, Option 4, and any change to unanimity remain unresolved; ADVANCE remains unanimous.
 3. **Critical rejection semantics:** may a REJECT rest on a supermajority of grounded dissent, or only on unanimity?
-4. **Dynamic switching:** build the ordered chain and the per-run health map? How long may a cooldown last? May any paid model ever join a chain, and under what cap?
-5. **D-Core:** how to fix the admission crash (guard, or redefine the check)?
+4. **Dynamic switching:** an ordered chain and per-run DEAD/COOLING map are implemented. A daily spend cap and the approval conditions for any paid model remain unresolved; no model is introduced automatically.
+5. **D-Core:** the admission mismatch is resolved with a versioned evidence-bound R-Fabric arbitration sidecar; the original decision packet remains unchanged.
 6. **Policies:** sign off or retire v0.2 to v0.4.
-7. **Commit:** this phase is uncommitted.
+7. **Commit:** Phase C changes are committed locally on `codex/daale-phase-c-readiness`; they have not been pushed.
+
+## 14. Phase C implementation addendum — 19 November 2026
+
+### A. Executive engineering summary
+
+Five bounded workstreams were implemented in separate commits. No LLM inference was performed. D-Core now validates an
+explicit arbitration sidecar and reproduces the intended evidence-overlap contradiction check on a derived fixture of
+stress run 3. R-Fabric supports explicit ordered model chains and run-local health, an opt-in L1 evidence block, and the
+additive `alleged_critical_failures` metric. A provider-neutral evaluation contract and blind Nemotron protocol are
+defined, but no Nemotron provider is connected to the pipeline.
+
+No decision rule, canonical policy, expected result, historical trace, CHOIR file, or superseded research artifact was
+changed. Model routing changes which explicitly configured model may serve a kernel; it does not change the policy or
+the authority to issue a judgment. The prompt flag changes only prompt construction and defaults off. L1 has not been
+validated against a live model and is not claimed to prevent prompt injection.
+
+### B. Workstream outcomes and remaining limits
+
+| Workstream | Implementation and evidence | Status / limit |
+|---|---|---|
+| D-Core admission | Added `rfabric-arbitration/1.0` typed sidecar with evidence-bound claim and requirement statuses. The adapter maps R-Fabric findings into that sidecar. Internal contradiction is tested by intersecting evidence IDs for a CONTRADICTED claim and a SATISFIED requirement. Actual stress-run-3 packet content is captured in a derived fixture with its source trace hash. | Fixed; original R-Fabric decision packet contract is unchanged. D-Core conformance and execution suites: 112 passed. The fixture is a test copy; the ignored historical trace was not modified. |
+| Ordered model fallback | Up to four explicit IDs per kernel; duplicates and empty entries rejected. Per-run `DEAD` and `COOLING` states cover model unavailability, shared authentication failure, rate limits, and daily quota. Traces record configured chains, provider endpoint, requested/served model, HTTP attempts, request IDs, usage, output ceilings, failure events, skips, and fallbacks. | Offline verified. In-flight parallel base-kernel requests cannot be recalled after another kernel marks a model unhealthy. Provider is the configured connector/endpoint; an upstream provider hidden behind a router is not guaranteed to be available in the trace. A total daily token/spend cap is not implemented. No model is auto-added, including paid models. |
+| T10 L1 | Default-off `DAALE_EVIDENCE_SEPARATION` keeps evidence objects intact in a content-derived delimiter block and repeats the complete kernel task after it. CLI, live-check, and service paths accept the flag. Deterministic tests verify unchanged prompt layout when disabled, block content, token stability, and instruction position. | Construction verified only. No live A/B evidence; no prompt-injection prevention claim. The screening/adoption metrics still do not alter decisions. |
+| T12 metric | `alleged_critical_failures` counts critical requirements with at least one evidence-citing kernel `NOT_SATISFIED` assessment, even if aggregation is UNKNOWN. Details identify the requirement, kernel, and evidence IDs. | Additive information only. No rule consumes it, no supermajority rule was added, and ADVANCE remains unanimous. Legacy replay omits the new metric when the recorded packet did not contain it. |
+| Nemotron readiness | Added an isolated typed adapter contract covering provider/model IDs, reasoning effort, JSON schema/output mode, ceiling, timeout, usage, failure classification, attempts, and trace provenance. Added paired blind single-kernel replacement protocol against Gemini on registered cases. | Contract tests pass. No provider implementation, pipeline integration, live evaluation, or cost approval. |
+
+### C. Provider-chain behavior
+
+`DAALE_FALLBACK_MODEL` and `DAALE_<KERNEL>_FALLBACK_MODEL` accept comma-separated alternatives, with per-kernel values replacing the default fallback list. The primary plus alternatives are explicitly validated before execution. The chain uses the existing configured provider connector; it cannot switch providers. No provider catalog is queried and no model ID is inferred.
+
+Model unavailability marks that model DEAD for the remainder of the run. Authentication failure marks the configured provider DEAD and stops the chain because the credential is shared. Rate limit and daily quota place a model in COOLING until Retry-After or the existing budget reset; a later status check can make it eligible again. A daily quota without an exposed reset uses a one-hour run-local cooldown. Temporary outages, timeouts, truncation, and invalid output retain their existing retry/fallback behavior. Each new run begins with fresh health state and tries the preferred configured model again.
+
+The current system still has per-model request and token-per-minute pacing and daily request limits. There is no total daily token cap or spend ceiling. Deployments that could incur charges must constrain configured model IDs and provider-side billing separately before live use.
+
+### D. Policies and reasoning integrity review
+
+- Policy v0.1 has none of the opt-in fields. v0.2 adds `requirement_aggregation: unanimous_definite`; v0.3 adds `contradiction_sources: any_kernel`; v0.4 adds `contradiction_grounding: quoted`. The four remain drafts and unsigned.
+- The `quotes` property and instruction are shown only when `contradiction_grounding` is `quoted`; strict schema validation accepts the selected schema. Existing policy versions with the flag off retain the pre-quotes prompt/schema behavior.
+- T9 pools duplicate contradiction quotes before applying grounding, so a duplicate without quotes cannot hide a grounded copy.
+- T13's cross-kernel claim aggregation changes the claim-status presentation and preserves per-kernel votes. Policy metrics/rules do not consume claim status; decision states are not changed by this aggregation.
+- The new alleged-failure metric is not referenced by any policy. Neither it nor the evidence-separation flag changes decision semantics.
+- Registered expectations and canonical policy v0.1 match `main` byte-for-byte. No v0.2–v0.4 draft was activated or signed.
+
+### E. Validation
+
+| Validation | Result |
+|---|---|
+| Full R-Fabric suite | **345 passed, 1 skipped**, 125 subtests passed; one existing Starlette/httpx deprecation warning |
+| D-Core full suite | **112 passed**. A temporary test-harness package shim was used so its subprocess boundary tests could import the nested package layout; no repository file was added for the shim. |
+| Saved trace replay | **21 traces scanned: 13 replayable, 8 refused by design, 0 replay differences** |
+| Registered expectations / canonical v0.1 | No diff from `main` |
+| External model calls | **None** |
+| Live model evidence | Not produced in this phase |
+
+The initial D-Core test invocation without the subprocess import shim produced two harness errors in tests that spawn a fresh
+Python process. The corrected harness run passed all 112 tests; this was test environment setup, not a product-code failure.
+
+### F. Changed-file manifest
+
+**Review update:** `daale/imported/DAALE_2026-11-10/ENGINEERING_REVIEW_2026-11-17.md` — Phase C status, validation, decisions, runbook, and manifest.
+
+**D-Core admission (commit `e8f5a87`):**
+
+- `daale/imported/DAALE_2026-11-10/D-Core/README.md` — sidecar contract and adapter documentation.
+- `daale/imported/DAALE_2026-11-10/D-Core/execution/arbitration.py` — consume typed evidence-bound packet and run the overlap check.
+- `daale/imported/DAALE_2026-11-10/D-Core/execution/arbitration_packet.py` — new versioned packet types and validation.
+- `daale/imported/DAALE_2026-11-10/D-Core/execution/commit.py` — optional packet field on candidate admission.
+- `daale/imported/DAALE_2026-11-10/D-Core/rfabric.py` — derive sidecar from the R-Fabric packet.
+- `daale/imported/DAALE_2026-11-10/D-Core/tests/fixtures/rfabric_stress_run3_packet.json` — derived regression fixture, source hash recorded.
+- `daale/imported/DAALE_2026-11-10/D-Core/tests/test_arbitration_packet.py` — schema and stress regression tests.
+
+**Ordered model routing (commit `5b1ef5b`):**
+
+- `daale/imported/DAALE_2026-11-10/R-Fabric/daale/client.py` — provider error and HTTP attempt provenance.
+- `daale/imported/DAALE_2026-11-10/R-Fabric/daale/model_routing.py` — chain validation and DEAD/COOLING state.
+- `daale/imported/DAALE_2026-11-10/R-Fabric/daale/pipeline.py` — ordered fallback execution, health and trace recording.
+- `daale/imported/DAALE_2026-11-10/R-Fabric/daale/providers.py` — comma-list configuration and connector identity.
+- `daale/imported/DAALE_2026-11-10/R-Fabric/docs/MODEL_ROUTING.md` — operator behavior and boundaries.
+- `daale/imported/DAALE_2026-11-10/R-Fabric/tests/test_budget.py` — run-level cooldown expectations.
+- `daale/imported/DAALE_2026-11-10/R-Fabric/tests/test_failure_classification.py` — shared model health and failure paths.
+- `daale/imported/DAALE_2026-11-10/R-Fabric/tests/test_model_routing.py` — new deterministic chain/health tests.
+- `daale/imported/DAALE_2026-11-10/R-Fabric/tests/test_resilience.py` — chain configuration and fallback assertions.
+
+**T10 L1 (commit `7e6e12e`):**
+
+- `daale/imported/DAALE_2026-11-10/R-Fabric/daale/prompts.py` — opt-in delimiter block construction.
+- `daale/imported/DAALE_2026-11-10/R-Fabric/daale/pipeline.py` — feature flag on prompt calls.
+- `daale/imported/DAALE_2026-11-10/R-Fabric/run_daale.py`, `daale/imported/DAALE_2026-11-10/R-Fabric/live_check.py`, `daale/imported/DAALE_2026-11-10/R-Fabric/service/app.py` — flag plumbing.
+- `daale/imported/DAALE_2026-11-10/R-Fabric/docs/EVIDENCE_SEPARATION.md` — scope and live-evidence caveat.
+- `daale/imported/DAALE_2026-11-10/R-Fabric/tests/test_prompts.py` — deterministic construction and disabled-mode checks.
+
+**T12 metric (commit `1f56e3a`):**
+
+- `daale/imported/DAALE_2026-11-10/R-Fabric/daale/policy_engine.py` — additive metric and evidence detail.
+- `daale/imported/DAALE_2026-11-10/R-Fabric/daale/replay.py` — preserve old trace metric shape.
+- `daale/imported/DAALE_2026-11-10/R-Fabric/tests/test_requirement_aggregation.py` — metric-only and no-decision-change regression tests.
+
+**Nemotron readiness (commit `426b382`):**
+
+- `daale/imported/DAALE_2026-11-10/R-Fabric/daale/evaluation_adapter.py` — isolated typed contract, not wired to live pipeline.
+- `daale/imported/DAALE_2026-11-10/R-Fabric/docs/NEMOTRON_EVALUATION_PROTOCOL.md` — blind paired comparison protocol.
+- `daale/imported/DAALE_2026-11-10/R-Fabric/tests/test_evaluation_adapter_contract.py` — contract validation tests.
+
+### G. Decisions still open
+
+1. T10: whether flagged evidence or adopted injected verdicts should be policy-only information, force ESCALATE, or trigger a narrowly defined integrity failure.
+2. T12: whether poisoned-kernel quarantine is warranted; whether any rejection rule may use non-unanimous evidence-grounded dissent. No such change was made.
+3. Keep ADVANCE unanimous unless an authorized policy decision changes it.
+4. Whether any paid model may be configured, and what explicit spend ceiling must guard it. The current route is explicit but has no built-in total spend cap.
+5. Whether model provenance should include upstream provider identity when an aggregator exposes one.
+6. Sign-off or retirement of unsigned policies v0.2–v0.4.
+
+### H. Post-quota live validation runbook
+
+No live validation is authorized by this offline phase. When quota and cost limits are explicitly confirmed:
+
+1. Run the existing tiny provider probes at the exact configured output ceilings; record success, returned model, usage, and failure class.
+2. Run `INV-STRESS-1` with policy v0.4 twice on the same pinned code and model mapping, once with L1 disabled and once enabled as a paired prompt test. Keep registered expectation files outside the model context. Save every trace.
+3. Score R2 against the registered expected REJECT only after traces are sealed. Record incomplete executions as execution failures even if partial outputs appear to match.
+4. Check the R-Fabric-to-D-Core admission using the resulting complete stress packet and verify the evidence overlap is preserved. Replay each completed run and record exact differences (expected: zero).
+5. For Nemotron, follow `R-Fabric/docs/NEMOTRON_EVALUATION_PROTOCOL.md`; pair one kernel replacement at a time, pin exact model/effort/ceilings, and do not proceed beyond the pre-approved budget.
+
+Success for L1 requires a repeated comparison over enough runs to assess variance; a single favorable output is not proof of prompt-injection resistance. The intended institutional outcome is not a run that merely matches the expected REJECT: it is a complete, traceable, evidence-grounded run with stable replay and no unsupported authority.
