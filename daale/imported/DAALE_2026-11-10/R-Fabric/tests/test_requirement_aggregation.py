@@ -118,6 +118,38 @@ class AggregationTests(unittest.TestCase):
         failed = {r for r, entry in packet["requirement_summary"].items() if entry["status"] == "NOT_SATISFIED"}
         self.assertEqual(sorted(failed & critical), packet["metrics"]["details"]["failed_critical_requirement_ids"])
 
+    def test_alleged_critical_failure_is_additive_when_requirement_verdicts_disagree(self):
+        outputs = all_outputs()
+        everyone_says(outputs, "SATISFIED")
+        outputs["ADVERSARY"]["output"]["findings"] = []
+        assessments(outputs, "ANALYST", "R1")[0]["status"] = "NOT_SATISFIED"
+        packet = apply_policy(self.case, self.policy, outputs)
+        old_metrics_packet = apply_policy(
+            self.case, self.policy, outputs, include_alleged_critical_failures=False
+        )
+
+        self.assertEqual(packet["requirement_summary"]["R1"]["status"], "UNKNOWN")
+        self.assertEqual(packet["metrics"]["failed_critical_requirements"], 0)
+        self.assertEqual(packet["metrics"]["alleged_critical_failures"], 1)
+        self.assertEqual(packet["metrics"]["details"]["alleged_critical_failure_ids"], ["R1"])
+        self.assertEqual(
+            packet["metrics"]["details"]["alleged_critical_failure_evidence"]["R1"],
+            {"ANALYST": ["E3"]},
+        )
+        self.assertEqual(packet["policy_state"], old_metrics_packet["policy_state"])
+        self.assertEqual(packet["triggered_rule"], old_metrics_packet["triggered_rule"])
+
+    def test_alleged_metric_requires_cited_evidence_and_a_critical_requirement(self):
+        outputs = all_outputs()
+        everyone_says(outputs, "SATISFIED")
+        outputs["ADVERSARY"]["output"]["findings"] = []
+        assessments(outputs, "ANALYST", "R1")[0]["status"] = "NOT_SATISFIED"
+        assessments(outputs, "ANALYST", "R1")[0]["evidence_ids"] = []
+        assessments(outputs, "HISTORIAN", "R3")[0]["status"] = "NOT_SATISFIED"
+        packet = apply_policy(self.case, self.policy, outputs)
+        self.assertEqual(packet["metrics"]["alleged_critical_failures"], 0)
+        self.assertEqual(packet["metrics"]["details"]["alleged_critical_failure_ids"], [])
+
     def test_a_kernel_that_contradicts_itself_has_no_verdict(self):
         outputs = all_outputs()
         twin = copy.deepcopy(assessments(outputs, "ANALYST", "R1")[0])

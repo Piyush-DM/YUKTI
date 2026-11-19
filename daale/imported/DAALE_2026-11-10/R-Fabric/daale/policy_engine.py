@@ -339,7 +339,7 @@ def _high_base_kernel_contradictions(base_outputs, already_counted):
     return found
 
 
-def compute_metrics(case, policy, all_outputs):
+def compute_metrics(case, policy, all_outputs, *, include_alleged_critical_failures=True):
     base_outputs = {k: v for k, v in all_outputs.items() if k != "ADVERSARY"}
     adversary = all_outputs.get("ADVERSARY", {}).get("output", {})
 
@@ -349,6 +349,7 @@ def compute_metrics(case, policy, all_outputs):
     verdicts = aggregate_requirement_assessments(policy, base_outputs)
 
     failed_critical = []
+    alleged_critical_failures = {}
     failed_mandatory = []
     unknown_mandatory = []
 
@@ -360,6 +361,19 @@ def compute_metrics(case, policy, all_outputs):
             failed_mandatory.append(requirement_id)
         if requirement["mandatory"] and status == "UNKNOWN":
             unknown_mandatory.append(requirement_id)
+
+    if include_alleged_critical_failures:
+        for assessment in _extract_requirement_assessments(base_outputs):
+            requirement_id = assessment["requirement_id"]
+            requirement = requirement_by_id[requirement_id]
+            if (
+                requirement["critical"]
+                and assessment["status"] == "NOT_SATISFIED"
+                and assessment["evidence_ids"]
+            ):
+                entry = alleged_critical_failures.setdefault(requirement_id, {})
+                evidence_ids = entry.setdefault(assessment["kernel_id"], set())
+                evidence_ids.update(assessment["evidence_ids"])
 
     relation_counts = defaultdict(int)
     claim_ids = {item["claim_id"] for item in case["claims"]}
@@ -430,6 +444,16 @@ def compute_metrics(case, policy, all_outputs):
     if ungrounded_contradictions is not None:
         metrics["ungrounded_high_contradictions"] = len(ungrounded_contradictions)
         metrics["details"]["ungrounded_contradiction_ids"] = ungrounded_contradictions
+    if include_alleged_critical_failures:
+        metrics["alleged_critical_failures"] = len(alleged_critical_failures)
+        metrics["details"]["alleged_critical_failure_ids"] = sorted(alleged_critical_failures)
+        metrics["details"]["alleged_critical_failure_evidence"] = {
+            requirement_id: {
+                kernel_id: sorted(evidence_ids)
+                for kernel_id, evidence_ids in sorted(by_kernel.items())
+            }
+            for requirement_id, by_kernel in sorted(alleged_critical_failures.items())
+        }
     if policy.get("evidence_screening", "none") == "flag":
         flagged = screen_evidence(case)
         adopted = adopted_injected_verdicts(flagged, base_outputs)
@@ -457,10 +481,16 @@ def _condition_matches(condition, metrics):
     raise DaaleValidationError(f"Unsupported policy operator: {operator}")
 
 
-def apply_policy(case, policy, all_outputs, legacy_claim_statuses=False):
+def apply_policy(
+    case, policy, all_outputs, legacy_claim_statuses=False,
+    include_alleged_critical_failures=True,
+):
     """``legacy_claim_statuses`` reproduces the last-kernel-wins claim statuses of traces recorded
     before 2026-11-17, so that replay of those traces still agrees with what they recorded."""
-    metrics = compute_metrics(case, policy, all_outputs)
+    metrics = compute_metrics(
+        case, policy, all_outputs,
+        include_alleged_critical_failures=include_alleged_critical_failures,
+    )
     rules = sorted(policy["rules"], key=lambda item: item["priority"], reverse=True)
     matching_rules = [rule for rule in rules if _condition_matches(rule["condition"], metrics)]
 

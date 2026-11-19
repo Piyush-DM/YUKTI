@@ -41,7 +41,14 @@ def replay_decision(trace):
     }
     # A trace recorded before 2026-11-17 has no claim_summary and used last-kernel-wins claim statuses.
     legacy = "claim_summary" not in trace["decision_packet"]
-    packet = apply_policy(trace["case"], trace["policy"], outputs, legacy_claim_statuses=legacy)
+    has_alleged_metric = "alleged_critical_failures" in trace["decision_packet"].get("metrics", {})
+    packet = apply_policy(
+        trace["case"],
+        trace["policy"],
+        outputs,
+        legacy_claim_statuses=legacy,
+        include_alleged_critical_failures=has_alleged_metric,
+    )
     return block_advance_if_incomplete(packet, tuple(trace["execution_state"]["failed_kernels"]))
 
 
