@@ -184,6 +184,53 @@ class PipelineBehaviourTests(unittest.TestCase):
                 self.assertIn("kernel-model-chain-stopped", events)
                 self.assertEqual(self.integrity(result)["fallbacks_used"], [])
 
+    def test_chain_stop_reports_only_models_after_the_authentication_failure(self):
+        client = ModelClient({("contrarian", "model-b"): lambda n: failure(401, "invalid key")})
+        pipeline = DaalePipeline(
+            client=client,
+            model_by_kernel={"default": "model-a"},
+            fallback_by_kernel={"default": ["model-b", "model-c"]},
+            provider_id="test-provider",
+        )
+        pipeline.model_chains["CONTRARIAN"] = pipeline._get_model_chain("CONTRARIAN")
+        pipeline.model_health.mark_failure(
+            "model-a", "test-provider", FailureMode.PROVIDER_RATE_LIMIT, retry_after=60
+        )
+
+        result = pipeline._execute_kernel(
+            "CONTRARIAN", KernelRole.BASE, self.case, self.policy
+        )
+
+        event = next(e for e in result.events if e["event_type"] == "kernel-model-chain-stopped")
+        metadata = event["metadata"]
+        self.assertEqual(metadata["models_skipped"][0]["model"], "model-a")
+        self.assertEqual(metadata["models_attempted"], ["model-b"])
+        self.assertEqual(metadata["models_not_attempted"], ["model-c"])
+        self.assertEqual(client.count("contrarian", "model-a"), 0)
+        self.assertEqual(client.count("contrarian", "model-b"), 1)
+        self.assertEqual(client.count("contrarian", "model-c"), 0)
+
+    def test_exhausted_chain_is_recorded_after_an_earlier_model_was_skipped(self):
+        client = ModelClient({("contrarian", "model-b"): lambda n: failure(404)})
+        pipeline = DaalePipeline(
+            client=client,
+            model_by_kernel={"default": "model-a"},
+            fallback_by_kernel={"default": ["model-b"]},
+            provider_id="test-provider",
+        )
+        pipeline.model_chains["CONTRARIAN"] = pipeline._get_model_chain("CONTRARIAN")
+        pipeline.model_health.mark_failure(
+            "model-a", "test-provider", FailureMode.PROVIDER_RATE_LIMIT, retry_after=60
+        )
+
+        result = pipeline._execute_kernel(
+            "CONTRARIAN", KernelRole.BASE, self.case, self.policy
+        )
+
+        event = next(e for e in result.events if e["event_type"] == "kernel-fallback-failed")
+        self.assertEqual(event["metadata"]["models_attempted"], ["model-b"])
+        self.assertEqual(event["metadata"]["models_skipped"][0]["model"], "model-a")
+
     def test_a_rejected_request_is_not_retried_but_the_fallback_is_tried_once(self):
         client = ModelClient({("contrarian", PRIMARY): lambda n: failure(400, "max_tokens is too large")})
         result = self.run_pipeline(client)

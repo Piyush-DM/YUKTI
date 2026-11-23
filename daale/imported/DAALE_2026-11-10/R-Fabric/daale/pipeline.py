@@ -531,7 +531,7 @@ class DaalePipeline:
                 break
 
         if last_run is not None:
-            if len(chain) > 1 and len(attempted) == len(chain):
+            if len(chain) > 1 and len(attempted) + len(skipped) == len(chain):
                 events.append(make_audit_event(
                     "kernel-fallback-failed", case["case_id"], kernel_id,
                     f"{kernel_id} exhausted its configured model chain",
@@ -543,16 +543,26 @@ class DaalePipeline:
                         "provider": self.provider_id,
                     },
                 ))
-            elif len(chain) > 1 and last_failure is FailureMode.AUTHENTICATION_FAILED:
+            elif len(chain) > 1:
+                if last_failure is FailureMode.AUTHENTICATION_FAILED:
+                    detail = (
+                        f"{kernel_id} stopped after a provider authentication failure; the shared credential "
+                        "would fail for every model in the chain"
+                    )
+                else:
+                    detail = (
+                        f"{kernel_id} stopped after {last_failure.value if last_failure else 'an error'}; "
+                        "the remaining configured models were not attempted"
+                    )
                 events.append(make_audit_event(
                     "kernel-model-chain-stopped", case["case_id"], kernel_id,
-                    f"{kernel_id} stopped after a provider authentication failure; the shared credential "
-                    "would fail for every model in the chain",
+                    detail,
                     {
                         "requested_model": chain[0],
                         "models_attempted": attempted,
-                        "models_not_attempted": list(chain[len(attempted):]),
-                        "failure_mode": last_failure.value,
+                        "models_skipped": skipped,
+                        "models_not_attempted": list(chain[index + 1:]),
+                        "failure_mode": last_failure.value if last_failure else None,
                         "provider": self.provider_id,
                     },
                 ))
